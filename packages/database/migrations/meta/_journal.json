@@ -5,99 +5,15 @@
     {
       "idx": 0,
       "version": "7",
-      "when": 1745518076143,
-      "tag": "0000_init-db",
+      "when": 1735948800000,
+      "tag": "0000_initial",
       "breakpoints": true
     },
     {
       "idx": 1,
       "version": "7",
-      "when": 1745520000000,
-      "tag": "0001_supabase_integration",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "7",
-      "when": 1745520100000,
-      "tag": "0002_fix_model_rankings_unique_constraint",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "7",
-      "when": 1745520200000,
-      "tag": "0003_add_shared_results_conversation_id_idx",
-      "breakpoints": true
-    },
-    {
-      "idx": 4,
-      "version": "7",
-      "when": 1761635000000,
-      "tag": "0004_add_better_auth_support",
-      "breakpoints": true
-    },
-    {
-      "idx": 5,
-      "version": "7",
-      "when": 1761650098478,
-      "tag": "0005_secret_human_robot",
-      "breakpoints": true
-    },
-    {
-      "idx": 6,
-      "version": "7",
-      "when": 1762165060094,
-      "tag": "0006_overconfident_blob",
-      "breakpoints": true
-    },
-    {
-      "idx": 7,
-      "version": "7",
-      "when": 1762166867762,
-      "tag": "0008_add_uuid_default",
-      "breakpoints": true
-    },
-    {
-      "idx": 8,
-      "version": "7",
-      "when": 1762170000000,
-      "tag": "0009_add_text_id_defaults",
-      "breakpoints": true
-    },
-    {
-      "idx": 9,
-      "version": "7",
-      "when": 1762228503052,
-      "tag": "0009_shocking_blue_marvel",
-      "breakpoints": true
-    },
-    {
-      "idx": 10,
-      "version": "7",
-      "when": 1762276000000,
-      "tag": "0012_add_users_insert_policy",
-      "breakpoints": false
-    },
-    {
-      "idx": 11,
-      "version": "7",
-      "when": 1762277000000,
-      "tag": "0013_detach_users_from_supabase_auth",
-      "breakpoints": false
-    },
-    {
-      "idx": 12,
-      "version": "7",
-      "when": 1762277100000,
-      "tag": "0014_update_account_columns_for_better_auth",
-      "breakpoints": false
-    },
-    {
-      "idx": 13,
-      "version": "7",
-      "when": 1762234293285,
-      "tag": "0013_complete_scrambler",
+      "when": 1762243220148,
+      "tag": "0001_fearless_sunfire",
       "breakpoints": true
     }
   ]

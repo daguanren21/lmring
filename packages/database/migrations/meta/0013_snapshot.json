@@ -1,6 +1,6 @@
 {
-  "id": "9b3cb3e7-c425-4ffe-bb8f-bff314612003",
-  "prevId": "7f8d9e2a-3b1c-4a5f-9876-abcdef123456",
+  "id": "553ae670-bb11-49b9-b72b-d9227b0e4f4d",
+  "prevId": "9b3cb3e7-c425-4ffe-bb8f-bff314612003",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -38,9 +38,21 @@
           "primaryKey": false,
           "notNull": false
         },
+        "access_token_expires_at": {
+          "name": "access_token_expires_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
         "refresh_token": {
           "name": "refresh_token",
           "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "refresh_token_expires_at": {
+          "name": "refresh_token_expires_at",
+          "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": false
         },
@@ -53,6 +65,12 @@
         "expires_at": {
           "name": "expires_at",
           "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "scope": {
+          "name": "scope",
+          "type": "text",
           "primaryKey": false,
           "notNull": false
         },

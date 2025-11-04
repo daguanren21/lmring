@@ -2,10 +2,17 @@
  * Server-side authentication instance
  */
 
-import { betterAuth } from 'better-auth';
+import { betterAuth, generateId } from 'better-auth';
 import { createAuthMiddleware } from 'better-auth/api';
 import { drizzleAdapter } from 'better-auth/adapters/drizzle';
-import { db, users, session, account, verification } from '@lmring/database';
+import {
+  db,
+  users,
+  session,
+  account,
+  verification,
+  syncUserProviderIdFromAccount,
+} from '@lmring/database';
 import { getAuthConfig } from './config';
 import { UserStatus } from './status';
 import type { AuthLogger } from './logger';
@@ -25,7 +32,47 @@ interface CreateAuthOptions {
 
 export function createAuth(options: CreateAuthOptions) {
   const logger = options.logger || defaultLogger;
-  
+  type AccountRecord = typeof account.$inferSelect;
+  type OAuthProviderId = 'github' | 'google';
+
+  const isSupportedProvider = (providerId: string): providerId is OAuthProviderId =>
+    providerId === 'github' || providerId === 'google';
+
+  const syncProviderIdForUser = async (userId: string, providerId: OAuthProviderId, source: string) => {
+    try {
+      const synced = await syncUserProviderIdFromAccount(userId, providerId);
+      if (synced) {
+        logger.debug('Synced OAuth provider id to user record', {
+          source,
+          userId,
+          providerId,
+        });
+      } else {
+        logger.warn('No OAuth account record found for user during provider sync', {
+          source,
+          userId,
+          providerId,
+        });
+      }
+    } catch (error) {
+      logger.error('Failed to sync OAuth provider id to user record', {
+        source,
+        userId,
+        providerId,
+        error: error instanceof Error ? error.message : 'Unknown error',
+      });
+    }
+  };
+
+  const syncProviderIdFromAccountRecord = async (
+    accountRecord: AccountRecord | null | undefined,
+    source: string,
+  ) => {
+    if (!accountRecord || !isSupportedProvider(accountRecord.providerId)) return;
+
+    await syncProviderIdForUser(accountRecord.userId, accountRecord.providerId, source);
+  };
+
   logger.info('Initializing Better-Auth server instance', {
     deploymentMode: options.deploymentMode,
   });
@@ -50,14 +97,14 @@ export function createAuth(options: CreateAuthOptions) {
         },
       }),
       advanced: {
-        // Let database generate UUIDs for user table only
-        // Better-Auth generates non-standard IDs incompatible with PostgreSQL UUID type
-        // For other tables (session, account, verification), let Better-Auth generate text IDs
-        generateId: (options: { model: string; fieldType?: string }) => {
-          if (options.model === 'user') {
-            return undefined; // Let database generate UUID
-          }
-          // Return undefined to use Better-Auth's default ID generation for other tables
+        // Use new API: advanced.database.generateId
+        database: {
+          generateId: (options: { model: string; size?: number }) => {
+            // Let database generate UUID for user IDs
+            if (options.model === 'user') return undefined;
+            // For other tables (session, account, verification), use Better-Auth's generator
+            return options.size ? generateId(options.size) : generateId();
+          },
         },
       },
       emailAndPassword: {
@@ -87,6 +134,36 @@ export function createAuth(options: CreateAuthOptions) {
           emailVerified: 'emailVerified', // Keep as is (snake_case in DB)
         },
         additionalFields: {
+          username: {
+            type: 'string',
+            required: false,
+            input: false,
+          },
+          githubId: {
+            type: 'string',
+            required: false,
+            input: false,
+          },
+          googleId: {
+            type: 'string',
+            required: false,
+            input: false,
+          },
+          linuxdoId: {
+            type: 'string',
+            required: false,
+            input: false,
+          },
+          inviterId: {
+            type: 'string',
+            required: false,
+            input: false,
+          },
+          deletedAt: {
+            type: 'date',
+            required: false,
+            input: false,
+          },
           role: {
             type: 'string',
             defaultValue: 'user',
@@ -123,8 +200,10 @@ export function createAuth(options: CreateAuthOptions) {
             ctx.path?.includes('/callback')
           ) {
             // Check if user was successfully authenticated
-            if (ctx.context?.user) {
-              const user = ctx.context.user as any;
+            const sessionInfo = ctx.context.newSession ?? ctx.context.session;
+
+            if (sessionInfo?.user) {
+              const user = sessionInfo.user as any;
 
               logger.debug('User authentication successful, checking status', {
                 userId: user.id,
@@ -162,6 +241,19 @@ export function createAuth(options: CreateAuthOptions) {
                   status: user.status,
                   provider: ctx.path?.includes('social') ? 'oauth' : 'email',
                 });
+
+                // When returning from an OAuth callback, mirror provider account id onto user record
+                // This keeps users.githubId/googleId in sync for app code that relies on these fields
+                if (ctx.path?.includes('/callback')) {
+                  const isGithub = ctx.path.includes('/callback/github');
+                  const isGoogle = ctx.path.includes('/callback/google');
+
+                  const providerId = isGithub ? 'github' : isGoogle ? 'google' : undefined;
+
+                  if (providerId) {
+                    await syncProviderIdForUser(user.id, providerId, 'middleware:callback');
+                  }
+                }
               }
             } else {
               logger.debug('Authentication attempt completed without user context', {
@@ -170,6 +262,26 @@ export function createAuth(options: CreateAuthOptions) {
             }
           }
         }),
+      },
+      databaseHooks: {
+        account: {
+          create: {
+            after: async (createdAccount: AccountRecord) => {
+              await syncProviderIdFromAccountRecord(
+                createdAccount as AccountRecord | null | undefined,
+                'databaseHook:create',
+              );
+            },
+          },
+          update: {
+            after: async (updatedAccount: AccountRecord) => {
+              await syncProviderIdFromAccountRecord(
+                updatedAccount as AccountRecord | null | undefined,
+                'databaseHook:update',
+              );
+            },
+          },
+        },
       },
     };
 

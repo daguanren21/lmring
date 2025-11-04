@@ -1,4 +1,5 @@
--- Create a function to generate random alphanumeric TEXT IDs (similar to Better-Auth's format)
+-- Fix the generate_text_id function to avoid name collision with built-in length() function
+-- The parameter was renamed from "length" to "id_length"
 CREATE OR REPLACE FUNCTION generate_text_id(id_length INTEGER DEFAULT 32)
 RETURNS TEXT AS $$
 DECLARE
@@ -14,8 +15,3 @@ BEGIN
   RETURN result;
 END;
 $$ LANGUAGE plpgsql;
-
--- Add default TEXT ID generation to Better-Auth tables
-ALTER TABLE "verification" ALTER COLUMN "id" SET DEFAULT generate_text_id(32);
-ALTER TABLE "session" ALTER COLUMN "id" SET DEFAULT generate_text_id(32);
-ALTER TABLE "account" ALTER COLUMN "id" SET DEFAULT generate_text_id(32);

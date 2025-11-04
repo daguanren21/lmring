@@ -64,6 +64,41 @@
       "when": 1762170000000,
       "tag": "0009_add_text_id_defaults",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1762228503052,
+      "tag": "0009_shocking_blue_marvel",
+      "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1762276000000,
+      "tag": "0012_add_users_insert_policy",
+      "breakpoints": false
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1762277000000,
+      "tag": "0013_detach_users_from_supabase_auth",
+      "breakpoints": false
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1762277100000,
+      "tag": "0014_update_account_columns_for_better_auth",
+      "breakpoints": false
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1762234293285,
+      "tag": "0013_complete_scrambler",
+      "breakpoints": true
     }
   ]
 }

@@ -126,8 +126,7 @@ export async function compareModels(
           messages,
         });
 
-        // Collect full text and track metrics
-        let _fullText = '';
+        // Track metrics
         let firstToken = true;
 
         for await (const chunk of result.textStream) {
@@ -135,8 +134,6 @@ export async function compareModels(
             timeToFirstToken = Date.now() - startTime;
             firstToken = false;
           }
-
-          _fullText += chunk;
 
           // Call progress callback
           if (onProgress) {

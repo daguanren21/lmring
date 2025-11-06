@@ -227,6 +227,10 @@ export async function raceModels(
   models: ModelComparisonConfig[],
   messages: ModelMessage[],
 ): Promise<ModelComparisonResult> {
+  if (models.length === 0) {
+    throw new Error('raceModels requires at least one model to compare');
+  }
+
   const promises = models.map(async (config) => {
     const startTime = Date.now();
     const executor = RuntimeExecutor.create(config.provider, config.options);

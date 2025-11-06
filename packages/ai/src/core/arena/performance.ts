@@ -233,13 +233,47 @@ export const performanceTracker = new PerformanceTracker();
  * @param tracker - Performance tracker instance (default: global tracker)
  * @returns Language model middleware
  *
+ * @remarks
+ * For non-streaming requests (`generateText`), token usage is automatically recorded
+ * when the request completes.
+ *
+ * For streaming requests (`streamText`), basic timing metrics (start time, end time,
+ * total time) are automatically recorded, but token usage must be manually updated by
+ * the caller after consuming the stream, as usage data is only available from the final
+ * result object.
+ *
  * @example
+ * Non-streaming usage:
  * ```typescript
  * const middleware = createPerformanceMiddleware('req-1', 'gpt-4', 'openai');
  * const model = wrapLanguageModel({
  *   model: openai('gpt-4'),
  *   middleware
  * });
+ * const result = await generateText({ model, prompt: 'Hello' });
+ * // Usage is automatically recorded
+ * ```
+ *
+ * @example
+ * Streaming usage with manual token tracking:
+ * ```typescript
+ * const requestId = 'req-1';
+ * const middleware = createPerformanceMiddleware(requestId, 'gpt-4', 'openai');
+ * const model = wrapLanguageModel({
+ *   model: openai('gpt-4'),
+ *   middleware
+ * });
+ *
+ * const result = await streamText({ model, prompt: 'Hello' });
+ *
+ * // Consume the stream
+ * for await (const chunk of result.textStream) {
+ *   console.log(chunk);
+ * }
+ *
+ * // Update token usage after stream completion
+ * const usage = await result.usage;
+ * performanceTracker.endRequest(requestId, usage);
  * ```
  */
 export function createPerformanceMiddleware(
@@ -289,8 +323,11 @@ export function createPerformanceMiddleware(
           },
 
           flush() {
-            // Note: usage will be recorded separately after stream completion
-            // This is handled in the stream consumption logic
+            // Record stream completion (basic timing metrics)
+            // Note: Token usage must be recorded separately by the caller after
+            // consuming the stream, as usage data is only available from the
+            // final result object (await result.usage)
+            tracker.endRequest(requestId);
           },
         });
 

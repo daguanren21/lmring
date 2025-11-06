@@ -154,9 +154,10 @@ export function createLoggingMiddleware(customLogger?: Logger): LanguageModelMid
 
   return {
     // biome-ignore lint/suspicious/noExplicitAny: Middleware function parameters are not strongly typed in AI SDK
-    wrapGenerate: async ({ doGenerate, params }: any) => {
+    wrapGenerate: async ({ doGenerate, params, model }: any) => {
       log.info('AI Request started (generate)', {
-        model: params.mode,
+        provider: model.provider,
+        modelId: model.modelId,
         messages: params.prompt?.length || 0,
       });
 
@@ -179,9 +180,10 @@ export function createLoggingMiddleware(customLogger?: Logger): LanguageModelMid
     },
 
     // biome-ignore lint/suspicious/noExplicitAny: Middleware function parameters are not strongly typed in AI SDK
-    wrapStream: async ({ doStream, params }: any) => {
+    wrapStream: async ({ doStream, params, model }: any) => {
       log.info('AI Request started (stream)', {
-        model: params.mode,
+        provider: model.provider,
+        modelId: model.modelId,
         messages: params.prompt?.length || 0,
       });
 

@@ -25,12 +25,9 @@ export function detectFormatFromModel(modelId: string): ApiFormat {
  * Checks if a provider supports a specific format
  */
 export function supportsFormat(config: ProviderConfig, format: ApiFormat): boolean {
-  // Check if model explicitly supports the format
-  if (config.models) {
-    const model = config.models[0];
-    if (model?.supportedFormats) {
-      return model.supportedFormats.includes(format);
-    }
+  // Check if any model explicitly supports the format
+  if (config.models?.some((model) => model.supportedFormats?.includes(format))) {
+    return true;
   }
 
   // Check if provider has alternative base URL for Anthropic format

@@ -6,43 +6,42 @@ export interface PluginContext {
   method: string;
   attempt: number;
   metadata: Record<string, unknown>;
-  retry?: () => void;
 }
 
 export abstract class AiPlugin {
   abstract name: string;
   description?: string;
-  enforce?: 'pre' | 'post' = undefined;
+  enforce?: 'pre' | 'post';
 
-  async onInit?(_context: PluginContext): Promise<void> {
+  async onInit(_context: PluginContext): Promise<void> {
     // Optional initialization
   }
 
-  async transformParams?(params: unknown, _context: PluginContext): Promise<unknown> {
+  async transformParams(params: unknown, _context: PluginContext): Promise<unknown> {
     return params;
   }
 
-  async transformResult?(result: unknown, _context: PluginContext): Promise<unknown> {
+  async transformResult(result: unknown, _context: PluginContext): Promise<unknown> {
     return result;
   }
 
-  async onRequestStart?(_context: PluginContext): Promise<void> {
+  async onRequestStart(_context: PluginContext): Promise<void> {
     // Optional hook
   }
 
-  async onRequestEnd?(_context: PluginContext, _result: unknown): Promise<void> {
+  async onRequestEnd(_context: PluginContext, _result: unknown): Promise<void> {
     // Optional hook
   }
 
-  async onError?(_error: Error, _context: PluginContext): Promise<void> {
+  async onError(_error: Error, _context: PluginContext): Promise<void> {
     // Optional hook
   }
 
-  async onStream?(chunk: unknown, _context: PluginContext): Promise<unknown> {
+  async onStream(chunk: unknown, _context: PluginContext): Promise<unknown> {
     return chunk;
   }
 
-  toMiddleware?(): LanguageModelMiddleware | null {
+  toMiddleware(): LanguageModelMiddleware | null {
     return null;
   }
 }

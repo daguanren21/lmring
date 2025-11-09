@@ -40,6 +40,8 @@ export class MetricsPlugin extends AiPlugin {
 
   async onRequestStart(context: PluginContext): Promise<void> {
     const collector = this.getCollector(context);
+    // Reset collector to clear any state from previous requests
+    collector.reset();
     collector.start();
 
     // Store collector reference in context for later use

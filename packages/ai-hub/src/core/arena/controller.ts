@@ -17,6 +17,7 @@ interface Task {
   error?: Error;
   abortController?: AbortController;
   promise?: Promise<ModelComparisonResult[]>;
+  originalOptions?: ArenaOptions;
 }
 
 export class ArenaController {
@@ -48,6 +49,7 @@ export class ArenaController {
       models,
       messages,
       abortController,
+      originalOptions: options,
     };
 
     this.tasks.set(id, task);
@@ -66,7 +68,9 @@ export class ArenaController {
       task.results = results;
       return results;
     } catch (error) {
-      task.status = 'failed';
+      if (task.status !== 'paused' && task.status !== 'cancelled') {
+        task.status = 'failed';
+      }
       task.error = error instanceof Error ? error : new Error(String(error));
       throw error;
     }
@@ -100,12 +104,13 @@ export class ArenaController {
       throw new Error(`Task ${id} is not paused`);
     }
 
-    // Restart the task with a new controller
+    // Restart the task with a new controller, preserving original options
     const newController = new AbortController();
     task.abortController = newController;
     task.status = 'running';
 
     const promise = compareModels(task.models, task.messages, {
+      ...task.originalOptions,
       controller: newController,
     });
 
@@ -117,7 +122,9 @@ export class ArenaController {
         task.results = results;
       },
       (error) => {
-        task.status = 'failed';
+        if (task.status !== 'paused' && task.status !== 'cancelled') {
+          task.status = 'failed';
+        }
         task.error = error instanceof Error ? error : new Error(String(error));
       },
     );

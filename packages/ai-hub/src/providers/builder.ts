@@ -54,22 +54,6 @@ export class ConfigurableBuilder {
     return this;
   }
 
-  withBedrockConfig(config: {
-    region: string;
-    accessKeyId?: string;
-    secretAccessKey?: string;
-  }): this {
-    this.options.region = config.region;
-    if (config.accessKeyId) {
-      this.options.headers = {
-        ...this.options.headers,
-        'x-amz-access-key-id': config.accessKeyId,
-        'x-amz-secret-access-key': config.secretAccessKey || '',
-      };
-    }
-    return this;
-  }
-
   withAnthropicFormat(useAnthropicFormat = true): this {
     this.options.useAnthropicFormat = useAnthropicFormat;
     return this;

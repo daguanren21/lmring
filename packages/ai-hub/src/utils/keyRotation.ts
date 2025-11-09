@@ -110,13 +110,25 @@ export class KeyRotationManager {
     }
 
     if (!pool.keys.includes(key)) {
-      pool.keys.push(key);
-
-      if (pool.strategy === 'weighted' && weight !== undefined) {
-        if (!pool.weights) {
-          pool.weights = Array(pool.keys.length - 1).fill(1);
+      if (pool.strategy === 'weighted') {
+        if (weight === undefined) {
+          throw new Error(`Weight is required when adding a key to weighted pool ${providerId}`);
         }
+
+        if (!pool.weights) {
+          // Initialize weights for existing keys with default value of 1
+          pool.weights = Array(pool.keys.length).fill(1);
+        }
+
+        // Ensure weights array is synchronized before adding new key
+        if (pool.weights.length !== pool.keys.length) {
+          throw new Error('Weights array must match keys array length when adding new keys');
+        }
+
+        pool.keys.push(key);
         pool.weights.push(weight);
+      } else {
+        pool.keys.push(key);
       }
     }
   }
@@ -193,9 +205,20 @@ export function getRotatedApiKey(
   apiKey?: string,
   apiKeys?: string | string[],
 ): string | undefined {
-  // If multiple keys provided, register them
+  // If multiple keys provided, check if we need to register them
   if (apiKeys) {
-    keyRotationManager.registerPool(providerId, apiKeys);
+    const nextKeys = Array.isArray(apiKeys) ? apiKeys : [apiKeys];
+    const currentKeys = keyRotationManager.getKeys(providerId);
+
+    // Only re-register if keys have changed
+    const needsRefresh =
+      currentKeys.length !== nextKeys.length ||
+      currentKeys.some((key, index) => key !== nextKeys[index]);
+
+    if (needsRefresh) {
+      keyRotationManager.registerPool(providerId, apiKeys);
+    }
+
     return keyRotationManager.getKey(providerId);
   }
 

@@ -92,11 +92,13 @@ export async function compareModels(
 
         // Record token usage if available
         const usage = await streamResult.usage;
-        collector.recordTokens({
-          promptTokens: usage.inputTokens,
-          completionTokens: usage.outputTokens,
-          totalTokens: usage.totalTokens,
-        });
+        if (usage) {
+          collector.recordTokens({
+            promptTokens: usage.inputTokens,
+            completionTokens: usage.outputTokens,
+            totalTokens: usage.totalTokens,
+          });
+        }
 
         // Record metrics to global tracker
         const metrics = collector.getMetrics();
@@ -195,7 +197,7 @@ class RetryPlugin extends AiPlugin {
     super();
   }
 
-  async onError(error: Error, context: PluginContext): Promise<void> {
+  async onError(error: Error, _context: PluginContext): Promise<void> {
     this.attempts++;
 
     const isRetryable = this.options.retryableErrors
@@ -212,10 +214,8 @@ class RetryPlugin extends AiPlugin {
 
       await new Promise((resolve) => setTimeout(resolve, delay));
 
-      // Trigger retry
-      if (context.retry) {
-        context.retry();
-      }
+      // Note: Retry mechanism needs to be implemented at a higher level
+      // The plugin can only delay, not trigger actual retries
     }
   }
 }

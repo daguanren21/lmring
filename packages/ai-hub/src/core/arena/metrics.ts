@@ -22,15 +22,15 @@ export class MetricsCollector {
     completionTokens?: number;
     totalTokens?: number;
   }): void {
-    if (usage.promptTokens) {
+    if (usage.promptTokens !== undefined) {
       this.promptTokens = usage.promptTokens;
     }
-    if (usage.completionTokens) {
+    if (usage.completionTokens !== undefined) {
       this.completionTokens = usage.completionTokens;
     }
-    if (usage.totalTokens) {
+    if (usage.totalTokens !== undefined) {
       this.totalTokens = usage.totalTokens;
-    } else if (usage.promptTokens && usage.completionTokens) {
+    } else if (usage.promptTokens !== undefined && usage.completionTokens !== undefined) {
       this.totalTokens = usage.promptTokens + usage.completionTokens;
     }
   }
@@ -133,9 +133,11 @@ export class GlobalMetricsTracker {
         ttftCount > 0 && sum.timeToFirstToken !== undefined
           ? Math.round(sum.timeToFirstToken / ttftCount)
           : undefined,
-      promptTokens: sum.promptTokens ? Math.round(sum.promptTokens / count) : undefined,
-      completionTokens: sum.completionTokens ? Math.round(sum.completionTokens / count) : undefined,
-      totalTokens: sum.totalTokens ? Math.round(sum.totalTokens / count) : undefined,
+      promptTokens:
+        sum.promptTokens !== undefined ? Math.round(sum.promptTokens / count) : undefined,
+      completionTokens:
+        sum.completionTokens !== undefined ? Math.round(sum.completionTokens / count) : undefined,
+      totalTokens: sum.totalTokens !== undefined ? Math.round(sum.totalTokens / count) : undefined,
       tokensPerSecond:
         tpsCount > 0 && sum.tokensPerSecond !== undefined
           ? sum.tokensPerSecond / tpsCount

@@ -59,10 +59,9 @@ export function createMetricsMiddleware(
     totalTokens?: number;
   }) => void,
 ): LanguageModelMiddleware {
-  const startTime = Date.now();
-
   return {
     wrapGenerate: async ({ doGenerate }) => {
+      const startTime = Date.now();
       const result = await doGenerate();
 
       const duration = Date.now() - startTime;

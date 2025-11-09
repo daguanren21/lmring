@@ -22,11 +22,17 @@ export class ModelResolver {
       useAnthropicFormat?: boolean;
     },
   ): ResolvedModel {
-    // Check cache
-    const cacheKey = `${modelId}_${fallbackProviderId}_${JSON.stringify(options)}`;
-    const cached = this.cache.get(cacheKey);
-    if (cached) {
-      return cached;
+    // Skip caching when middlewares are present since functions cannot be properly serialized
+    const hasMiddlewares = Boolean(options?.middlewares?.length);
+    const cacheKey = hasMiddlewares
+      ? undefined
+      : `${modelId}_${fallbackProviderId}_${JSON.stringify(options)}`;
+
+    if (cacheKey) {
+      const cached = this.cache.get(cacheKey);
+      if (cached) {
+        return cached;
+      }
     }
 
     // Parse model ID - support multiple formats
@@ -82,8 +88,10 @@ export class ModelResolver {
       model,
     };
 
-    // Cache the result
-    this.cache.set(cacheKey, resolved);
+    // Only cache when cache key is defined (no middlewares)
+    if (cacheKey) {
+      this.cache.set(cacheKey, resolved);
+    }
 
     return resolved;
   }
@@ -96,12 +104,16 @@ export class ModelResolver {
     const separators = ['>', '|', ':'];
 
     for (const separator of separators) {
-      const [providerPart, modelPart] = modelId.split(separator);
-      if (providerPart && modelPart) {
-        return {
-          providerId: providerPart.trim(),
-          modelName: modelPart.trim(),
-        };
+      const separatorIndex = modelId.indexOf(separator);
+      if (separatorIndex > 0) {
+        const providerPart = modelId.slice(0, separatorIndex).trim();
+        const modelPart = modelId.slice(separatorIndex + separator.length).trim();
+        if (providerPart && modelPart) {
+          return {
+            providerId: providerPart,
+            modelName: modelPart,
+          };
+        }
       }
     }
 

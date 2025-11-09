@@ -99,7 +99,6 @@ export class RuntimeExecutor {
       middlewares?: LanguageModelMiddleware[];
     },
   ): Promise<StreamTextResponse> {
-    const model = this.resolveModel(params.model);
     const context = this.createContext(params.model, 'streamText');
 
     // Merge plugins
@@ -108,14 +107,23 @@ export class RuntimeExecutor {
 
     // Merge middlewares
     const allMiddlewares = [...this.middlewares, ...(options?.middlewares || [])];
-    const wrappedModel =
-      allMiddlewares.length > 0 ? wrapWithMiddlewares(model, allMiddlewares) : model;
 
     return engine.executeLifecycle(
       'streamText',
       params,
       async (transformedParams) => {
         const { model: modelId, ...restParams } = transformedParams;
+
+        // Resolve model after transformation
+        const resolvedModel = this.resolveModel(modelId);
+        const wrappedModel =
+          allMiddlewares.length > 0
+            ? wrapWithMiddlewares(resolvedModel, allMiddlewares)
+            : resolvedModel;
+
+        // Update context with transformed modelId
+        context.modelId = modelId;
+
         return aiStreamText({
           model: wrappedModel,
           ...restParams,
@@ -139,7 +147,6 @@ export class RuntimeExecutor {
       middlewares?: LanguageModelMiddleware[];
     },
   ): Promise<GenerateTextResponse> {
-    const model = this.resolveModel(params.model);
     const context = this.createContext(params.model, 'generateText');
 
     // Merge plugins
@@ -148,14 +155,23 @@ export class RuntimeExecutor {
 
     // Merge middlewares
     const allMiddlewares = [...this.middlewares, ...(options?.middlewares || [])];
-    const wrappedModel =
-      allMiddlewares.length > 0 ? wrapWithMiddlewares(model, allMiddlewares) : model;
 
     return engine.executeLifecycle(
       'generateText',
       params,
       async (transformedParams) => {
         const { model: modelId, ...restParams } = transformedParams;
+
+        // Resolve model after transformation
+        const resolvedModel = this.resolveModel(modelId);
+        const wrappedModel =
+          allMiddlewares.length > 0
+            ? wrapWithMiddlewares(resolvedModel, allMiddlewares)
+            : resolvedModel;
+
+        // Update context with transformed modelId
+        context.modelId = modelId;
+
         return aiGenerateText({
           model: wrappedModel,
           ...restParams,
@@ -179,7 +195,6 @@ export class RuntimeExecutor {
       middlewares?: LanguageModelMiddleware[];
     },
   ): Promise<GenerateObjectResponse> {
-    const model = this.resolveModel(params.model);
     const context = this.createContext(params.model, 'generateObject');
 
     // Merge plugins
@@ -188,14 +203,23 @@ export class RuntimeExecutor {
 
     // Merge middlewares
     const allMiddlewares = [...this.middlewares, ...(options?.middlewares || [])];
-    const wrappedModel =
-      allMiddlewares.length > 0 ? wrapWithMiddlewares(model, allMiddlewares) : model;
 
     return engine.executeLifecycle(
       'generateObject',
       params,
       async (transformedParams) => {
         const { model: modelId, stopSequences: _stopSequences, ...restParams } = transformedParams;
+
+        // Resolve model after transformation
+        const resolvedModel = this.resolveModel(modelId);
+        const wrappedModel =
+          allMiddlewares.length > 0
+            ? wrapWithMiddlewares(resolvedModel, allMiddlewares)
+            : resolvedModel;
+
+        // Update context with transformed modelId
+        context.modelId = modelId;
+
         const request: Parameters<typeof aiGenerateObject>[0] = {
           model: wrappedModel,
           ...restParams,
@@ -220,7 +244,6 @@ export class RuntimeExecutor {
       middlewares?: LanguageModelMiddleware[];
     },
   ): Promise<StreamObjectResponse> {
-    const model = this.resolveModel(params.model);
     const context = this.createContext(params.model, 'streamObject');
 
     // Merge plugins
@@ -229,14 +252,23 @@ export class RuntimeExecutor {
 
     // Merge middlewares
     const allMiddlewares = [...this.middlewares, ...(options?.middlewares || [])];
-    const wrappedModel =
-      allMiddlewares.length > 0 ? wrapWithMiddlewares(model, allMiddlewares) : model;
 
     return engine.executeLifecycle(
       'streamObject',
       params,
       async (transformedParams) => {
         const { model: modelId, stopSequences: _stopSequences, ...restParams } = transformedParams;
+
+        // Resolve model after transformation
+        const resolvedModel = this.resolveModel(modelId);
+        const wrappedModel =
+          allMiddlewares.length > 0
+            ? wrapWithMiddlewares(resolvedModel, allMiddlewares)
+            : resolvedModel;
+
+        // Update context with transformed modelId
+        context.modelId = modelId;
+
         const request: Parameters<typeof aiStreamObject>[0] = {
           model: wrappedModel,
           ...restParams,

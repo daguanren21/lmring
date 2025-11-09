@@ -14,7 +14,6 @@ export class RetryPlugin extends AiPlugin {
   description = 'Handles automatic retries with configurable backoff strategies';
 
   private options: RetryPluginOptions;
-  private attempts = new Map<string, number>();
 
   constructor(options: RetryPluginOptions = {}) {
     super();
@@ -28,27 +27,27 @@ export class RetryPlugin extends AiPlugin {
   }
 
   async onError(error: Error, context: PluginContext): Promise<void> {
-    const key = this.getContextKey(context);
-    const currentAttempt = this.attempts.get(key) || 0;
+    // Track attempts per-request using context metadata
+    const currentAttempt = (context.metadata.retryAttempt as number) || 0;
 
     // Check if error is retryable
     if (!this.isRetryable(error)) {
-      this.attempts.delete(key);
+      delete context.metadata.retryAttempt;
       return;
     }
 
     // Check if max attempts reached
     const maxAttempts = this.options.maxAttempts ?? 3;
     if (currentAttempt >= maxAttempts - 1) {
-      this.attempts.delete(key);
+      delete context.metadata.retryAttempt;
       return;
     }
 
     // Calculate delay
     const delay = this.calculateDelay(currentAttempt);
 
-    // Update attempt count
-    this.attempts.set(key, currentAttempt + 1);
+    // Update attempt count in context metadata
+    context.metadata.retryAttempt = currentAttempt + 1;
     context.attempt = currentAttempt + 1;
 
     // Call retry handler if provided
@@ -59,10 +58,8 @@ export class RetryPlugin extends AiPlugin {
     // Wait before retrying
     await this.sleep(delay);
 
-    // Trigger retry
-    if (context.retry) {
-      context.retry();
-    }
+    // Note: Actual retry needs to be implemented at a higher level
+    // This plugin can only delay and track attempts
   }
 
   private isRetryable(error: Error): boolean {
@@ -124,16 +121,13 @@ export class RetryPlugin extends AiPlugin {
     return new Promise((resolve) => setTimeout(resolve, ms));
   }
 
-  private getContextKey(context: PluginContext): string {
-    return `${context.providerId}_${context.modelId}_${context.method}`;
-  }
-
+  // Reset is now a no-op since attempts are tracked per-request in context
   reset(): void {
-    this.attempts.clear();
+    // No global state to clear
   }
 
   getAttemptCount(context: PluginContext): number {
-    const key = this.getContextKey(context);
-    return this.attempts.get(key) || 0;
+    // Return attempt count from context metadata
+    return (context.metadata.retryAttempt as number) || 0;
   }
 }

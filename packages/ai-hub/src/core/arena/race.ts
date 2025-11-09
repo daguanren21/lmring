@@ -57,11 +57,13 @@ export async function raceModels(
 
         // Record token usage if available
         const usage = await streamResult.usage;
-        collector.recordTokens({
-          promptTokens: usage.inputTokens,
-          completionTokens: usage.outputTokens,
-          totalTokens: usage.totalTokens,
-        });
+        if (usage) {
+          collector.recordTokens({
+            promptTokens: usage.inputTokens,
+            completionTokens: usage.outputTokens,
+            totalTokens: usage.totalTokens,
+          });
+        }
 
         // Record metrics to global tracker
         const metrics = collector.getMetrics();

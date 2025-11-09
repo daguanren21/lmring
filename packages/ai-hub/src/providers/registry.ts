@@ -49,11 +49,13 @@ export class ProviderRegistry {
   }
 
   cacheInstance(id: string, instance: ProviderInstance): void {
-    this.instances.set(id, instance);
+    const actualId = this.aliases.get(id) || id;
+    this.instances.set(actualId, instance);
   }
 
   getCachedInstance(id: string): ProviderInstance | undefined {
-    return this.instances.get(id);
+    const actualId = this.aliases.get(id) || id;
+    return this.instances.get(actualId);
   }
 
   clear(): void {

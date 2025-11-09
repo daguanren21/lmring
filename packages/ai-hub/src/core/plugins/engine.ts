@@ -170,12 +170,6 @@ export class PluginEngine {
       // Notify error
       await this.executeParallel('onError', context, error);
 
-      // Check if any plugin wants to retry
-      if (context.retry && context.attempt < 3) {
-        context.attempt++;
-        return this.executeLifecycle(method, params, executor, context);
-      }
-
       throw error;
     }
 

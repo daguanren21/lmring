@@ -42,4 +42,7 @@ export {
   DropdownMenuSubTrigger,
   DropdownMenuRadioGroup,
 } from './dropdown-menu';
+export { Popover, PopoverTrigger, PopoverContent, PopoverAnchor } from './popover';
+export { Slider } from './slider';
+export { Switch } from './switch';
 

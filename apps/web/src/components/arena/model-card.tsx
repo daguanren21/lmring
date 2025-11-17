@@ -1,50 +1,125 @@
 'use client';
 
-import { Badge, Card, CardContent, CardDescription, CardHeader, CardTitle } from '@lmring/ui';
+import {
+  Badge,
+  Button,
+  Card,
+  CardContent,
+  CardHeader,
+  Label,
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+  Slider,
+  Switch,
+} from '@lmring/ui';
 import { motion } from 'framer-motion';
 import {
-  CheckIcon,
+  ArrowLeftIcon,
+  ArrowRightIcon,
+  ChevronDownIcon,
   ClockIcon,
-  CopyIcon,
-  SparklesIcon,
+  EraserIcon,
+  ExternalLinkIcon,
+  MoreVerticalIcon,
+  PlusIcon,
+  Settings2Icon,
   ThumbsDownIcon,
   ThumbsUpIcon,
+  Trash2Icon,
 } from 'lucide-react';
 import * as React from 'react';
 
+export interface ModelConfig {
+  maxTokens: number;
+  temperature: number;
+  topP: number;
+  frequencyPenalty: number;
+  presencePenalty: number;
+}
+
+export interface ModelOption {
+  id: string;
+  name: string;
+  provider: string;
+  description: string;
+  icon?: string;
+  context?: string;
+  inputPricing?: string;
+  outputPricing?: string;
+  badge?: 'Hobby' | 'Pro' | 'Enterprise';
+  isPremium?: boolean;
+  isNew?: boolean;
+}
+
 interface ModelCardProps {
-  modelName: string;
-  provider?: string;
+  modelId?: string;
+  models: ModelOption[];
   response?: string;
   isLoading?: boolean;
   responseTime?: number;
   tokenCount?: number;
-  onCopy?: () => void;
+  synced?: boolean;
+  customPrompt?: string;
+  config?: ModelConfig;
+  index?: number;
+  canMoveLeft?: boolean;
+  canMoveRight?: boolean;
+  onModelSelect?: (modelId: string) => void;
+  onSyncToggle?: (synced: boolean) => void;
+  onConfigChange?: (config: ModelConfig) => void;
+  onCustomPromptChange?: (prompt: string) => void;
+  onClear?: () => void;
+  onDelete?: () => void;
+  onMoveLeft?: () => void;
+  onMoveRight?: () => void;
+  onAddCard?: () => void;
   onThumbsUp?: () => void;
   onThumbsDown?: () => void;
-  index?: number;
 }
 
+const DEFAULT_CONFIG: ModelConfig = {
+  maxTokens: 2048,
+  temperature: 0.7,
+  topP: 0.9,
+  frequencyPenalty: 0,
+  presencePenalty: 0,
+};
+
 export function ModelCard({
-  modelName,
-  provider,
+  modelId,
+  models,
   response = '',
   isLoading = false,
   responseTime,
   tokenCount,
-  onCopy,
+  synced = true,
+  customPrompt = '',
+  config = DEFAULT_CONFIG,
+  index = 0,
+  canMoveLeft = false,
+  canMoveRight = false,
+  onModelSelect,
+  onSyncToggle,
+  onConfigChange,
+  onCustomPromptChange,
+  onClear,
+  onDelete,
+  onMoveLeft,
+  onMoveRight,
+  onAddCard,
   onThumbsUp,
   onThumbsDown,
-  index = 0,
 }: ModelCardProps) {
-  const [copied, setCopied] = React.useState(false);
+  const [settingsOpen, setSettingsOpen] = React.useState(false);
+  const [dropdownOpen, setDropdownOpen] = React.useState(false);
+  const [modelMenuOpen, setModelMenuOpen] = React.useState(false);
 
-  const handleCopy = async () => {
-    if (response) {
-      await navigator.clipboard.writeText(response);
-      setCopied(true);
-      onCopy?.();
-      setTimeout(() => setCopied(false), 2000);
+  const selectedModel = models.find((m) => m.id === modelId);
+
+  const handleConfigChange = <K extends keyof ModelConfig>(key: K, value: ModelConfig[K]) => {
+    if (value !== undefined) {
+      onConfigChange?.({ ...config, [key]: value });
     }
   };
 
@@ -57,65 +132,424 @@ export function ModelCard({
         delay: index * 0.1,
         ease: [0.25, 0.1, 0.25, 1],
       }}
-      className="w-full h-full min-w-[400px] max-w-[500px] lg:min-w-[500px]"
+      className="w-full h-full"
     >
-      <Card className="h-full arena-card flex flex-col">
-        <CardHeader className="pb-4 flex-shrink-0">
-          <div className="flex items-start justify-between">
-            <div className="space-y-1">
-              <CardTitle className="text-lg font-medium flex items-center gap-2">
-                <SparklesIcon className="h-4 w-4 text-primary" />
-                {modelName}
-              </CardTitle>
-              {provider && <CardDescription className="text-sm">{provider}</CardDescription>}
-            </div>
-            <div className="flex items-center gap-2">
-              {responseTime && (
-                <Badge variant="secondary" className="flex items-center gap-1">
-                  <ClockIcon className="h-3 w-3" />
-                  {responseTime}ms
-                </Badge>
+      <Card className="h-full arena-card flex flex-col glass-effect">
+        <CardHeader className="pb-3 flex-shrink-0 space-y-0">
+          {/* Top Controls */}
+          <div className="flex items-center gap-2">
+            {/* Model Selector Dropdown */}
+            <div className="relative flex-1">
+              <button
+                type="button"
+                onClick={() => setModelMenuOpen(!modelMenuOpen)}
+                className="w-full flex items-center justify-between h-9 px-3 rounded-lg border border-border/50 hover:border-border transition-colors bg-background/50"
+              >
+                {selectedModel ? (
+                  <div className="flex items-center gap-2">
+                    <span className="text-base">{selectedModel.icon || '🤖'}</span>
+                    <span className="font-medium text-sm">{selectedModel.name}</span>
+                    {selectedModel.badge && (
+                      <Badge variant="secondary" className="text-xs px-1.5 py-0">
+                        {selectedModel.badge}
+                      </Badge>
+                    )}
+                    {selectedModel.isNew && (
+                      <Badge variant="default" className="text-xs px-1.5 py-0">
+                        NEW
+                      </Badge>
+                    )}
+                  </div>
+                ) : (
+                  <span className="text-sm text-muted-foreground">Select a model...</span>
+                )}
+                <ChevronDownIcon className="h-4 w-4 opacity-50" />
+              </button>
+
+              {modelMenuOpen && (
+                <>
+                  <button
+                    type="button"
+                    className="fixed inset-0 z-10"
+                    onClick={() => setModelMenuOpen(false)}
+                    onKeyDown={(e) => e.key === 'Escape' && setModelMenuOpen(false)}
+                    aria-label="Close model selector"
+                  />
+                  <div className="absolute top-full left-0 right-0 mt-1 z-20 bg-popover border rounded-xl shadow-lg max-h-[300px] overflow-y-auto">
+                    {models.map((model) => (
+                      <button
+                        key={model.id}
+                        type="button"
+                        onClick={() => {
+                          onModelSelect?.(model.id);
+                          setModelMenuOpen(false);
+                        }}
+                        className="w-full flex items-start gap-2 py-3 px-3 hover:bg-accent transition-colors text-left"
+                      >
+                        <span className="text-base">{model.icon || '🤖'}</span>
+                        <div className="flex-1 min-w-0">
+                          <div className="font-medium text-sm">{model.name}</div>
+                          <div className="text-xs text-muted-foreground">{model.provider}</div>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          {model.badge && (
+                            <Badge variant="secondary" className="text-xs px-1.5 py-0">
+                              {model.badge}
+                            </Badge>
+                          )}
+                          {model.isNew && (
+                            <Badge variant="default" className="text-xs px-1.5 py-0">
+                              NEW
+                            </Badge>
+                          )}
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                </>
               )}
-              {tokenCount && <Badge variant="secondary">{tokenCount} tokens</Badge>}
+            </div>
+
+            {/* Action Toolbar */}
+            <div className="flex items-center gap-1">
+              {/* Sync/Custom Toggle */}
+              <div className="flex items-center gap-1.5 rounded-lg border border-border/50 px-2.5 py-1.5 bg-background/50">
+                <Label
+                  htmlFor={`sync-${index}`}
+                  className="text-xs cursor-pointer font-medium select-none"
+                >
+                  {synced ? 'Synced' : 'Custom'}
+                </Label>
+                <Switch
+                  id={`sync-${index}`}
+                  checked={synced}
+                  onCheckedChange={onSyncToggle}
+                  className="scale-90"
+                />
+              </div>
+
+              {/* Settings Popover */}
+              <Popover open={settingsOpen} onOpenChange={setSettingsOpen}>
+                <PopoverTrigger asChild>
+                  <Button variant="ghost" size="icon" className="h-8 w-8 hover-lift">
+                    <Settings2Icon className="h-4 w-4" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-80 glass-effect" align="end">
+                  <div className="space-y-4">
+                    <h4 className="font-medium">Model Settings</h4>
+
+                    <div className="space-y-3">
+                      {/* Max Tokens */}
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between">
+                          <Label className="text-sm">Max Output Tokens</Label>
+                          <span className="text-sm text-muted-foreground">{config.maxTokens}</span>
+                        </div>
+                        <Slider
+                          value={[config.maxTokens]}
+                          onValueChange={([value]) =>
+                            handleConfigChange('maxTokens', value ?? config.maxTokens)
+                          }
+                          min={256}
+                          max={8192}
+                          step={256}
+                        />
+                      </div>
+
+                      {/* Temperature */}
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between">
+                          <Label className="text-sm">Temperature</Label>
+                          <span className="text-sm text-muted-foreground">
+                            {config.temperature.toFixed(2)}
+                          </span>
+                        </div>
+                        <Slider
+                          value={[config.temperature]}
+                          onValueChange={([value]) =>
+                            handleConfigChange('temperature', value ?? config.temperature)
+                          }
+                          min={0}
+                          max={2}
+                          step={0.01}
+                        />
+                      </div>
+
+                      {/* Top P */}
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between">
+                          <Label className="text-sm">Top P</Label>
+                          <span className="text-sm text-muted-foreground">
+                            {config.topP.toFixed(2)}
+                          </span>
+                        </div>
+                        <Slider
+                          value={[config.topP]}
+                          onValueChange={([value]) =>
+                            handleConfigChange('topP', value ?? config.topP)
+                          }
+                          min={0}
+                          max={1}
+                          step={0.01}
+                        />
+                      </div>
+
+                      {/* Frequency Penalty */}
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between">
+                          <Label className="text-sm">Frequency Penalty</Label>
+                          <span className="text-sm text-muted-foreground">
+                            {config.frequencyPenalty.toFixed(2)}
+                          </span>
+                        </div>
+                        <Slider
+                          value={[config.frequencyPenalty]}
+                          onValueChange={([value]) =>
+                            handleConfigChange('frequencyPenalty', value ?? config.frequencyPenalty)
+                          }
+                          min={0}
+                          max={2}
+                          step={0.01}
+                        />
+                      </div>
+
+                      {/* Presence Penalty */}
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between">
+                          <Label className="text-sm">Presence Penalty</Label>
+                          <span className="text-sm text-muted-foreground">
+                            {config.presencePenalty.toFixed(2)}
+                          </span>
+                        </div>
+                        <Slider
+                          value={[config.presencePenalty]}
+                          onValueChange={([value]) =>
+                            handleConfigChange('presencePenalty', value ?? config.presencePenalty)
+                          }
+                          min={0}
+                          max={2}
+                          step={0.01}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </PopoverContent>
+              </Popover>
+
+              {/* Add Card Button */}
+              {onAddCard && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8 hover-lift"
+                  onClick={onAddCard}
+                >
+                  <PlusIcon className="h-4 w-4" />
+                </Button>
+              )}
+
+              {/* More Actions Dropdown */}
+              <div className="relative">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8 hover-lift"
+                  onClick={() => setDropdownOpen(!dropdownOpen)}
+                >
+                  <MoreVerticalIcon className="h-4 w-4" />
+                </Button>
+
+                {dropdownOpen && (
+                  <>
+                    <button
+                      type="button"
+                      className="fixed inset-0 z-10"
+                      onClick={() => setDropdownOpen(false)}
+                      onKeyDown={(e) => e.key === 'Escape' && setDropdownOpen(false)}
+                      aria-label="Close dropdown menu"
+                    />
+                    <div className="absolute top-full right-0 mt-1 z-20 bg-popover border rounded-xl shadow-lg min-w-[160px] py-1">
+                      {onClear && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            onClear();
+                            setDropdownOpen(false);
+                          }}
+                          className="w-full flex items-center gap-2 px-3 py-2 text-sm hover:bg-accent transition-colors text-left"
+                        >
+                          <EraserIcon className="h-4 w-4" />
+                          Clear Chat
+                        </button>
+                      )}
+                      {canMoveLeft && onMoveLeft && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            onMoveLeft();
+                            setDropdownOpen(false);
+                          }}
+                          className="w-full flex items-center gap-2 px-3 py-2 text-sm hover:bg-accent transition-colors text-left"
+                        >
+                          <ArrowLeftIcon className="h-4 w-4" />
+                          Move Left
+                        </button>
+                      )}
+                      {canMoveRight && onMoveRight && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            onMoveRight();
+                            setDropdownOpen(false);
+                          }}
+                          className="w-full flex items-center gap-2 px-3 py-2 text-sm hover:bg-accent transition-colors text-left"
+                        >
+                          <ArrowRightIcon className="h-4 w-4" />
+                          Move Right
+                        </button>
+                      )}
+                      {onDelete && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            onDelete();
+                            setDropdownOpen(false);
+                          }}
+                          className="w-full flex items-center gap-2 px-3 py-2 text-sm hover:bg-accent transition-colors text-left text-destructive"
+                        >
+                          <Trash2Icon className="h-4 w-4" />
+                          Delete Chat
+                        </button>
+                      )}
+                    </div>
+                  </>
+                )}
+              </div>
             </div>
           </div>
         </CardHeader>
-        <CardContent className="flex-1 overflow-y-auto space-y-4">
-          <div className="relative">
-            {isLoading ? (
-              <div className="space-y-3">
-                <motion.div
-                  className="h-4 bg-muted rounded animate-pulse"
-                  animate={{ opacity: [0.5, 1, 0.5] }}
-                  transition={{ duration: 1.5, repeat: Infinity }}
-                />
-                <motion.div
-                  className="h-4 bg-muted rounded animate-pulse w-5/6"
-                  animate={{ opacity: [0.5, 1, 0.5] }}
-                  transition={{ duration: 1.5, repeat: Infinity, delay: 0.2 }}
-                />
-                <motion.div
-                  className="h-4 bg-muted rounded animate-pulse w-4/6"
-                  animate={{ opacity: [0.5, 1, 0.5] }}
-                  transition={{ duration: 1.5, repeat: Infinity, delay: 0.4 }}
-                />
-              </div>
-            ) : (
-              <div className="prose prose-sm max-w-none dark:prose-invert">
-                <p className="text-sm text-foreground whitespace-pre-wrap">
-                  {response || 'No response yet...'}
-                </p>
-              </div>
-            )}
-          </div>
 
+        <CardContent className="flex-1 flex flex-col space-y-0 overflow-hidden pb-4">
+          {/* Content Area */}
+          {!response && !isLoading && selectedModel ? (
+            /* Centered Model Info Display */
+            <div className="flex-1 flex items-center justify-center p-4">
+              <div className="rounded-lg border bg-muted/30 p-4 space-y-3 max-w-xl w-full backdrop-blur-sm">
+                <div className="flex items-center gap-2 text-sm font-medium">
+                  <span className="text-base">{selectedModel.icon || '🤖'}</span>
+                  <span>
+                    {selectedModel.provider} / {selectedModel.name}
+                  </span>
+                </div>
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  {selectedModel.description}
+                </p>
+
+                {/* Model Stats */}
+                {(selectedModel.context || selectedModel.inputPricing) && (
+                  <div className="grid grid-cols-2 gap-2 text-xs text-muted-foreground pt-2">
+                    {selectedModel.context && (
+                      <div>
+                        <span className="font-medium">Context:</span> {selectedModel.context}
+                      </div>
+                    )}
+                    {selectedModel.inputPricing && (
+                      <div>
+                        <span className="font-medium">Input:</span> {selectedModel.inputPricing}
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Footer Links */}
+                <div className="flex items-center justify-between text-xs text-muted-foreground pt-3 border-t">
+                  <div className="flex gap-4">
+                    <button
+                      type="button"
+                      className="hover:text-foreground transition-colors flex items-center gap-1"
+                    >
+                      Model Page <ExternalLinkIcon className="h-3 w-3" />
+                    </button>
+                    <button
+                      type="button"
+                      className="hover:text-foreground transition-colors flex items-center gap-1"
+                    >
+                      Pricing <ExternalLinkIcon className="h-3 w-3" />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ) : (
+            /* Response Display */
+            <div className="flex-1 overflow-y-auto custom-scrollbar">
+              <div className="space-y-4 p-1">
+                {/* Metrics Badges */}
+                {(responseTime || tokenCount) && (
+                  <div className="flex items-center gap-2">
+                    {responseTime && (
+                      <Badge variant="secondary" className="flex items-center gap-1">
+                        <ClockIcon className="h-3 w-3" />
+                        {responseTime}ms
+                      </Badge>
+                    )}
+                    {tokenCount && <Badge variant="secondary">{tokenCount} tokens</Badge>}
+                  </div>
+                )}
+
+                {/* Loading State */}
+                {isLoading && (
+                  <div className="space-y-3">
+                    <motion.div
+                      className="h-4 bg-muted/50 rounded animate-pulse"
+                      animate={{ opacity: [0.5, 1, 0.5] }}
+                      transition={{ duration: 1.5, repeat: Infinity }}
+                    />
+                    <motion.div
+                      className="h-4 bg-muted/50 rounded animate-pulse w-5/6"
+                      animate={{ opacity: [0.5, 1, 0.5] }}
+                      transition={{ duration: 1.5, repeat: Infinity, delay: 0.2 }}
+                    />
+                    <motion.div
+                      className="h-4 bg-muted/50 rounded animate-pulse w-4/6"
+                      animate={{ opacity: [0.5, 1, 0.5] }}
+                      transition={{ duration: 1.5, repeat: Infinity, delay: 0.4 }}
+                    />
+                  </div>
+                )}
+
+                {/* Response Text */}
+                {response && !isLoading && (
+                  <div className="prose prose-sm max-w-none dark:prose-invert">
+                    <p className="text-sm text-foreground whitespace-pre-wrap">{response}</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Custom Prompt Input (when not synced) */}
+          {!synced && (
+            <div className="pt-3 flex-shrink-0">
+              <input
+                type="text"
+                value={customPrompt}
+                onChange={(e) => onCustomPromptChange?.(e.target.value)}
+                placeholder="Type a custom prompt for this model..."
+                className="w-full px-3 py-2 text-sm rounded-lg border border-border/50 bg-background/50 focus:outline-none focus:ring-2 focus:ring-ring/50 transition-all"
+              />
+            </div>
+          )}
+
+          {/* Action Footer (when response exists) */}
           {response && !isLoading && (
             <div className="flex items-center justify-between pt-4 border-t flex-shrink-0">
               <div className="flex items-center gap-1">
                 <button
                   type="button"
                   onClick={onThumbsUp}
-                  className="p-2 rounded-lg hover:bg-accent transition-colors"
+                  className="p-2 rounded-lg hover:bg-accent transition-colors hover-lift button-press"
                   aria-label="Thumbs up"
                 >
                   <ThumbsUpIcon className="h-4 w-4" />
@@ -123,30 +557,12 @@ export function ModelCard({
                 <button
                   type="button"
                   onClick={onThumbsDown}
-                  className="p-2 rounded-lg hover:bg-accent transition-colors"
+                  className="p-2 rounded-lg hover:bg-accent transition-colors hover-lift button-press"
                   aria-label="Thumbs down"
                 >
                   <ThumbsDownIcon className="h-4 w-4" />
                 </button>
               </div>
-              <button
-                type="button"
-                onClick={handleCopy}
-                className="p-2 rounded-lg hover:bg-accent transition-colors flex items-center gap-2"
-                aria-label="Copy response"
-              >
-                {copied ? (
-                  <>
-                    <CheckIcon className="h-4 w-4 text-green-500" />
-                    <span className="text-xs text-green-500">Copied!</span>
-                  </>
-                ) : (
-                  <>
-                    <CopyIcon className="h-4 w-4" />
-                    <span className="text-xs">Copy</span>
-                  </>
-                )}
-              </button>
             </div>
           )}
         </CardContent>

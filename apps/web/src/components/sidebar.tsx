@@ -12,13 +12,14 @@ import {
 import { AnimatePresence, motion } from 'framer-motion';
 import {
   ChevronDownIcon,
-  ChevronLeftIcon,
   ClockIcon,
   HelpCircleIcon,
   InfoIcon,
   LifeBuoyIcon,
   MenuIcon,
   MessageSquarePlusIcon,
+  PanelLeftClose,
+  PanelLeftOpen,
   SparklesIcon,
   TrophyIcon,
   UsersIcon,
@@ -60,6 +61,7 @@ interface SidebarProps {
 export function Sidebar({ locale = 'en' }: SidebarProps) {
   const [collapsed, setCollapsed] = React.useState(false);
   const [mobileOpen, setMobileOpen] = React.useState(false);
+  const [isLogoHovered, setIsLogoHovered] = React.useState(false);
   const pathname = usePathname();
 
   // Remove locale from pathname for matching
@@ -71,90 +73,107 @@ export function Sidebar({ locale = 'en' }: SidebarProps) {
     <>
       {/* Logo/Brand with Dropdown Menu */}
       <div className="h-16 flex items-center justify-between px-4 border-b border-sidebar-border">
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <button
-              type="button"
-              className="flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-sidebar-accent transition-colors flex-1 min-w-0"
-            >
-              <SparklesIcon className="h-6 w-6 text-primary flex-shrink-0" />
-              <AnimatePresence>
-                {!collapsed && (
-                  <>
-                    <motion.span
-                      initial={{ opacity: 0, width: 0 }}
-                      animate={{ opacity: 1, width: 'auto' }}
-                      exit={{ opacity: 0, width: 0 }}
-                      transition={{ duration: 0.2 }}
-                      className="text-lg font-semibold whitespace-nowrap overflow-hidden text-left"
-                    >
-                      LMArena
-                    </motion.span>
-                    <ChevronDownIcon className="h-4 w-4 flex-shrink-0 ml-1" />
-                  </>
-                )}
-              </AnimatePresence>
-            </button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="start" className="w-56">
-            <DropdownMenuLabel>Resources</DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem asChild>
-              <a
-                href="https://lmarena.ai/about"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center cursor-pointer"
+        {collapsed ? (
+          <button
+            type="button"
+            className="flex items-center justify-center w-full h-full hover:bg-sidebar-accent transition-colors rounded-lg"
+            onClick={() => setCollapsed(false)}
+            onMouseEnter={() => setIsLogoHovered(true)}
+            onMouseLeave={() => setIsLogoHovered(false)}
+          >
+            {isLogoHovered ? (
+              <PanelLeftOpen className="h-6 w-6 text-primary" />
+            ) : (
+              <SparklesIcon className="h-6 w-6 text-primary" />
+            )}
+          </button>
+        ) : (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button
+                type="button"
+                className="flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-sidebar-accent transition-colors"
               >
-                <InfoIcon className="mr-2 h-4 w-4" />
-                <span>About Us</span>
-              </a>
-            </DropdownMenuItem>
-            <DropdownMenuItem asChild>
-              <a
-                href="https://lmarena.ai/how-it-works"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center cursor-pointer"
-              >
-                <HelpCircleIcon className="mr-2 h-4 w-4" />
-                <span>How it Works</span>
-              </a>
-            </DropdownMenuItem>
-            <DropdownMenuItem asChild>
-              <a
-                href="https://lmarena.ai/help-center"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center cursor-pointer"
-              >
-                <LifeBuoyIcon className="mr-2 h-4 w-4" />
-                <span>Help Center</span>
-              </a>
-            </DropdownMenuItem>
-            <DropdownMenuItem asChild>
-              <a
-                href="https://lmarena.ai/careers"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center cursor-pointer"
-              >
-                <UsersIcon className="mr-2 h-4 w-4" />
-                <span>Join the Team</span>
-              </a>
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-        <button
-          type="button"
-          onClick={() => setCollapsed(!collapsed)}
-          className="p-1.5 rounded-lg hover:bg-sidebar-accent transition-colors lg:flex hidden flex-shrink-0"
-          aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-        >
-          <ChevronLeftIcon
-            className={`h-4 w-4 transition-transform ${collapsed ? 'rotate-180' : ''}`}
-          />
-        </button>
+                <SparklesIcon className="h-6 w-6 text-primary flex-shrink-0" />
+                <AnimatePresence>
+                  {!collapsed && (
+                    <>
+                      <motion.span
+                        initial={{ opacity: 0, width: 0 }}
+                        animate={{ opacity: 1, width: 'auto' }}
+                        exit={{ opacity: 0, width: 0 }}
+                        transition={{ duration: 0.2 }}
+                        className="text-lg font-semibold whitespace-nowrap overflow-hidden text-left"
+                      >
+                        LMArena
+                      </motion.span>
+                      <ChevronDownIcon className="h-4 w-4 flex-shrink-0" />
+                    </>
+                  )}
+                </AnimatePresence>
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="start" className="w-56">
+              <DropdownMenuLabel>Resources</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem asChild>
+                <a
+                  href="https://lmarena.ai/about"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center cursor-pointer"
+                >
+                  <InfoIcon className="mr-2 h-4 w-4" />
+                  <span>About Us</span>
+                </a>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <a
+                  href="https://lmarena.ai/how-it-works"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center cursor-pointer"
+                >
+                  <HelpCircleIcon className="mr-2 h-4 w-4" />
+                  <span>How it Works</span>
+                </a>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <a
+                  href="https://lmarena.ai/help-center"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center cursor-pointer"
+                >
+                  <LifeBuoyIcon className="mr-2 h-4 w-4" />
+                  <span>Help Center</span>
+                </a>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <a
+                  href="https://lmarena.ai/careers"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center cursor-pointer"
+                >
+                  <UsersIcon className="mr-2 h-4 w-4" />
+                  <span>Join the Team</span>
+                </a>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        )}
+
+        {!collapsed && (
+          <button
+            type="button"
+            onClick={() => setCollapsed(!collapsed)}
+            className="p-1.5 rounded-lg hover:bg-sidebar-accent transition-colors lg:flex hidden flex-shrink-0"
+            aria-label="Collapse sidebar"
+          >
+            <PanelLeftClose className="h-4 w-4" />
+          </button>
+        )}
       </div>
 
       {/* Navigation */}

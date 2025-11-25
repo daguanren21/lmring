@@ -2,8 +2,9 @@
 
 import { motion } from 'framer-motion';
 import * as React from 'react';
-import { ModelCard, type ModelConfig, type ModelOption } from '@/components/arena/model-card';
+import { ModelCard } from '@/components/arena/model-card';
 import { PromptInput } from '@/components/arena/prompt-input';
+import type { ModelConfig, ModelOption } from '@/types/arena';
 
 // Mock data for available models - enhanced with v0 style data
 const AVAILABLE_MODELS: ModelOption[] = [

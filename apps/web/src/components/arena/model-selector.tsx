@@ -10,24 +10,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@lmring/ui';
-import { motion } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
 import { SparklesIcon, XIcon } from 'lucide-react';
 import * as React from 'react';
 
-export interface ModelOption {
-  id: string;
-  name: string;
-  provider: string;
-  description?: string;
-  category?: string;
-  icon?: string;
-  context?: string;
-  inputPricing?: string;
-  outputPricing?: string;
-  badge?: 'Hobby' | 'Pro' | 'Enterprise';
-  isPremium?: boolean;
-  isNew?: boolean;
-}
+import type { ModelOption } from '@/types/arena';
 
 interface ModelSelectorProps {
   models: ModelOption[];
@@ -133,18 +120,20 @@ export function ModelSelector({
           </SelectContent>
         </Select>
 
-        {showRemove && selectedModel && (
-          <motion.button
-            initial={{ opacity: 0, x: -10 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -10 }}
-            onClick={onRemove}
-            className="p-2 rounded-lg hover:bg-destructive/10 text-destructive transition-colors"
-            aria-label="Remove model"
-          >
-            <XIcon className="h-4 w-4" />
-          </motion.button>
-        )}
+        <AnimatePresence>
+          {showRemove && selectedModel && (
+            <motion.button
+              initial={{ opacity: 0, x: -10 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -10 }}
+              onClick={onRemove}
+              className="p-2 rounded-lg hover:bg-destructive/10 text-destructive transition-colors"
+              aria-label="Remove model"
+            >
+              <XIcon className="h-4 w-4" />
+            </motion.button>
+          )}
+        </AnimatePresence>
       </div>
     </motion.div>
   );

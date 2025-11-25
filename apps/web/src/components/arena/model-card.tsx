@@ -35,27 +35,7 @@ import {
 } from 'lucide-react';
 import * as React from 'react';
 
-export interface ModelConfig {
-  maxTokens: number;
-  temperature: number;
-  topP: number;
-  frequencyPenalty: number;
-  presencePenalty: number;
-}
-
-export interface ModelOption {
-  id: string;
-  name: string;
-  provider: string;
-  description: string;
-  icon?: string;
-  context?: string;
-  inputPricing?: string;
-  outputPricing?: string;
-  badge?: 'Hobby' | 'Pro' | 'Enterprise';
-  isPremium?: boolean;
-  isNew?: boolean;
-}
+import type { ModelConfig, ModelOption } from '@/types/arena';
 
 interface ModelCardProps {
   modelId?: string;

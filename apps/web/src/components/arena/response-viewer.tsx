@@ -6,7 +6,7 @@ import * as React from 'react';
 interface ResponseViewerProps {
   content: string;
   isStreaming?: boolean;
-  format?: 'text' | 'markdown' | 'code';
+  format?: 'text' | 'code';
   language?: string;
 }
 

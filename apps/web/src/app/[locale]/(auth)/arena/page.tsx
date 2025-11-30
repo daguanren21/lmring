@@ -298,8 +298,10 @@ export default function ArenaPage() {
   const defaultModelId =
     AVAILABLE_MODELS.find((m) => m.default)?.id || AVAILABLE_MODELS[0]?.id || '';
 
-  // Get the second default model ID (GPT-5.1)
-  const secondDefaultModelId = 'gpt-5.1';
+  const secondDefaultModelId =
+    AVAILABLE_MODELS.find((m) => m.id === 'gpt-5.1')?.id ||
+    AVAILABLE_MODELS.find((m) => m.id !== defaultModelId)?.id ||
+    defaultModelId;
 
   const [comparisons, setComparisons] = React.useState<ModelComparison[]>([
     {

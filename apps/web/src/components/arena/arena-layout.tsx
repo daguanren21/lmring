@@ -17,7 +17,7 @@ export function ArenaLayout({ children }: ArenaLayoutProps) {
         className="flex items-center justify-between p-4 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60"
       >
         <div>
-          <h1 className="text-2xl font-semibold gradient-text">Arena</h1>
+          <span className="font-bold text-xl text-foreground">LLM Ring</span>
           <p className="text-sm text-muted-foreground mt-1">Compare AI models side by side</p>
         </div>
       </motion.div>

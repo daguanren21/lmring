@@ -52,7 +52,7 @@ export default function HistoryPage() {
       >
         <div className="flex items-center gap-3 mb-6">
           <ClockIcon className="h-8 w-8 text-primary" />
-          <h1 className="text-3xl font-bold gradient-text">Conversation History</h1>
+          <h1 className="text-3xl font-bold text-foreground">Conversation History</h1>
         </div>
 
         <div className="grid gap-4">

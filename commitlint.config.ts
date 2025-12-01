@@ -1,6 +1,9 @@
 const Configuration = {
   extends: ['@commitlint/config-conventional'],
-  ignores: [(message: string) => message.startsWith('chore: bump')], // Ignore dependabot commits
+  rules: {
+    'subject-case': [0],
+  },
+  ignores: [(message: string) => message.startsWith('chore: bump')],
 };
 
 export default Configuration;

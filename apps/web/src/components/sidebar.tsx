@@ -7,7 +7,6 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-  Separator,
 } from '@lmring/ui';
 import { AnimatePresence, motion } from 'framer-motion';
 import {
@@ -28,6 +27,7 @@ import {
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import * as React from 'react';
+import { UserMenu } from './user-menu';
 
 interface NavItem {
   title: string;
@@ -56,9 +56,14 @@ const navItems: NavItem[] = [
 
 interface SidebarProps {
   locale?: string;
+  user?: {
+    name?: string;
+    email?: string;
+    image?: string;
+  };
 }
 
-export function Sidebar({ locale = 'en' }: SidebarProps) {
+export function Sidebar({ locale = 'en', user }: SidebarProps) {
   const [collapsed, setCollapsed] = React.useState(false);
   const [mobileOpen, setMobileOpen] = React.useState(false);
   const [isLogoHovered, setIsLogoHovered] = React.useState(false);
@@ -66,6 +71,15 @@ export function Sidebar({ locale = 'en' }: SidebarProps) {
 
   // Remove locale from pathname for matching
   const currentPath = pathname.replace(`/${locale}`, '');
+
+  // Auto-collapse sidebar on settings page
+  const isSettingsPage = currentPath.startsWith('/settings');
+
+  React.useEffect(() => {
+    if (isSettingsPage) {
+      setCollapsed(true);
+    }
+  }, [isSettingsPage]);
 
   const sidebarWidth = collapsed ? 'w-16' : 'w-64';
 
@@ -105,7 +119,7 @@ export function Sidebar({ locale = 'en' }: SidebarProps) {
                         transition={{ duration: 0.2 }}
                         className="text-lg font-semibold whitespace-nowrap overflow-hidden text-left"
                       >
-                        LMArena
+                        LMRing
                       </motion.span>
                       <ChevronDownIcon className="h-4 w-4 flex-shrink-0" />
                     </>
@@ -118,7 +132,7 @@ export function Sidebar({ locale = 'en' }: SidebarProps) {
               <DropdownMenuSeparator />
               <DropdownMenuItem asChild>
                 <a
-                  href="https://lmarena.ai/about"
+                  href="https://lmring.ai/about"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center cursor-pointer"
@@ -129,7 +143,7 @@ export function Sidebar({ locale = 'en' }: SidebarProps) {
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
                 <a
-                  href="https://lmarena.ai/how-it-works"
+                  href="https://lmring.ai/how-it-works"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center cursor-pointer"
@@ -140,7 +154,7 @@ export function Sidebar({ locale = 'en' }: SidebarProps) {
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
                 <a
-                  href="https://lmarena.ai/help-center"
+                  href="https://lmring.ai/help-center"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center cursor-pointer"
@@ -151,7 +165,7 @@ export function Sidebar({ locale = 'en' }: SidebarProps) {
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
                 <a
-                  href="https://lmarena.ai/careers"
+                  href="https://lmring.ai/careers"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center cursor-pointer"
@@ -231,17 +245,9 @@ export function Sidebar({ locale = 'en' }: SidebarProps) {
         })}
       </nav>
 
-      <Separator className="mx-3" />
-
       {/* User Section */}
-      <div className="p-3 space-y-2">
-        <button
-          type="button"
-          className="w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-sidebar-accent/50 transition-colors"
-        >
-          <HelpCircleIcon className="h-5 w-5 flex-shrink-0" />
-          {!collapsed && <span className="text-sm font-medium">Help & Support</span>}
-        </button>
+      <div className="p-3 mt-auto">
+        <UserMenu user={user} collapsed={collapsed} />
       </div>
     </>
   );

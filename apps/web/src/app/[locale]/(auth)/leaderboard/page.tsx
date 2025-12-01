@@ -32,7 +32,7 @@ export default function LeaderboardPage() {
       >
         <div className="flex items-center gap-3 mb-6">
           <TrophyIcon className="h-8 w-8 text-primary" />
-          <h1 className="text-3xl font-bold gradient-text">Model Leaderboard</h1>
+          <h1 className="text-3xl font-bold text-foreground">Model Leaderboard</h1>
         </div>
 
         <div className="grid gap-4">

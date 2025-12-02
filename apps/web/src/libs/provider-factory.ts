@@ -1,20 +1,9 @@
 import { ProviderBuilder } from '@lmring/ai-hub';
 import { and, db, decrypt, eq, inArray } from '@lmring/database';
 import { apiKeys } from '@lmring/database/schema';
+import type { SupportedProvider } from './validation';
 
-export type SupportedProvider =
-  | 'openai'
-  | 'anthropic'
-  | 'deepseek'
-  | 'mistral'
-  | 'xai'
-  | 'openrouter'
-  | 'google'
-  | 'gemini'
-  | 'vertex'
-  | 'cohere'
-  | 'together'
-  | 'perplexity';
+export type { SupportedProvider };
 
 const COMPATIBLE_PROVIDERS: Record<string, string> = {
   google: 'https://generativelanguage.googleapis.com/v1beta/openai/',

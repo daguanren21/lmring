@@ -1,5 +1,22 @@
 import { z } from 'zod';
 
+export const SUPPORTED_PROVIDERS = [
+  'openai',
+  'anthropic',
+  'deepseek',
+  'mistral',
+  'xai',
+  'openrouter',
+  'google',
+  'gemini',
+  'vertex',
+  'cohere',
+  'together',
+  'perplexity',
+] as const;
+
+export type SupportedProvider = (typeof SUPPORTED_PROVIDERS)[number];
+
 export const conversationSchema = z.object({
   title: z
     .string()
@@ -33,7 +50,7 @@ export const voteSchema = z.object({
 });
 
 export const apiKeySchema = z.object({
-  providerName: z.string().min(1).max(50),
+  providerName: z.enum(SUPPORTED_PROVIDERS),
   apiKey: z.string().min(10).max(500),
   proxyUrl: z
     .string()

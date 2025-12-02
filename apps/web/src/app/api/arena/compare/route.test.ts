@@ -87,6 +87,7 @@ vi.mock('@lmring/ai-hub', () => ({
     cohere: vi.fn(() => ({ providerId: 'cohere' })),
     together: vi.fn(() => ({ providerId: 'together' })),
     perplexity: vi.fn(() => ({ providerId: 'perplexity' })),
+    compatible: vi.fn((_provider: string) => ({ providerId: 'compatible' })),
     create: vi.fn(() => ({
       withApiKey: vi.fn().mockReturnThis(),
       build: vi.fn(() => ({ providerId: 'custom' })),

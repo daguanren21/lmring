@@ -1,11 +1,10 @@
-import { db } from '@lmring/database';
+import { and, db, decrypt, eq } from '@lmring/database';
 import { apiKeys } from '@lmring/database/schema';
-import { and, eq } from 'drizzle-orm';
 import { NextResponse } from 'next/server';
 import { auth } from '@/libs/Auth';
-import { decryptApiKey } from '@/libs/encryption';
+import { logError } from '@/libs/error-logging';
 
-export async function GET(request: Request, { params }: { params: { provider: string } }) {
+export async function GET(request: Request, { params }: { params: Promise<{ provider: string }> }) {
   try {
     const session = await auth.api.getSession({
       headers: request.headers,
@@ -16,7 +15,7 @@ export async function GET(request: Request, { params }: { params: { provider: st
     }
 
     const userId = session.user.id;
-    const providerName = params.provider;
+    const { provider: providerName } = await params;
 
     const [key] = await db
       .select()
@@ -28,7 +27,7 @@ export async function GET(request: Request, { params }: { params: { provider: st
       return NextResponse.json({ error: 'API key not found' }, { status: 404 });
     }
 
-    const decryptedKey = decryptApiKey(key.encryptedKey);
+    const decryptedKey = decrypt(key.encryptedKey);
 
     return NextResponse.json(
       {
@@ -40,7 +39,7 @@ export async function GET(request: Request, { params }: { params: { provider: st
       { status: 200 },
     );
   } catch (error) {
-    console.error('Get API key error:', error);
+    logError('Get API key error', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

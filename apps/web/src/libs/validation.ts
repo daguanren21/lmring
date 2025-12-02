@@ -3,15 +3,16 @@ import { z } from 'zod';
 export const conversationSchema = z.object({
   title: z
     .string()
+    .trim()
     .min(1, 'Title is required')
-    .max(255, 'Title must be less than 255 characters')
-    .trim(),
+    .max(255, 'Title must be less than 255 characters'),
 });
 
 export const messageSchema = z.object({
   role: z.enum(['user', 'assistant', 'system']),
   content: z
     .string()
+    .trim()
     .min(1, 'Content is required')
     .max(50000, 'Content must be less than 50000 characters'),
 });
@@ -20,7 +21,7 @@ export const modelResponseSchema = z.object({
   messageId: z.string().uuid('Invalid message ID'),
   modelName: z.string().min(1).max(100),
   providerName: z.string().min(1).max(100),
-  responseContent: z.string().min(1).max(50000),
+  responseContent: z.string().trim().min(1).max(50000),
   tokensUsed: z.number().int().min(0).max(1000000).optional(),
   responseTimeMs: z.number().int().min(0).max(3600000).optional(),
 });
@@ -79,7 +80,7 @@ export const arenaCompareSchema = z.object({
     .array(
       z.object({
         role: z.enum(['user', 'assistant', 'system']),
-        content: z.string().min(1).max(50000),
+        content: z.string().trim().min(1).max(50000),
       }),
     )
     .min(1)
@@ -91,3 +92,27 @@ export const arenaCompareSchema = z.object({
     })
     .optional(),
 });
+
+// Type exports
+export type ConversationInput = z.infer<typeof conversationSchema>;
+export type MessageInput = z.infer<typeof messageSchema>;
+export type ModelResponseInput = z.infer<typeof modelResponseSchema>;
+export type VoteInput = z.infer<typeof voteSchema>;
+export type ApiKeyInput = z.infer<typeof apiKeySchema>;
+export type UserPreferencesInput = z.infer<typeof userPreferencesSchema>;
+export type ShareInput = z.infer<typeof shareSchema>;
+export type ArenaModelInput = z.infer<typeof arenaModelSchema>;
+export type ArenaCompareInput = z.infer<typeof arenaCompareSchema>;
+
+// Utility functions
+export function maskApiKey(apiKey: string): string {
+  if (apiKey.length <= 8) {
+    return '*'.repeat(apiKey.length);
+  }
+
+  const visibleStart = apiKey.slice(0, 4);
+  const visibleEnd = apiKey.slice(-4);
+  const maskedMiddle = '*'.repeat(Math.min(apiKey.length - 8, 20));
+
+  return `${visibleStart}${maskedMiddle}${visibleEnd}`;
+}

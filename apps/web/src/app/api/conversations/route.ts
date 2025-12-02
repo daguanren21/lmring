@@ -1,8 +1,8 @@
-import { db } from '@lmring/database';
+import { db, desc, eq } from '@lmring/database';
 import { conversations } from '@lmring/database/schema';
-import { desc, eq } from 'drizzle-orm';
 import { NextResponse } from 'next/server';
 import { auth } from '@/libs/Auth';
+import { logError } from '@/libs/error-logging';
 import { conversationSchema } from '@/libs/validation';
 
 export async function GET(request: Request) {
@@ -17,8 +17,10 @@ export async function GET(request: Request) {
 
     const userId = session.user.id;
     const { searchParams } = new URL(request.url);
-    const limit = Number.parseInt(searchParams.get('limit') || '50', 10);
-    const offset = Number.parseInt(searchParams.get('offset') || '0', 10);
+    const parsedLimit = Number.parseInt(searchParams.get('limit') || '50', 10);
+    const parsedOffset = Number.parseInt(searchParams.get('offset') || '0', 10);
+    const limit = Number.isNaN(parsedLimit) || parsedLimit < 1 ? 50 : Math.min(parsedLimit, 100);
+    const offset = Number.isNaN(parsedOffset) || parsedOffset < 0 ? 0 : parsedOffset;
 
     const userConversations = await db
       .select()
@@ -30,7 +32,7 @@ export async function GET(request: Request) {
 
     return NextResponse.json({ conversations: userConversations }, { status: 200 });
   } catch (error) {
-    console.error('Get conversations error:', error);
+    logError('Get conversations error', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
@@ -51,7 +53,7 @@ export async function POST(request: Request) {
     const validationResult = conversationSchema.safeParse(rawBody);
     if (!validationResult.success) {
       return NextResponse.json(
-        { error: 'Validation failed', details: validationResult.error.errors },
+        { error: 'Validation failed', details: validationResult.error.issues },
         { status: 400 },
       );
     }
@@ -68,7 +70,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ conversation: newConversation }, { status: 201 });
   } catch (error) {
-    console.error('Create conversation error:', error);
+    logError('Create conversation error', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

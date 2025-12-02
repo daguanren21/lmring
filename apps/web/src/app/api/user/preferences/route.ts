@@ -1,8 +1,9 @@
-import { db } from '@lmring/database';
+import { db, eq } from '@lmring/database';
 import { userPreferences } from '@lmring/database/schema';
-import { eq } from 'drizzle-orm';
 import { NextResponse } from 'next/server';
 import { auth } from '@/libs/Auth';
+import { logError } from '@/libs/error-logging';
+import { userPreferencesSchema } from '@/libs/validation';
 
 export async function GET(request: Request) {
   try {
@@ -38,7 +39,7 @@ export async function GET(request: Request) {
 
     return NextResponse.json({ preferences }, { status: 200 });
   } catch (error) {
-    console.error('Get preferences error:', error);
+    logError('Get preferences error', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
@@ -54,12 +55,17 @@ export async function PUT(request: Request) {
     }
 
     const userId = session.user.id;
-    const body = (await request.json()) as {
-      theme?: string;
-      language?: string;
-      defaultModels?: string[];
-      configSource?: 'manual' | 'cherry-studio' | 'newapi';
-    };
+    const rawBody = await request.json();
+
+    const validationResult = userPreferencesSchema.safeParse(rawBody);
+    if (!validationResult.success) {
+      return NextResponse.json(
+        { error: 'Validation failed', details: validationResult.error.issues },
+        { status: 400 },
+      );
+    }
+
+    const body = validationResult.data;
 
     const [existing] = await db
       .select()
@@ -87,16 +93,16 @@ export async function PUT(request: Request) {
       .insert(userPreferences)
       .values({
         userId,
-        theme: body.theme || 'system',
-        language: body.language || 'en',
+        theme: body.theme ?? 'system',
+        language: body.language ?? 'en',
         defaultModels: body.defaultModels,
-        configSource: body.configSource || 'manual',
+        configSource: body.configSource ?? 'manual',
       })
       .returning();
 
     return NextResponse.json({ preferences: newPreferences }, { status: 201 });
   } catch (error) {
-    console.error('Update preferences error:', error);
+    logError('Update preferences error', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

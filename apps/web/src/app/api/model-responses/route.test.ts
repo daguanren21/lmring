@@ -56,15 +56,17 @@ vi.mock('@/libs/Auth', () => ({
 
 vi.mock('@lmring/database', () => ({
   db: mockDbInstance,
-}));
-
-vi.mock('drizzle-orm', () => ({
   eq: vi.fn(),
   and: vi.fn(),
   or: vi.fn(),
   desc: vi.fn(),
   asc: vi.fn(),
   sql: vi.fn(),
+  gt: vi.fn(),
+  gte: vi.fn(),
+  lt: vi.fn(),
+  lte: vi.fn(),
+  ne: vi.fn(),
 }));
 
 vi.mock('@lmring/database/schema', () => ({

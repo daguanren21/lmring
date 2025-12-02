@@ -1,4 +1,4 @@
-import type { ModelMessage } from 'ai';
+import type { ModelMessage } from '@lmring/ai-hub';
 
 export interface ModelConfig {
   providerId: string;

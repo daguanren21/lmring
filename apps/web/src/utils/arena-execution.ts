@@ -22,10 +22,16 @@ export async function executeComparison(
   availableModels: ModelOption[],
   onProgress: (index: number, update: Partial<ComparisonResult>) => void,
 ): Promise<void> {
-  const activeComparisons = activeIndices.map((index) => ({
-    index,
-    comparison: comparisons[index]!,
-  }));
+  const activeComparisons = activeIndices
+    .map((index) => {
+      const comparison = comparisons[index];
+      if (!comparison) return null;
+      return {
+        index,
+        comparison,
+      };
+    })
+    .filter((item): item is { index: number; comparison: ComparisonResult } => item !== null);
 
   const modelConfigs: ApiModelConfig[] = [];
   const indexMap = new Map<string, number>();
@@ -42,8 +48,6 @@ export async function executeComparison(
       });
       continue;
     }
-
-    const _promptToUse = comparison.synced ? globalPrompt : comparison.customPrompt;
 
     modelConfigs.push({
       providerId: model.providerId,

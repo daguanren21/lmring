@@ -3,7 +3,7 @@ import { GET as GET_PROVIDER_KEY } from '@/app/api/settings/api-keys/[provider]/
 import { DELETE, GET, POST } from '@/app/api/settings/api-keys/route';
 import { createMockRequest, parseJsonResponse, setupTestEnvironment } from '@/test/helpers';
 
-const { mockDbInstance, mockAuthInstance, mockEncryptionFns } = vi.hoisted(() => {
+const { mockDbInstance, mockAuthInstance, mockEncryptFn, mockDecryptFn } = vi.hoisted(() => {
   const mockSession = {
     session: {
       id: 'test-session-id',
@@ -48,11 +48,8 @@ const { mockDbInstance, mockAuthInstance, mockEncryptionFns } = vi.hoisted(() =>
         getSession: vi.fn().mockResolvedValue(mockSession),
       },
     },
-    mockEncryptionFns: {
-      encryptApiKey: vi.fn((key: string) => `encrypted_${key}`),
-      decryptApiKey: vi.fn((encrypted: string) => encrypted.replace('encrypted_', '')),
-      maskApiKey: vi.fn((key: string) => `${key.slice(0, 4)}****${key.slice(-4)}`),
-    },
+    mockEncryptFn: vi.fn((key: string) => `encrypted_${key}`),
+    mockDecryptFn: vi.fn((encrypted: string) => encrypted.replace('encrypted_', '')),
   };
 });
 
@@ -62,15 +59,19 @@ vi.mock('@/libs/Auth', () => ({
 
 vi.mock('@lmring/database', () => ({
   db: mockDbInstance,
-}));
-
-vi.mock('drizzle-orm', () => ({
+  encrypt: mockEncryptFn,
+  decrypt: mockDecryptFn,
   eq: vi.fn(),
   and: vi.fn(),
   or: vi.fn(),
   desc: vi.fn(),
   asc: vi.fn(),
   sql: vi.fn(),
+  gt: vi.fn(),
+  gte: vi.fn(),
+  lt: vi.fn(),
+  lte: vi.fn(),
+  ne: vi.fn(),
 }));
 
 vi.mock('@lmring/database/schema', () => ({
@@ -84,8 +85,6 @@ vi.mock('@lmring/database/schema', () => ({
     updatedAt: 'updatedAt',
   },
 }));
-
-vi.mock('@/libs/encryption', () => mockEncryptionFns);
 
 setupTestEnvironment();
 
@@ -150,7 +149,7 @@ describe('API Keys Management', () => {
       const data = await parseJsonResponse(response);
 
       expect(response.status).toBe(400);
-      expect(data.error).toBe('Provider name and API key are required');
+      expect(data.error).toBe('Validation failed');
     });
 
     it('should create a new API key', async () => {
@@ -174,7 +173,7 @@ describe('API Keys Management', () => {
       expect(response.status).toBe(201);
       expect(data.message).toBe('API key added successfully');
       expect(data.providerName).toBe('openai');
-      expect(mockEncryptionFns.encryptApiKey).toHaveBeenCalledWith('sk-test123');
+      expect(mockEncryptFn).toHaveBeenCalledWith('sk-test123');
     });
 
     it('should update existing API key', async () => {
@@ -197,7 +196,7 @@ describe('API Keys Management', () => {
 
       expect(response.status).toBe(200);
       expect(data.message).toBe('API key updated successfully');
-      expect(mockEncryptionFns.encryptApiKey).toHaveBeenCalledWith('sk-new-key');
+      expect(mockEncryptFn).toHaveBeenCalledWith('sk-new-key');
     });
   });
 
@@ -260,7 +259,9 @@ describe('API Keys Management', () => {
         'GET',
         'http://localhost:3000/api/settings/api-keys/openai',
       );
-      const response = await GET_PROVIDER_KEY(request, { params: { provider: 'openai' } });
+      const response = await GET_PROVIDER_KEY(request, {
+        params: Promise.resolve({ provider: 'openai' }),
+      });
       const data = await parseJsonResponse(response);
 
       expect(response.status).toBe(404);
@@ -277,13 +278,15 @@ describe('API Keys Management', () => {
         'GET',
         'http://localhost:3000/api/settings/api-keys/openai',
       );
-      const response = await GET_PROVIDER_KEY(request, { params: { provider: 'openai' } });
+      const response = await GET_PROVIDER_KEY(request, {
+        params: Promise.resolve({ provider: 'openai' }),
+      });
       const data = await parseJsonResponse(response);
 
       expect(response.status).toBe(200);
       expect(data.providerName).toBe('openai');
       expect(data.apiKey).toBe('sk-test123');
-      expect(mockEncryptionFns.decryptApiKey).toHaveBeenCalledWith('encrypted_sk-test123');
+      expect(mockDecryptFn).toHaveBeenCalledWith('encrypted_sk-test123');
     });
   });
 });

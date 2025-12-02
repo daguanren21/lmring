@@ -57,15 +57,17 @@ vi.mock('@/libs/Auth', () => ({
 
 vi.mock('@lmring/database', () => ({
   db: mockDbInstance,
-}));
-
-vi.mock('drizzle-orm', () => ({
   eq: vi.fn(),
   and: vi.fn(),
   or: vi.fn(),
   desc: vi.fn(),
   asc: vi.fn(),
   sql: vi.fn(),
+  gt: vi.fn(),
+  gte: vi.fn(),
+  lt: vi.fn(),
+  lte: vi.fn(),
+  ne: vi.fn(),
 }));
 
 vi.mock('@lmring/database/schema', () => ({
@@ -146,7 +148,7 @@ describe('Share and Shared Results API', () => {
         {},
       );
 
-      const response = await POST(request, { params: { id: 'conv-123' } });
+      const response = await POST(request, { params: Promise.resolve({ id: 'conv-123' }) });
       const data = await parseJsonResponse(response);
 
       expect(response.status).toBe(401);
@@ -165,7 +167,7 @@ describe('Share and Shared Results API', () => {
         {},
       );
 
-      const response = await POST(request, { params: { id: 'conv-123' } });
+      const response = await POST(request, { params: Promise.resolve({ id: 'conv-123' }) });
       const data = await parseJsonResponse(response);
 
       expect(response.status).toBe(404);
@@ -184,7 +186,7 @@ describe('Share and Shared Results API', () => {
         {},
       );
 
-      const response = await POST(request, { params: { id: 'conv-123' } });
+      const response = await POST(request, { params: Promise.resolve({ id: 'conv-123' }) });
       const data = await parseJsonResponse(response);
 
       expect(response.status).toBe(404);
@@ -207,7 +209,7 @@ describe('Share and Shared Results API', () => {
         {},
       );
 
-      const response = await POST(request, { params: { id: 'conv-123' } });
+      const response = await POST(request, { params: Promise.resolve({ id: 'conv-123' }) });
       const data = await parseJsonResponse(response);
 
       expect(response.status).toBe(201);
@@ -236,7 +238,7 @@ describe('Share and Shared Results API', () => {
         },
       );
 
-      const response = await POST(request, { params: { id: 'conv-123' } });
+      const response = await POST(request, { params: Promise.resolve({ id: 'conv-123' }) });
       const data = await parseJsonResponse(response);
 
       expect(response.status).toBe(201);
@@ -254,7 +256,7 @@ describe('Share and Shared Results API', () => {
 
       const request = createMockRequest('GET', 'http://localhost:3000/api/shared/test-token-123');
 
-      const response = await GET(request, { params: { token: 'test-token-123' } });
+      const response = await GET(request, { params: Promise.resolve({ token: 'test-token-123' }) });
       const data = await parseJsonResponse(response);
 
       expect(response.status).toBe(404);
@@ -274,7 +276,7 @@ describe('Share and Shared Results API', () => {
 
       const request = createMockRequest('GET', 'http://localhost:3000/api/shared/test-token-123');
 
-      const response = await GET(request, { params: { token: 'test-token-123' } });
+      const response = await GET(request, { params: Promise.resolve({ token: 'test-token-123' }) });
       const data = await parseJsonResponse(response);
 
       expect(response.status).toBe(410);
@@ -294,7 +296,7 @@ describe('Share and Shared Results API', () => {
 
       const request = createMockRequest('GET', 'http://localhost:3000/api/shared/test-token-123');
 
-      const response = await GET(request, { params: { token: 'test-token-123' } });
+      const response = await GET(request, { params: Promise.resolve({ token: 'test-token-123' }) });
       const data = await parseJsonResponse(response);
 
       expect(response.status).toBe(404);
@@ -319,7 +321,7 @@ describe('Share and Shared Results API', () => {
 
       const request = createMockRequest('GET', 'http://localhost:3000/api/shared/test-token-123');
 
-      const response = await GET(request, { params: { token: 'test-token-123' } });
+      const response = await GET(request, { params: Promise.resolve({ token: 'test-token-123' }) });
       const data = await parseJsonResponse(response);
 
       expect(response.status).toBe(200);
@@ -349,7 +351,7 @@ describe('Share and Shared Results API', () => {
 
       const request = createMockRequest('GET', 'http://localhost:3000/api/shared/test-token-123');
 
-      const response = await GET(request, { params: { token: 'test-token-123' } });
+      const response = await GET(request, { params: Promise.resolve({ token: 'test-token-123' }) });
 
       expect(response.status).toBe(200);
     });

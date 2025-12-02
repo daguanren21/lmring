@@ -57,15 +57,17 @@ vi.mock('@/libs/Auth', () => ({
 
 vi.mock('@lmring/database', () => ({
   db: mockDbInstance,
-}));
-
-vi.mock('drizzle-orm', () => ({
   eq: vi.fn(),
   and: vi.fn(),
   or: vi.fn(),
   desc: vi.fn(),
   asc: vi.fn(),
   sql: vi.fn(),
+  gt: vi.fn(),
+  gte: vi.fn(),
+  lt: vi.fn(),
+  lte: vi.fn(),
+  ne: vi.fn(),
 }));
 
 vi.mock('@lmring/database/schema', () => ({
@@ -117,19 +119,25 @@ vi.mock('@lmring/database/schema', () => ({
 setupTestEnvironment();
 
 describe('Votes and Leaderboard API', () => {
+  // Use valid UUIDs for test data
+  const TEST_MESSAGE_ID = '550e8400-e29b-41d4-a716-446655440001';
+  const TEST_RESPONSE_ID = '550e8400-e29b-41d4-a716-446655440002';
+  const TEST_VOTE_ID = '550e8400-e29b-41d4-a716-446655440003';
+  const TEST_CONVERSATION_ID = '550e8400-e29b-41d4-a716-446655440004';
+
   const mockVote = {
-    id: 'vote-123',
+    id: TEST_VOTE_ID,
     userId: 'test-user-id',
-    messageId: 'msg-123',
-    modelResponseId: 'resp-123',
+    messageId: TEST_MESSAGE_ID,
+    modelResponseId: TEST_RESPONSE_ID,
     voteType: 'like' as const,
     createdAt: new Date(),
     updatedAt: new Date(),
   };
 
   const mockModelResponse = {
-    id: 'resp-123',
-    messageId: 'msg-123',
+    id: TEST_RESPONSE_ID,
+    messageId: TEST_MESSAGE_ID,
     modelName: 'gpt-4o',
     providerName: 'openai',
     responseContent: 'Test response',
@@ -139,8 +147,8 @@ describe('Votes and Leaderboard API', () => {
   };
 
   const mockMessage = {
-    id: 'msg-123',
-    conversationId: 'conv-123',
+    id: TEST_MESSAGE_ID,
+    conversationId: TEST_CONVERSATION_ID,
     userId: 'test-user-id',
     role: 'user' as const,
     content: 'Test message',
@@ -167,8 +175,8 @@ describe('Votes and Leaderboard API', () => {
       vi.mocked(mockAuthInstance.api.getSession).mockResolvedValueOnce(null);
 
       const request = createMockRequest('POST', 'http://localhost:3000/api/votes', {
-        messageId: 'msg-123',
-        modelResponseId: 'resp-123',
+        messageId: TEST_MESSAGE_ID,
+        modelResponseId: TEST_RESPONSE_ID,
         voteType: 'like',
       });
 
@@ -181,7 +189,7 @@ describe('Votes and Leaderboard API', () => {
 
     it('should return 400 when required fields are missing', async () => {
       const request = createMockRequest('POST', 'http://localhost:3000/api/votes', {
-        messageId: 'msg-123',
+        messageId: TEST_MESSAGE_ID,
       });
 
       const response = await POST(request);
@@ -226,8 +234,8 @@ describe('Votes and Leaderboard API', () => {
       mockDbInstance.onConflictDoUpdate.mockResolvedValue([mockRanking]);
 
       const request = createMockRequest('POST', 'http://localhost:3000/api/votes', {
-        messageId: 'msg-123',
-        modelResponseId: 'resp-123',
+        messageId: TEST_MESSAGE_ID,
+        modelResponseId: TEST_RESPONSE_ID,
         voteType: 'like',
       });
 
@@ -272,8 +280,8 @@ describe('Votes and Leaderboard API', () => {
       mockDbInstance.onConflictDoUpdate.mockResolvedValue([mockRanking]);
 
       const request = createMockRequest('POST', 'http://localhost:3000/api/votes', {
-        messageId: 'msg-123',
-        modelResponseId: 'resp-123',
+        messageId: TEST_MESSAGE_ID,
+        modelResponseId: TEST_RESPONSE_ID,
         voteType: 'dislike',
       });
 
@@ -326,7 +334,10 @@ describe('Votes and Leaderboard API', () => {
       mockDbInstance.values.mockReturnValue(mockDbInstance);
       mockDbInstance.onConflictDoUpdate.mockResolvedValue([mockRanking]);
 
-      const request = createMockRequest('DELETE', 'http://localhost:3000/api/votes?id=vote-123');
+      const request = createMockRequest(
+        'DELETE',
+        `http://localhost:3000/api/votes?id=${TEST_VOTE_ID}`,
+      );
       const response = await DELETE(request);
       const data = await parseJsonResponse(response);
 

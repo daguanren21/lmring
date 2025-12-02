@@ -1,4 +1,4 @@
-import type { Session } from 'better-auth';
+import type { Session } from '@lmring/auth';
 import { beforeEach, vi } from 'vitest';
 
 export const mockSession: Session = {
@@ -72,9 +72,8 @@ export async function parseJsonResponse(response: Response) {
 
 export function mockEncryption() {
   return {
-    encryptApiKey: vi.fn((key: string) => `encrypted_${key}`),
-    decryptApiKey: vi.fn((encrypted: string) => encrypted.replace('encrypted_', '')),
-    maskApiKey: vi.fn((key: string) => `${key.slice(0, 4)}****${key.slice(-4)}`),
+    encrypt: vi.fn((key: string) => `encrypted_${key}`),
+    decrypt: vi.fn((encrypted: string) => encrypted.replace('encrypted_', '')),
   };
 }
 

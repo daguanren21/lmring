@@ -1,11 +1,11 @@
-import { db } from '@lmring/database';
+import { and, asc, db, eq } from '@lmring/database';
 import { conversations, messages } from '@lmring/database/schema';
-import { and, asc, eq } from 'drizzle-orm';
 import { NextResponse } from 'next/server';
 import { auth } from '@/libs/Auth';
+import { logError } from '@/libs/error-logging';
 import { messageSchema } from '@/libs/validation';
 
-export async function GET(request: Request, { params }: { params: { id: string } }) {
+export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const session = await auth.api.getSession({
       headers: request.headers,
@@ -16,7 +16,7 @@ export async function GET(request: Request, { params }: { params: { id: string }
     }
 
     const userId = session.user.id;
-    const conversationId = params.id;
+    const { id: conversationId } = await params;
 
     const [conversation] = await db
       .select()
@@ -36,12 +36,12 @@ export async function GET(request: Request, { params }: { params: { id: string }
 
     return NextResponse.json({ messages: conversationMessages }, { status: 200 });
   } catch (error) {
-    console.error('Get messages error:', error);
+    logError('Get messages error', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
 
-export async function POST(request: Request, { params }: { params: { id: string } }) {
+export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const session = await auth.api.getSession({
       headers: request.headers,
@@ -52,7 +52,7 @@ export async function POST(request: Request, { params }: { params: { id: string 
     }
 
     const userId = session.user.id;
-    const conversationId = params.id;
+    const { id: conversationId } = await params;
     const rawBody = (await request.json()) as {
       role: 'user' | 'assistant' | 'system';
       content: string;
@@ -61,7 +61,7 @@ export async function POST(request: Request, { params }: { params: { id: string 
     const validationResult = messageSchema.safeParse(rawBody);
     if (!validationResult.success) {
       return NextResponse.json(
-        { error: 'Validation failed', details: validationResult.error.errors },
+        { error: 'Validation failed', details: validationResult.error.issues },
         { status: 400 },
       );
     }
@@ -94,7 +94,7 @@ export async function POST(request: Request, { params }: { params: { id: string 
 
     return NextResponse.json({ message: newMessage }, { status: 201 });
   } catch (error) {
-    console.error('Create message error:', error);
+    logError('Create message error', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

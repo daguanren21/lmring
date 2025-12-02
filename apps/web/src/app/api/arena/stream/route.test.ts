@@ -298,7 +298,10 @@ describe('POST /api/arena/stream', () => {
     const response = await POST(request);
     const events = await parseStreamResponse(response);
 
-    const completeEvents = events.filter((e: any) => e.type === 'complete');
+    const completeEvents = events.filter(
+      (e): e is { type: string } =>
+        typeof e === 'object' && e !== null && 'type' in e && e.type === 'complete',
+    );
     expect(completeEvents).toHaveLength(2);
   });
 });

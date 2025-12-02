@@ -1,4 +1,4 @@
-import { db } from '@lmring/database';
+import { and, db, eq, sql } from '@lmring/database';
 import {
   conversations,
   messages,
@@ -6,9 +6,10 @@ import {
   modelResponses,
   userVotes,
 } from '@lmring/database/schema';
-import { and, eq, sql } from 'drizzle-orm';
 import { NextResponse } from 'next/server';
 import { auth } from '@/libs/Auth';
+import { logError } from '@/libs/error-logging';
+import { voteSchema } from '@/libs/validation';
 
 async function updateModelRanking(modelName: string, providerName: string) {
   const votes = await db
@@ -69,18 +70,17 @@ export async function POST(request: Request) {
     }
 
     const userId = session.user.id;
-    const body = (await request.json()) as {
-      messageId: string;
-      modelResponseId: string;
-      voteType: 'like' | 'dislike' | 'neutral';
-    };
+    const rawBody = await request.json();
 
-    if (!body.messageId || !body.modelResponseId || !body.voteType) {
+    const validationResult = voteSchema.safeParse(rawBody);
+    if (!validationResult.success) {
       return NextResponse.json(
-        { error: 'messageId, modelResponseId, and voteType are required' },
+        { error: 'Validation failed', details: validationResult.error.issues },
         { status: 400 },
       );
     }
+
+    const body = validationResult.data;
 
     const [message] = await db
       .select({
@@ -141,7 +141,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ vote: newVote }, { status: 201 });
   } catch (error) {
-    console.error('Create/update vote error:', error);
+    logError('Create/update vote error', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
@@ -160,17 +160,18 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const messageId = searchParams.get('messageId');
 
-    const query = db.select().from(userVotes).where(eq(userVotes.userId, userId));
-
+    let whereCondition = eq(userVotes.userId, userId);
     if (messageId) {
-      query.where(and(eq(userVotes.userId, userId), eq(userVotes.messageId, messageId)));
+      whereCondition =
+        and(eq(userVotes.userId, userId), eq(userVotes.messageId, messageId)) ??
+        eq(userVotes.userId, userId);
     }
 
-    const votes = await query;
+    const votes = await db.select().from(userVotes).where(whereCondition);
 
     return NextResponse.json({ votes }, { status: 200 });
   } catch (error) {
-    console.error('Get votes error:', error);
+    logError('Get votes error', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
@@ -217,7 +218,7 @@ export async function DELETE(request: Request) {
 
     return NextResponse.json({ message: 'Vote deleted successfully' }, { status: 200 });
   } catch (error) {
-    console.error('Delete vote error:', error);
+    logError('Delete vote error', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

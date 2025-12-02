@@ -1,9 +1,9 @@
-import { db } from '@lmring/database';
+import { and, db, encrypt, eq } from '@lmring/database';
 import { apiKeys } from '@lmring/database/schema';
-import { and, eq } from 'drizzle-orm';
 import { NextResponse } from 'next/server';
 import { auth } from '@/libs/Auth';
-import { decryptApiKey, encryptApiKey, maskApiKey } from '@/libs/encryption';
+import { logError } from '@/libs/error-logging';
+import { apiKeySchema } from '@/libs/validation';
 
 export async function GET(request: Request) {
   try {
@@ -30,7 +30,7 @@ export async function GET(request: Request) {
 
     return NextResponse.json({ keys }, { status: 200 });
   } catch (error) {
-    console.error('Get API keys error:', error);
+    logError('Get API keys error', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
@@ -46,17 +46,17 @@ export async function POST(request: Request) {
     }
 
     const userId = session.user.id;
-    const body = (await request.json()) as {
-      providerName: string;
-      apiKey: string;
-    };
+    const rawBody = await request.json();
 
-    if (!body.providerName || !body.apiKey) {
+    const validationResult = apiKeySchema.safeParse(rawBody);
+    if (!validationResult.success) {
       return NextResponse.json(
-        { error: 'Provider name and API key are required' },
+        { error: 'Validation failed', details: validationResult.error.issues },
         { status: 400 },
       );
     }
+
+    const body = validationResult.data;
 
     const existing = await db
       .select()
@@ -64,21 +64,22 @@ export async function POST(request: Request) {
       .where(and(eq(apiKeys.userId, userId), eq(apiKeys.providerName, body.providerName)))
       .limit(1);
 
-    const encryptedKey = encryptApiKey(body.apiKey);
+    const encryptedKey = encrypt(body.apiKey);
 
-    if (existing.length > 0) {
+    const [existingKey] = existing;
+    if (existingKey) {
       await db
         .update(apiKeys)
         .set({
           encryptedKey,
           updatedAt: new Date(),
         })
-        .where(eq(apiKeys.id, existing[0]!.id));
+        .where(eq(apiKeys.id, existingKey.id));
 
       return NextResponse.json(
         {
           message: 'API key updated successfully',
-          id: existing[0]!.id,
+          id: existingKey.id,
           providerName: body.providerName,
         },
         { status: 200 },
@@ -98,13 +99,13 @@ export async function POST(request: Request) {
     return NextResponse.json(
       {
         message: 'API key added successfully',
-        id: newKey!.id,
+        id: newKey?.id,
         providerName: body.providerName,
       },
       { status: 201 },
     );
   } catch (error) {
-    console.error('Add API key error:', error);
+    logError('Add API key error', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
@@ -141,7 +142,7 @@ export async function DELETE(request: Request) {
 
     return NextResponse.json({ message: 'API key deleted successfully' }, { status: 200 });
   } catch (error) {
-    console.error('Delete API key error:', error);
+    logError('Delete API key error', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

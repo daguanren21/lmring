@@ -1,11 +1,11 @@
-import { db } from '@lmring/database';
+import { asc, db, eq } from '@lmring/database';
 import { conversations, messages, sharedResults } from '@lmring/database/schema';
-import { asc, eq } from 'drizzle-orm';
 import { NextResponse } from 'next/server';
+import { logError } from '@/libs/error-logging';
 
-export async function GET(request: Request, { params }: { params: { token: string } }) {
+export async function GET(_request: Request, { params }: { params: Promise<{ token: string }> }) {
   try {
-    const shareToken = params.token;
+    const { token: shareToken } = await params;
 
     const [shared] = await db
       .select()
@@ -49,7 +49,7 @@ export async function GET(request: Request, { params }: { params: { token: strin
       { status: 200 },
     );
   } catch (error) {
-    console.error('Get shared result error:', error);
+    logError('Get shared result error', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

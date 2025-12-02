@@ -35,6 +35,9 @@ importers:
       '@hookform/resolvers':
         specifier: ^5.2.2
         version: 5.2.2(react-hook-form@7.65.0(react@19.2.0))
+      '@lmring/ai-hub':
+        specifier: workspace:*
+        version: link:../../packages/ai-hub
       '@lmring/auth':
         specifier: workspace:*
         version: link:../../packages/auth

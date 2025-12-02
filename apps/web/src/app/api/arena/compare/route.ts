@@ -1,7 +1,8 @@
-import { compareModels, ProviderBuilder } from '@lmring/ai-hub';
-import type { ModelMessage } from 'ai';
+import { compareModels, type ModelMessage } from '@lmring/ai-hub';
 import { NextResponse } from 'next/server';
 import { auth } from '@/libs/Auth';
+import { logError } from '@/libs/error-logging';
+import { createProviderConfigs } from '@/libs/provider-factory';
 import { arenaCompareSchema } from '@/libs/validation';
 
 interface CompareRequest {
@@ -37,87 +38,49 @@ export async function POST(request: Request) {
     const validationResult = arenaCompareSchema.safeParse(rawBody);
     if (!validationResult.success) {
       return NextResponse.json(
-        { error: 'Validation failed', details: validationResult.error.errors },
+        { error: 'Validation failed', details: validationResult.error.issues },
         { status: 400 },
       );
     }
 
     const body = validationResult.data;
 
-    const providerConfigs = body.models.map((model) => {
-      let provider: ReturnType<typeof ProviderBuilder.openai>;
-
-      switch (model.providerId) {
-        case 'openai':
-          provider = ProviderBuilder.openai(model.apiKey);
-          break;
-        case 'anthropic':
-          provider = ProviderBuilder.anthropic(model.apiKey);
-          break;
-        case 'deepseek':
-          provider = ProviderBuilder.deepseek(model.apiKey);
-          break;
-        case 'mistral':
-          provider = ProviderBuilder.mistral(model.apiKey);
-          break;
-        case 'xai':
-          provider = ProviderBuilder.xai(model.apiKey);
-          break;
-        case 'openrouter':
-          provider = ProviderBuilder.openrouter(model.apiKey);
-          break;
-        case 'google':
-          provider = ProviderBuilder.google(model.apiKey);
-          break;
-        case 'cohere':
-          provider = ProviderBuilder.cohere(model.apiKey);
-          break;
-        case 'together':
-          provider = ProviderBuilder.together(model.apiKey);
-          break;
-        case 'perplexity':
-          provider = ProviderBuilder.perplexity(model.apiKey);
-          break;
-        default:
-          throw new Error(`Unsupported provider: ${model.providerId}`);
-      }
-
-      return {
-        provider,
-        model: model.modelId,
-        options: model.options || {},
-      };
-    });
+    const providerConfigs = createProviderConfigs(body.models);
 
     const results = await compareModels(providerConfigs, body.messages, {
       streaming: false,
       stopOnError: body.options?.stopOnError ?? false,
     });
 
-    const response = results.map((result) => ({
-      provider: result.provider,
-      model: result.model,
-      status: result.status,
-      text: result.result && 'text' in result.result ? result.result.text : undefined,
-      usage:
-        result.result && 'usage' in result.result
-          ? {
-              inputTokens: result.result.usage?.promptTokens,
-              outputTokens: result.result.usage?.completionTokens,
-              totalTokens: result.result.usage?.totalTokens,
-            }
-          : undefined,
-      metrics: {
-        totalTime: result.metrics?.totalTime,
-        timeToFirstToken: result.metrics?.timeToFirstToken,
-        tokensPerSecond: result.metrics?.tokensPerSecond,
-      },
-      error: result.error?.message,
-    }));
+    const response = await Promise.all(
+      results.map(async (result) => {
+        const usage =
+          result.result && 'usage' in result.result ? await result.result.usage : undefined;
+        return {
+          provider: result.provider,
+          model: result.model,
+          status: result.status,
+          text: result.result && 'text' in result.result ? result.result.text : undefined,
+          usage: usage
+            ? {
+                inputTokens: usage.inputTokens,
+                outputTokens: usage.outputTokens,
+                totalTokens: usage.totalTokens,
+              }
+            : undefined,
+          metrics: {
+            totalTime: result.metrics?.totalTime,
+            timeToFirstToken: result.metrics?.timeToFirstToken,
+            tokensPerSecond: result.metrics?.tokensPerSecond,
+          },
+          error: result.error?.message,
+        };
+      }),
+    );
 
     return NextResponse.json({ results: response }, { status: 200 });
   } catch (error) {
-    console.error('Arena compare error:', error);
+    logError('Arena compare error', error);
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Internal server error' },
       { status: 500 },

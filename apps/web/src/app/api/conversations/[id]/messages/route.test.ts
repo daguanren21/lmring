@@ -56,15 +56,17 @@ vi.mock('@/libs/Auth', () => ({
 
 vi.mock('@lmring/database', () => ({
   db: mockDbInstance,
-}));
-
-vi.mock('drizzle-orm', () => ({
   eq: vi.fn(),
   and: vi.fn(),
   or: vi.fn(),
   desc: vi.fn(),
   asc: vi.fn(),
   sql: vi.fn(),
+  gt: vi.fn(),
+  gte: vi.fn(),
+  lt: vi.fn(),
+  lte: vi.fn(),
+  ne: vi.fn(),
 }));
 
 vi.mock('@lmring/database/schema', () => ({
@@ -115,7 +117,7 @@ describe('Conversation Messages API', () => {
         'GET',
         'http://localhost:3000/api/conversations/conv-123/messages',
       );
-      const response = await GET(request, { params: { id: 'conv-123' } });
+      const response = await GET(request, { params: Promise.resolve({ id: 'conv-123' }) });
       const data = await parseJsonResponse(response);
 
       expect(response.status).toBe(401);
@@ -132,7 +134,7 @@ describe('Conversation Messages API', () => {
         'GET',
         'http://localhost:3000/api/conversations/conv-123/messages',
       );
-      const response = await GET(request, { params: { id: 'conv-123' } });
+      const response = await GET(request, { params: Promise.resolve({ id: 'conv-123' }) });
       const data = await parseJsonResponse(response);
 
       expect(response.status).toBe(404);
@@ -149,7 +151,7 @@ describe('Conversation Messages API', () => {
         'GET',
         'http://localhost:3000/api/conversations/conv-123/messages',
       );
-      const response = await GET(request, { params: { id: 'conv-123' } });
+      const response = await GET(request, { params: Promise.resolve({ id: 'conv-123' }) });
       const data = await parseJsonResponse(response);
 
       expect(response.status).toBe(404);
@@ -177,7 +179,7 @@ describe('Conversation Messages API', () => {
         'GET',
         'http://localhost:3000/api/conversations/conv-123/messages',
       );
-      const response = await GET(request, { params: { id: 'conv-123' } });
+      const response = await GET(request, { params: Promise.resolve({ id: 'conv-123' }) });
       const data = await parseJsonResponse(response);
 
       expect(response.status).toBe(200);
@@ -200,7 +202,7 @@ describe('Conversation Messages API', () => {
         },
       );
 
-      const response = await POST(request, { params: { id: 'conv-123' } });
+      const response = await POST(request, { params: Promise.resolve({ id: 'conv-123' }) });
       const data = await parseJsonResponse(response);
 
       expect(response.status).toBe(401);
@@ -216,7 +218,7 @@ describe('Conversation Messages API', () => {
         },
       );
 
-      const response = await POST(request, { params: { id: 'conv-123' } });
+      const response = await POST(request, { params: Promise.resolve({ id: 'conv-123' }) });
       const data = await parseJsonResponse(response);
 
       expect(response.status).toBe(400);
@@ -232,7 +234,7 @@ describe('Conversation Messages API', () => {
         },
       );
 
-      const response = await POST(request, { params: { id: 'conv-123' } });
+      const response = await POST(request, { params: Promise.resolve({ id: 'conv-123' }) });
       const data = await parseJsonResponse(response);
 
       expect(response.status).toBe(400);
@@ -254,7 +256,7 @@ describe('Conversation Messages API', () => {
         },
       );
 
-      const response = await POST(request, { params: { id: 'conv-123' } });
+      const response = await POST(request, { params: Promise.resolve({ id: 'conv-123' }) });
       const data = await parseJsonResponse(response);
 
       expect(response.status).toBe(404);
@@ -284,7 +286,7 @@ describe('Conversation Messages API', () => {
         },
       );
 
-      const response = await POST(request, { params: { id: 'conv-123' } });
+      const response = await POST(request, { params: Promise.resolve({ id: 'conv-123' }) });
       const data = await parseJsonResponse(response);
 
       expect(response.status).toBe(201);
@@ -319,7 +321,7 @@ describe('Conversation Messages API', () => {
           },
         );
 
-        const response = await POST(request, { params: { id: 'conv-123' } });
+        const response = await POST(request, { params: Promise.resolve({ id: 'conv-123' }) });
         const data = await parseJsonResponse(response);
 
         expect(response.status).toBe(201);

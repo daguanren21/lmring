@@ -1,10 +1,10 @@
-import { db } from '@lmring/database';
+import { and, db, eq } from '@lmring/database';
 import { conversations } from '@lmring/database/schema';
-import { and, eq } from 'drizzle-orm';
 import { NextResponse } from 'next/server';
 import { auth } from '@/libs/Auth';
+import { logError } from '@/libs/error-logging';
 
-export async function GET(request: Request, { params }: { params: { id: string } }) {
+export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const session = await auth.api.getSession({
       headers: request.headers,
@@ -15,7 +15,7 @@ export async function GET(request: Request, { params }: { params: { id: string }
     }
 
     const userId = session.user.id;
-    const conversationId = params.id;
+    const { id: conversationId } = await params;
 
     const [conversation] = await db
       .select()
@@ -29,12 +29,12 @@ export async function GET(request: Request, { params }: { params: { id: string }
 
     return NextResponse.json({ conversation }, { status: 200 });
   } catch (error) {
-    console.error('Get conversation error:', error);
+    logError('Get conversation error', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
 
-export async function PUT(request: Request, { params }: { params: { id: string } }) {
+export async function PUT(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const session = await auth.api.getSession({
       headers: request.headers,
@@ -45,7 +45,7 @@ export async function PUT(request: Request, { params }: { params: { id: string }
     }
 
     const userId = session.user.id;
-    const conversationId = params.id;
+    const { id: conversationId } = await params;
     const body = (await request.json()) as { title?: string };
 
     if (!body.title || body.title.trim() === '') {
@@ -73,12 +73,12 @@ export async function PUT(request: Request, { params }: { params: { id: string }
 
     return NextResponse.json({ conversation: updated }, { status: 200 });
   } catch (error) {
-    console.error('Update conversation error:', error);
+    logError('Update conversation error', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
 
-export async function DELETE(request: Request, { params }: { params: { id: string } }) {
+export async function DELETE(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const session = await auth.api.getSession({
       headers: request.headers,
@@ -89,7 +89,7 @@ export async function DELETE(request: Request, { params }: { params: { id: strin
     }
 
     const userId = session.user.id;
-    const conversationId = params.id;
+    const { id: conversationId } = await params;
 
     const [existing] = await db
       .select()
@@ -105,7 +105,7 @@ export async function DELETE(request: Request, { params }: { params: { id: strin
 
     return NextResponse.json({ message: 'Conversation deleted successfully' }, { status: 200 });
   } catch (error) {
-    console.error('Delete conversation error:', error);
+    logError('Delete conversation error', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

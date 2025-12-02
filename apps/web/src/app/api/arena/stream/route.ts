@@ -1,6 +1,7 @@
-import { compareModels, ProviderBuilder } from '@lmring/ai-hub';
-import type { ModelMessage } from 'ai';
+import { compareModels, type ModelMessage } from '@lmring/ai-hub';
 import { auth } from '@/libs/Auth';
+import { logError } from '@/libs/error-logging';
+import { createProviderConfigs } from '@/libs/provider-factory';
 import { arenaCompareSchema } from '@/libs/validation';
 
 interface StreamRequest {
@@ -35,7 +36,7 @@ export async function POST(request: Request) {
     const validationResult = arenaCompareSchema.safeParse(rawBody);
     if (!validationResult.success) {
       return new Response(
-        JSON.stringify({ error: 'Validation failed', details: validationResult.error.errors }),
+        JSON.stringify({ error: 'Validation failed', details: validationResult.error.issues }),
         {
           status: 400,
           headers: { 'Content-Type': 'application/json' },
@@ -49,50 +50,7 @@ export async function POST(request: Request) {
     const stream = new ReadableStream({
       async start(controller) {
         try {
-          const providerConfigs = body.models.map((model) => {
-            let provider: ReturnType<typeof ProviderBuilder.openai>;
-
-            switch (model.providerId) {
-              case 'openai':
-                provider = ProviderBuilder.openai(model.apiKey);
-                break;
-              case 'anthropic':
-                provider = ProviderBuilder.anthropic(model.apiKey);
-                break;
-              case 'deepseek':
-                provider = ProviderBuilder.deepseek(model.apiKey);
-                break;
-              case 'mistral':
-                provider = ProviderBuilder.mistral(model.apiKey);
-                break;
-              case 'xai':
-                provider = ProviderBuilder.xai(model.apiKey);
-                break;
-              case 'openrouter':
-                provider = ProviderBuilder.openrouter(model.apiKey);
-                break;
-              case 'google':
-                provider = ProviderBuilder.google(model.apiKey);
-                break;
-              case 'cohere':
-                provider = ProviderBuilder.cohere(model.apiKey);
-                break;
-              case 'together':
-                provider = ProviderBuilder.together(model.apiKey);
-                break;
-              case 'perplexity':
-                provider = ProviderBuilder.perplexity(model.apiKey);
-                break;
-              default:
-                throw new Error(`Unsupported provider: ${model.providerId}`);
-            }
-
-            return {
-              provider,
-              model: model.modelId,
-              options: model.options || {},
-            };
-          });
+          const providerConfigs = createProviderConfigs(body.models);
 
           const results = await compareModels(providerConfigs, body.messages, {
             streaming: true,
@@ -148,7 +106,7 @@ export async function POST(request: Request) {
       },
     });
   } catch (error) {
-    console.error('Arena stream error:', error);
+    logError('Arena stream error', error);
     return new Response(JSON.stringify({ error: 'Internal server error' }), {
       status: 500,
       headers: { 'Content-Type': 'application/json' },

@@ -1,8 +1,8 @@
-import { db } from '@lmring/database';
+import { and, db, eq } from '@lmring/database';
 import { conversations, messages, modelResponses } from '@lmring/database/schema';
-import { and, eq } from 'drizzle-orm';
 import { NextResponse } from 'next/server';
 import { auth } from '@/libs/Auth';
+import { logError } from '@/libs/error-logging';
 import { modelResponseSchema } from '@/libs/validation';
 
 export async function POST(request: Request) {
@@ -28,7 +28,7 @@ export async function POST(request: Request) {
     const validationResult = modelResponseSchema.safeParse(rawBody);
     if (!validationResult.success) {
       return NextResponse.json(
-        { error: 'Validation failed', details: validationResult.error.errors },
+        { error: 'Validation failed', details: validationResult.error.issues },
         { status: 400 },
       );
     }
@@ -64,7 +64,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ response: newResponse }, { status: 201 });
   } catch (error) {
-    console.error('Create model response error:', error);
+    logError('Create model response error', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
@@ -105,7 +105,7 @@ export async function GET(request: Request) {
 
     return NextResponse.json({ responses }, { status: 200 });
   } catch (error) {
-    console.error('Get model responses error:', error);
+    logError('Get model responses error', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

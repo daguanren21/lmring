@@ -1,13 +1,15 @@
-import { db } from '@lmring/database';
+import { db, desc } from '@lmring/database';
 import { modelRankings } from '@lmring/database/schema';
-import { desc } from 'drizzle-orm';
 import { NextResponse } from 'next/server';
+import { logError } from '@/libs/error-logging';
 
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
-    const limit = Number.parseInt(searchParams.get('limit') || '50', 10);
-    const offset = Number.parseInt(searchParams.get('offset') || '0', 10);
+    const parsedLimit = Number.parseInt(searchParams.get('limit') || '50', 10);
+    const parsedOffset = Number.parseInt(searchParams.get('offset') || '0', 10);
+    const limit = Number.isNaN(parsedLimit) || parsedLimit < 1 ? 50 : Math.min(parsedLimit, 100);
+    const offset = Number.isNaN(parsedOffset) || parsedOffset < 0 ? 0 : parsedOffset;
 
     const rankings = await db
       .select()
@@ -18,7 +20,7 @@ export async function GET(request: Request) {
 
     return NextResponse.json({ rankings }, { status: 200 });
   } catch (error) {
-    console.error('Get leaderboard error:', error);
+    logError('Get leaderboard error', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

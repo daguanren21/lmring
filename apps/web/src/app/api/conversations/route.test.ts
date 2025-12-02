@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { DELETE, GET, POST, PUT } from '@/app/api/conversations/[id]/route';
+import { DELETE, GET, PUT } from '@/app/api/conversations/[id]/route';
 import { GET as GET_LIST, POST as POST_CREATE } from '@/app/api/conversations/route';
 import { createMockRequest, parseJsonResponse, setupTestEnvironment } from '@/test/helpers';
 
@@ -57,15 +57,17 @@ vi.mock('@/libs/Auth', () => ({
 
 vi.mock('@lmring/database', () => ({
   db: mockDbInstance,
-}));
-
-vi.mock('drizzle-orm', () => ({
   eq: vi.fn(),
   and: vi.fn(),
   or: vi.fn(),
   desc: vi.fn(),
   asc: vi.fn(),
   sql: vi.fn(),
+  gt: vi.fn(),
+  gte: vi.fn(),
+  lt: vi.fn(),
+  lte: vi.fn(),
+  ne: vi.fn(),
 }));
 
 vi.mock('@lmring/database/schema', () => ({
@@ -179,7 +181,7 @@ describe('Conversations API', () => {
       mockDbInstance.limit.mockResolvedValue([]);
 
       const request = createMockRequest('GET', 'http://localhost:3000/api/conversations/conv-123');
-      const response = await GET(request, { params: { id: 'conv-123' } });
+      const response = await GET(request, { params: Promise.resolve({ id: 'conv-123' }) });
       const data = await parseJsonResponse(response);
 
       expect(response.status).toBe(404);
@@ -193,7 +195,7 @@ describe('Conversations API', () => {
       mockDbInstance.limit.mockResolvedValue([mockConversation]);
 
       const request = createMockRequest('GET', 'http://localhost:3000/api/conversations/conv-123');
-      const response = await GET(request, { params: { id: 'conv-123' } });
+      const response = await GET(request, { params: Promise.resolve({ id: 'conv-123' }) });
       const data = await parseJsonResponse(response);
 
       expect(response.status).toBe(200);
@@ -218,7 +220,7 @@ describe('Conversations API', () => {
         title: 'Updated Title',
       });
 
-      const response = await PUT(request, { params: { id: 'conv-123' } });
+      const response = await PUT(request, { params: Promise.resolve({ id: 'conv-123' }) });
       const data = await parseJsonResponse(response);
 
       expect(response.status).toBe(200);
@@ -240,7 +242,7 @@ describe('Conversations API', () => {
         'DELETE',
         'http://localhost:3000/api/conversations/conv-123',
       );
-      const response = await DELETE(request, { params: { id: 'conv-123' } });
+      const response = await DELETE(request, { params: Promise.resolve({ id: 'conv-123' }) });
       const data = await parseJsonResponse(response);
 
       expect(response.status).toBe(200);

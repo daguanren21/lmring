@@ -1,5 +1,5 @@
 import type { ModelConfig, ModelOption } from '@/types/arena';
-import { executeComparison } from './arena-execution';
+import { executeComparison } from '@/utils/arena-execution';
 
 interface ModelComparison {
   id: string;

@@ -237,7 +237,6 @@ function ProviderCard({ provider, onToggle, onSelect }: ProviderCardProps) {
             checked={provider.connected}
             onCheckedChange={() => onToggle(provider.id)}
             onClick={(e) => e.stopPropagation()}
-            className="data-[state=checked]:bg-blue-600"
           />
         </div>
       </div>
@@ -308,7 +307,7 @@ export default function SettingsPage() {
 
       {/* Content Area */}
       <div className="flex-1 overflow-y-auto">
-        <div className="max-w-6xl mx-auto p-8">
+        <div className="max-w-6xl p-8">
           <AnimatePresence mode="wait">
             {/* General Settings */}
             {activeTab === 'general' && (
@@ -398,15 +397,12 @@ export default function SettingsPage() {
                         <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                         <Input placeholder="Search Providers..." className="pl-9 bg-muted/50" />
                       </div>
-                      <Button size="icon" variant="outline" className="shrink-0">
-                        <PlusIcon className="h-4 w-4" />
-                      </Button>
-                    </div>
-
-                    <div className="flex items-center gap-2">
-                      <Button variant="secondary" size="sm" className="h-8 px-3 gap-2">
-                        <BoxIcon className="h-3.5 w-3.5" />
+                      <Button variant="secondary" className="gap-2">
+                        <BoxIcon className="h-4 w-4" />
                         All
+                      </Button>
+                      <Button size="icon" variant="outline">
+                        <PlusIcon className="h-4 w-4" />
                       </Button>
                     </div>
 
@@ -487,7 +483,6 @@ export default function SettingsPage() {
                       <Switch
                         checked={selectedProvider.connected}
                         onCheckedChange={() => handleToggleProvider(selectedProvider.id)}
-                        className="data-[state=checked]:bg-blue-600"
                       />
                     </div>
 

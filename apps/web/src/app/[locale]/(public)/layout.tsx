@@ -55,11 +55,7 @@ export default async function PublicLayout(props: {
               <UserMenu user={userData} />
             </li>
           )}
-          <li>
-            <Link href="/arena/" className="border-none text-gray-700 hover:text-gray-900">
-              {t('arena_link')}
-            </Link>
-          </li>
+
           <li>
             <LocaleSwitcher />
           </li>

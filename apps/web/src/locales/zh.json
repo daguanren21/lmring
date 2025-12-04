@@ -33,5 +33,26 @@
   },
   "UserProfile": {
     "meta_title": "用户资料"
+  },
+  "Providers": {
+    "openai_description": "OpenAI 是人工智能研究领域的全球领导者，拥有 GPT 系列等模型。",
+    "anthropic_description": "Anthropic 是一家 AI 安全研究公司，构建可靠、可解释、可控的 AI 系统。",
+    "azure_description": "Azure OpenAI 服务提供对 OpenAI 强大语言模型的 REST API 访问。",
+    "vertex_description": "Google Vertex AI 提供对 Gemini 和其他 Google 强大模型的访问。",
+    "xai_description": "xAI 是一家致力于理解宇宙真正本质的 AI 公司。",
+    "deepseek_description": "DeepSeek 是一家专注于通用人工智能的公司，提供开源模型。",
+    "mistral_description": "Mistral AI 提供高效且强大的开放权重模型。",
+    "openrouter_description": "OpenRouter 是顶级大语言模型的统一接口。",
+    "silicon_description": "硅基流动提供高性能推理服务。",
+    "dashscope_description": "阿里云灵积提供模型即服务 (MaaS)。",
+    "zhipu_description": "智谱 AI 提供 ChatGLM 系列模型。",
+    "baichuan_description": "百川智能提供强大的中文大语言模型。",
+    "moonshot_description": "月之暗面提供 Kimi 系列模型。",
+    "yi_description": "零一万物提供高质量的双语模型。",
+    "minimax_description": "MiniMax 提供 ABAB 系列模型。",
+    "step_description": "阶跃星辰提供具有长上下文的多模态模型。",
+    "ollama_description": "Ollama 让您可以在本地运行开源大语言模型。",
+    "bedrock_description": "Amazon Bedrock 是一项完全托管的服务，提供多种高性能基础模型。",
+    "google_description": "Google AI 提供广泛的 AI 服务和模型。"
   }
 }

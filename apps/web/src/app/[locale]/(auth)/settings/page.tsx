@@ -12,7 +12,26 @@ import {
   Separator,
   Switch,
 } from '@lmring/ui';
-import { Anthropic, Aws, Azure, DeepSeek, Google, Moonshot, Ollama, OpenAI } from '@lobehub/icons';
+import {
+  AlibabaCloud,
+  Anthropic,
+  Aws,
+  Azure,
+  Baichuan,
+  DeepSeek,
+  Google,
+  Minimax,
+  Mistral,
+  Moonshot,
+  Ollama,
+  OpenAI,
+  OpenRouter,
+  SiliconCloud,
+  Stepfun,
+  XAI,
+  Yi,
+  Zhipu,
+} from '@lobehub/icons';
 import { AnimatePresence, motion } from 'framer-motion';
 import {
   BotIcon,
@@ -31,148 +50,39 @@ import {
   UsersIcon,
 } from 'lucide-react';
 import * as React from 'react';
+import { useProviderMetadata } from '@/hooks/use-provider-metadata';
 import { ProviderLayout } from './_components/provider/ProviderLayout';
 import type { Provider } from './_components/provider/types';
 
-// Mock Data for Providers
-const defaultProviders: Provider[] = [
-  {
-    id: 'azure',
-    name: 'Azure AI',
-    connected: true,
-    Icon: Azure,
-    description:
-      'Azure offers a variety of advanced AI models, including GPT-3.5 and the latest GPT-4 series.',
-    type: 'enabled',
-    tags: [],
-  },
-  {
-    id: 'comfyui',
-    name: 'ComfyUI',
-    connected: true,
-    Icon: null, // Placeholder
-    description: 'A powerful open-source workflow engine for generating images, videos, and audio.',
-    type: 'enabled',
-    tags: [],
-  },
-  {
-    id: 'fal',
-    name: 'fal',
-    connected: true,
-    Icon: null, // Placeholder
-    description: 'Generative Media Platform for Developers',
-    type: 'enabled',
-    tags: [],
-  },
-  {
-    id: 'openai',
-    name: 'OpenAI',
-    connected: false,
-    Icon: OpenAI,
-    description:
-      'OpenAI is a global leader in artificial intelligence research, with models like the GPT series.',
-    type: 'disabled',
-    tags: ['OpenAI'],
-  },
-  {
-    id: 'azure-openai',
-    name: 'Microsoft Azure',
-    connected: false,
-    Icon: Azure,
-    description:
-      'Azure offers a variety of advanced AI models, including GPT-3.5 and the latest GPT-4 series.',
-    type: 'disabled',
-    tags: ['Microsoft Azure', 'OpenAI'],
-  },
-  {
-    id: 'ollama',
-    name: 'Ollama',
-    connected: false,
-    Icon: Ollama,
-    description:
-      'Ollama provides models that cover a wide range of fields, including code generation.',
-    type: 'disabled',
-    tags: ['Ollama'],
-  },
-  {
-    id: 'ollama-cloud',
-    name: 'Ollama Cloud',
-    connected: false,
-    Icon: Ollama,
-    description:
-      'Ollama Cloud offers officially hosted inference services, providing out-of-the-box access.',
-    type: 'disabled',
-    tags: ['Ollama Cloud'],
-  },
-  {
-    id: 'vllm',
-    name: 'vLLM',
-    connected: false,
-    Icon: null, // Placeholder
-    description: 'vLLM is a fast and easy-to-use library for LLM inference and serving.',
-    type: 'disabled',
-    tags: ['LLM'],
-  },
-  {
-    id: 'xinference',
-    name: 'Xinference',
-    connected: false,
-    Icon: null, // Placeholder
-    description:
-      'Xorbits Inference (Xinference) is an open-source platform designed to simplify the...',
-    type: 'disabled',
-    tags: ['Xinference'],
-  },
-  {
-    id: 'anthropic',
-    name: 'Anthropic',
-    connected: false,
-    Icon: Anthropic,
-    description:
-      'Anthropic is a company focused on AI research and development, offering a range of...',
-    type: 'disabled',
-    tags: ['ANTHROPIC', 'Claude'],
-  },
-  {
-    id: 'bedrock',
-    name: 'Amazon Bedrock',
-    connected: false,
-    Icon: Aws,
-    description:
-      'Bedrock is a service provided by Amazon AWS, focusing on delivering advanced AI languag...',
-    type: 'disabled',
-    tags: ['aws', 'Amazon Bedrock'],
-  },
-  {
-    id: 'google',
-    name: 'Google',
-    connected: false,
-    Icon: Google,
-    description: 'Google AI offers a wide range of AI services and models.',
-    type: 'disabled',
-    tags: ['Google'],
-  },
-  {
-    id: 'deepseek',
-    name: 'DeepSeek',
-    connected: false,
-    Icon: DeepSeek,
-    description: 'DeepSeek is an AI company focused on AGI.',
-    type: 'disabled',
-    tags: ['DeepSeek'],
-  },
-  {
-    id: 'moonshot',
-    name: 'Moonshot',
-    connected: false,
-    Icon: Moonshot,
-    description: 'Moonshot AI provides advanced LLM services.',
-    type: 'disabled',
-    tags: ['Moonshot'],
-  },
-];
+// biome-ignore lint/suspicious/noExplicitAny: @lobehub/icons has incompatible CompoundedIcon types per icon
+const ICON_MAP: Record<string, any> = {
+  openai: OpenAI,
+  anthropic: Anthropic,
+  azure: Azure,
+  vertex: Google,
+  xai: XAI,
+  deepseek: DeepSeek,
+  mistral: Mistral,
+  openrouter: OpenRouter,
+  silicon: SiliconCloud,
+  dashscope: AlibabaCloud,
+  zhipu: Zhipu,
+  baichuan: Baichuan,
+  moonshot: Moonshot,
+  yi: Yi,
+  minimax: Minimax,
+  step: Stepfun,
+  ollama: Ollama,
+  bedrock: Aws,
+  google: Google,
+};
 
-// Mock Data for System Models
+// biome-ignore lint/suspicious/noExplicitAny: Icon component may have Color/Avatar variants
+const getColorfulIcon = (Icon: any) => {
+  if (!Icon) return null;
+  return Icon.Color || Icon.Avatar || Icon;
+};
+
 const systemModels = [
   { id: 'gpt-4o', name: 'GPT-4o', description: 'OpenAI flagship model' },
   {
@@ -188,8 +98,35 @@ type Tab = 'general' | 'provider' | 'system-model' | 'storage' | 'help' | 'about
 
 export default function SettingsPage() {
   const [activeTab, setActiveTab] = React.useState<Tab>('general');
-  const [providers, setProviders] = React.useState(defaultProviders);
   const [telemetryEnabled, setTelemetryEnabled] = React.useState(false);
+  const providerMetadata = useProviderMetadata();
+
+  const initialProviders: Provider[] = React.useMemo(
+    () =>
+      providerMetadata.map((p) => ({
+        id: p.id,
+        name: p.name,
+        connected: false,
+        Icon: getColorfulIcon(ICON_MAP[p.id]),
+        description: p.description,
+        type: 'disabled' as const,
+        tags: [p.name],
+        models:
+          p.models?.map((m) => ({
+            id: m.id,
+            name: m.name,
+            contextLength: m.contextLength,
+            maxOutputTokens: m.maxOutputTokens,
+          })) || [],
+      })),
+    [providerMetadata],
+  );
+
+  const [providers, setProviders] = React.useState<Provider[]>([]);
+
+  React.useEffect(() => {
+    setProviders(initialProviders);
+  }, [initialProviders]);
 
   const handleToggleProvider = (id: string) => {
     setProviders((prev) =>
@@ -224,7 +161,6 @@ export default function SettingsPage() {
 
   return (
     <div className="h-full flex bg-background overflow-hidden">
-      {/* Sidebar */}
       <div className="w-64 flex-none border-r border-border bg-muted/10 flex flex-col">
         <div className="p-4 pb-2">
           <h1 className="text-2xl font-bold">Settings</h1>
@@ -246,7 +182,6 @@ export default function SettingsPage() {
         </div>
       </div>
 
-      {/* Content Area */}
       <div className="flex-1 flex flex-col overflow-hidden h-full">
         {activeTab === 'provider' ? (
           <ProviderLayout
@@ -258,7 +193,6 @@ export default function SettingsPage() {
           <div className="flex-1 overflow-y-auto">
             <div className="max-w-6xl p-8">
               <AnimatePresence mode="wait">
-                {/* General Settings */}
                 {activeTab === 'general' && (
                   <motion.div
                     key="general"
@@ -329,7 +263,6 @@ export default function SettingsPage() {
                   </motion.div>
                 )}
 
-                {/* System Model */}
                 {activeTab === 'system-model' && (
                   <motion.div
                     key="system-model"
@@ -365,7 +298,6 @@ export default function SettingsPage() {
                   </motion.div>
                 )}
 
-                {/* Data Storage */}
                 {activeTab === 'storage' && (
                   <motion.div
                     key="storage"
@@ -416,7 +348,6 @@ export default function SettingsPage() {
                   </motion.div>
                 )}
 
-                {/* Help & Support */}
                 {activeTab === 'help' && (
                   <motion.div
                     key="help"
@@ -434,7 +365,6 @@ export default function SettingsPage() {
                     </div>
 
                     <div className="space-y-6">
-                      {/* Resources Section */}
                       <div className="space-y-4">
                         <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
                           Resources
@@ -479,7 +409,6 @@ export default function SettingsPage() {
                         </div>
                       </div>
 
-                      {/* About Us Section */}
                       <div className="space-y-4">
                         <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
                           About Us
@@ -527,7 +456,6 @@ export default function SettingsPage() {
                   </motion.div>
                 )}
 
-                {/* About */}
                 {activeTab === 'about' && (
                   <motion.div
                     key="about"

@@ -32,24 +32,22 @@ export function ProviderCard({ provider, onToggle, onSelect }: ProviderCardProps
       <div className="p-4 flex-1 flex flex-col">
         <div className="flex items-center gap-3 mb-3">
           <div className="h-10 w-10 flex items-center justify-center rounded-lg bg-muted/20 shrink-0">
-            {Icon ? (
-              <Icon size={24} className={provider.connected ? '' : 'grayscale'} />
-            ) : (
-              <span className="text-xl">{provider.name[0]}</span>
-            )}
+            {Icon ? <Icon size={24} /> : <span className="text-xl">{provider.name[0]}</span>}
           </div>
           <div className="flex flex-col justify-center">
             <div className="flex items-center gap-2">
               <h3 className="font-bold text-base">{provider.name}</h3>
-              {provider.tags.map((tag) => (
-                <span
-                  key={tag}
-                  className="text-[10px] text-muted-foreground flex items-center gap-1"
-                >
-                  {tag === 'OpenAI' && <OpenAI.Avatar size={12} />}
-                  {tag}
-                </span>
-              ))}
+              {provider.tags
+                .filter((tag) => tag !== provider.name)
+                .map((tag) => (
+                  <span
+                    key={tag}
+                    className="text-[10px] text-muted-foreground flex items-center gap-1"
+                  >
+                    {tag === 'OpenAI' && <OpenAI.Avatar size={12} />}
+                    {tag}
+                  </span>
+                ))}
             </div>
           </div>
         </div>

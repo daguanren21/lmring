@@ -81,14 +81,7 @@ export function ProviderLayout({
                   }`}
                 >
                   <div className="h-8 w-8 rounded-md flex items-center justify-center bg-background border shrink-0">
-                    {Icon ? (
-                      <Icon
-                        size={16}
-                        className={provider.connected ? '' : 'grayscale opacity-50'}
-                      />
-                    ) : (
-                      <span>{provider.name[0]}</span>
-                    )}
+                    {Icon ? <Icon size={16} className="" /> : <span>{provider.name[0]}</span>}
                   </div>
                   <span className="truncate text-left flex-1">{provider.name}</span>
                   {provider.connected && (

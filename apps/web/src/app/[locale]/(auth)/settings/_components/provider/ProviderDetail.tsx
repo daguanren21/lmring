@@ -58,12 +58,14 @@ export function ProviderDetail({ provider, onToggle }: ProviderDetailProps) {
       <div className="space-y-4">
         <Label>Model List</Label>
         <div className="border rounded-lg divide-y">
-          {['gpt-4o', 'gpt-4-turbo', 'gpt-3.5-turbo'].map((model) => (
-            <div key={model} className="p-3 flex items-center justify-between hover:bg-muted/50">
-              <span className="font-medium">{model}</span>
+          {provider.models?.map((model) => (
+            <div key={model.id} className="p-3 flex items-center justify-between hover:bg-muted/50">
+              <span className="font-medium">{model.name}</span>
               <Badge variant="outline">Chat</Badge>
             </div>
-          ))}
+          )) ?? (
+            <div className="p-4 text-center text-muted-foreground text-sm">No models available</div>
+          )}
         </div>
       </div>
     </div>

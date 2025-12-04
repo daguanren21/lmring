@@ -33,5 +33,26 @@
   },
   "UserProfile": {
     "meta_title": "User Profile"
+  },
+  "Providers": {
+    "openai_description": "OpenAI is a global leader in AI research, with models like the GPT series.",
+    "anthropic_description": "Anthropic is an AI safety and research company that builds reliable, interpretable, and steerable AI systems.",
+    "azure_description": "Azure OpenAI Service provides REST API access to OpenAI's powerful language models.",
+    "vertex_description": "Google Vertex AI offers access to Gemini and other powerful models from Google.",
+    "xai_description": "xAI is an AI company with the mission to understand the true nature of the universe.",
+    "deepseek_description": "DeepSeek is an AI company focused on AGI, offering open-source models.",
+    "mistral_description": "Mistral AI provides efficient and powerful open-weight models.",
+    "openrouter_description": "OpenRouter is a unified interface for top LLMs.",
+    "silicon_description": "SiliconFlow provides high-performance inference services.",
+    "dashscope_description": "Alibaba Cloud DashScope provides Model-as-a-Service (MaaS).",
+    "zhipu_description": "Zhipu AI provides the ChatGLM series of models.",
+    "baichuan_description": "Baichuan Intelligence provides powerful Chinese LLMs.",
+    "moonshot_description": "Moonshot AI provides the Kimi series of models.",
+    "yi_description": "01.AI (Yi) provides high-quality bilingual models.",
+    "minimax_description": "MiniMax provides the ABAB series of models.",
+    "step_description": "StepFun provides multimodal models with long context.",
+    "ollama_description": "Ollama allows you to run open-source LLMs locally.",
+    "bedrock_description": "Amazon Bedrock is a fully managed service that offers a choice of high-performing foundation models.",
+    "google_description": "Google AI offers a wide range of AI services and models."
   }
 }

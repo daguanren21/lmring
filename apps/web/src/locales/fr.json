@@ -33,5 +33,26 @@
   },
   "UserProfile": {
     "meta_title": "Profil de l'utilisateur"
+  },
+  "Providers": {
+    "openai_description": "OpenAI est un leader mondial de la recherche en IA, avec des modèles comme la série GPT.",
+    "anthropic_description": "Anthropic est une entreprise de recherche en sécurité de l'IA qui construit des systèmes d'IA fiables et interprétables.",
+    "azure_description": "Azure OpenAI Service fournit un accès API REST aux puissants modèles de langage d'OpenAI.",
+    "vertex_description": "Google Vertex AI offre l'accès à Gemini et autres modèles puissants de Google.",
+    "xai_description": "xAI est une entreprise d'IA dont la mission est de comprendre la véritable nature de l'univers.",
+    "deepseek_description": "DeepSeek est une entreprise d'IA axée sur l'AGI, proposant des modèles open source.",
+    "mistral_description": "Mistral AI fournit des modèles open-weight efficaces et puissants.",
+    "openrouter_description": "OpenRouter est une interface unifiée pour les meilleurs LLMs.",
+    "silicon_description": "SiliconFlow fournit des services d'inférence haute performance.",
+    "dashscope_description": "Alibaba Cloud DashScope fournit le Model-as-a-Service (MaaS).",
+    "zhipu_description": "Zhipu AI fournit la série de modèles ChatGLM.",
+    "baichuan_description": "Baichuan Intelligence fournit des LLMs chinois puissants.",
+    "moonshot_description": "Moonshot AI fournit la série de modèles Kimi.",
+    "yi_description": "01.AI (Yi) fournit des modèles bilingues de haute qualité.",
+    "minimax_description": "MiniMax fournit la série de modèles ABAB.",
+    "step_description": "StepFun fournit des modèles multimodaux avec un long contexte.",
+    "ollama_description": "Ollama vous permet d'exécuter des LLMs open source localement.",
+    "bedrock_description": "Amazon Bedrock est un service entièrement géré offrant des modèles de fondation performants.",
+    "google_description": "Google AI offre une large gamme de services et modèles d'IA."
   }
 }

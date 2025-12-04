@@ -10,4 +10,9 @@ export interface Provider {
   description: string;
   type: 'enabled' | 'disabled';
   tags: string[];
+  models?: {
+    id: string;
+    name: string;
+    description?: string;
+  }[];
 }

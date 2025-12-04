@@ -6,6 +6,8 @@ export const ALL_PROVIDERS: ProviderConfig[] = [...OFFICIAL_PROVIDERS, ...DOMEST
 
 export { OFFICIAL_PROVIDERS, DOMESTIC_PROVIDERS };
 
+export * from './metadata';
+
 // Helper functions for provider management
 export function getProviderById(id: string): ProviderConfig | undefined {
   return ALL_PROVIDERS.find((p) => p.id === id);

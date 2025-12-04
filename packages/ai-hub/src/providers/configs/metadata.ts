@@ -218,6 +218,53 @@ export const OFFICIAL_PROVIDER_METADATA: ProviderMetadata[] = [
     supportsVision: true,
     supportsFunctionCalling: true,
   },
+  {
+    id: 'google',
+    name: 'Google AI',
+    type: 'official',
+    supportsStreaming: true,
+    supportsStructuredOutput: true,
+    supportsVision: true,
+    supportsFunctionCalling: true,
+    models: [
+      {
+        id: 'gemini-1.5-pro',
+        name: 'Gemini 1.5 Pro',
+        contextLength: 2097152,
+        maxOutputTokens: 8192,
+      },
+      {
+        id: 'gemini-1.5-flash',
+        name: 'Gemini 1.5 Flash',
+        contextLength: 1048576,
+        maxOutputTokens: 8192,
+      },
+      {
+        id: 'gemini-2.0-flash-exp',
+        name: 'Gemini 2.0 Flash (Experimental)',
+        contextLength: 1048576,
+        maxOutputTokens: 8192,
+      },
+    ],
+  },
+  {
+    id: 'bedrock',
+    name: 'Amazon Bedrock',
+    type: 'official',
+    supportsStreaming: true,
+    supportsStructuredOutput: true,
+    supportsVision: true,
+    supportsFunctionCalling: true,
+  },
+  {
+    id: 'ollama',
+    name: 'Ollama',
+    type: 'official',
+    supportsStreaming: true,
+    supportsStructuredOutput: true,
+    supportsVision: true,
+    supportsFunctionCalling: true,
+  },
 ];
 
 export const DOMESTIC_PROVIDER_METADATA: ProviderMetadata[] = [

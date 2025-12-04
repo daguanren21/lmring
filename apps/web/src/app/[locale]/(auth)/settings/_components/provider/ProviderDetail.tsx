@@ -15,13 +15,16 @@ export function ProviderDetail({ provider, onToggle }: ProviderDetailProps) {
     <div className="space-y-6 p-4 md:p-8 max-w-3xl mx-auto">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <div className="h-16 w-16 flex items-center justify-center rounded-2xl bg-muted/20 text-4xl">
-            {provider.Icon ? <provider.Icon size={40} /> : provider.name[0]}
-          </div>
-          <div>
-            <h2 className="text-2xl font-bold">{provider.name}</h2>
-            <p className="text-muted-foreground">{provider.description}</p>
-          </div>
+          {provider.CombineIcon ? (
+            <provider.CombineIcon size={40} className="text-foreground" />
+          ) : (
+            <>
+              <div className="h-16 w-16 flex items-center justify-center rounded-2xl bg-muted/20 text-4xl">
+                {provider.Icon ? <provider.Icon size={40} /> : provider.name[0]}
+              </div>
+              <h2 className="text-2xl font-bold">{provider.name}</h2>
+            </>
+          )}
         </div>
         <Switch checked={provider.connected} onCheckedChange={() => onToggle(provider.id)} />
       </div>

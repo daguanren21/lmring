@@ -33,7 +33,7 @@ export function ProviderLayout({
 
   return (
     <div className="h-full flex items-stretch">
-      <div className="w-64 flex-none border-r bg-muted/10 flex flex-col">
+      <div className="w-64 flex-none border-r bg-muted/40 flex flex-col">
         <div className="p-4 space-y-4">
           <div className="relative">
             <SearchIcon className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -80,8 +80,8 @@ export function ProviderLayout({
                       : 'text-muted-foreground hover:bg-muted/50 hover:text-foreground'
                   }`}
                 >
-                  <div className="h-8 w-8 rounded-md flex items-center justify-center bg-background border shrink-0">
-                    {Icon ? <Icon size={16} className="" /> : <span>{provider.name[0]}</span>}
+                  <div className="h-8 w-8 rounded-md flex items-center justify-center bg-background shrink-0">
+                    {Icon ? <Icon size={24} className="" /> : <span>{provider.name[0]}</span>}
                   </div>
                   <span className="truncate text-left flex-1">{provider.name}</span>
                   {provider.connected && (

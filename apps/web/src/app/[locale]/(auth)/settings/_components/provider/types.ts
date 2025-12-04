@@ -7,6 +7,11 @@ export interface Provider {
   name: string;
   connected: boolean;
   Icon: IconType | LucideIcon | ComponentType<{ size?: number; className?: string }> | null;
+  CombineIcon?:
+    | IconType
+    | LucideIcon
+    | ComponentType<{ size?: number; className?: string; type?: 'color' | 'mono' }>
+    | null;
   description: string;
   type: 'enabled' | 'disabled';
   tags: string[];

@@ -164,24 +164,6 @@ export async function compareModels(
   const allFailed = results.every((r) => r.status === 'failed');
   if (allFailed) {
     const errors = results.filter((r) => r.error).map((r) => r.error as Error);
-    console.error('=== Arena Comparison: All Models Failed ===');
-    for (const result of results) {
-      console.error(`\n--- Model: ${result.provider}/${result.model} ---`);
-      console.error('Status:', result.status);
-      if (result.error) {
-        console.error('Error Name:', result.error.name);
-        console.error('Error Message:', result.error.message);
-        if (result.error.cause) {
-          console.error('Error Cause:', result.error.cause);
-        }
-        if (result.error.stack) {
-          console.error('Stack Trace:', result.error.stack);
-        }
-      }
-      console.error('Metrics:', JSON.stringify(result.metrics, null, 2));
-    }
-    console.error('===========================================\n');
-
     throw new ArenaError('All models failed', errors);
   }
 

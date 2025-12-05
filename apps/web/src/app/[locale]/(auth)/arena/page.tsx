@@ -39,18 +39,19 @@ export default function ArenaPage() {
         for (const model of provider.models) {
           models.push({
             id: `${provider.id}:${model.id}`,
-            name: model.name,
+            name: model.displayName || model.id,
             provider: provider.name,
             providerId: provider.id,
-            description: provider.description || `${model.name} from ${provider.name}`,
-            context: model.contextLength
-              ? `${model.contextLength.toLocaleString()} tokens`
+            description:
+              provider.description || `${model.displayName || model.id} from ${provider.name}`,
+            context: model.contextWindowTokens
+              ? `${model.contextWindowTokens.toLocaleString()} tokens`
               : undefined,
-            inputPricing: model.inputPricePerMillion
-              ? `$${model.inputPricePerMillion} / million tokens`
+            inputPricing: model.pricing?.input
+              ? `$${model.pricing.input} / million tokens`
               : undefined,
-            outputPricing: model.outputPricePerMillion
-              ? `$${model.outputPricePerMillion} / million tokens`
+            outputPricing: model.pricing?.output
+              ? `$${model.pricing.output} / million tokens`
               : undefined,
             type: 'pro',
             isNew: false,

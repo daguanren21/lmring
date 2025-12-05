@@ -8,6 +8,12 @@ export interface ProviderInstance {
   languageModel(modelId: string): LanguageModelV2;
 }
 
+export interface ModelConfig {
+  id: string;
+  name?: string;
+  supportedFormats?: Array<'openai' | 'anthropic'>;
+}
+
 export interface ProviderConfig {
   id: string;
   name: string;
@@ -16,7 +22,7 @@ export interface ProviderConfig {
   creator?: (options: ProviderOptions) => ProviderInstance;
   compatibleConfig?: {
     baseURL: string;
-    alternativeBaseURL?: string; // For dual format support
+    alternativeBaseURL?: string;
     defaultHeaders?: Record<string, string>;
   };
   models?: ModelConfig[];
@@ -26,26 +32,16 @@ export interface ProviderConfig {
   supportsFunctionCalling?: boolean;
 }
 
-export interface ModelConfig {
-  id: string;
-  name: string;
-  contextLength?: number;
-  maxOutputTokens?: number;
-  inputPricePerMillion?: number;
-  outputPricePerMillion?: number;
-  supportedFormats?: ('openai' | 'anthropic')[];
-}
-
 export interface ProviderOptions {
   apiKey?: string;
   baseURL?: string;
   headers?: Record<string, string>;
   organization?: string;
   project?: string;
-  resourceName?: string; // Azure
-  apiVersion?: string; // Azure
-  region?: string; // AWS Bedrock
-  useAnthropicFormat?: boolean; // For dual format providers
+  resourceName?: string;
+  apiVersion?: string;
+  region?: string;
+  useAnthropicFormat?: boolean;
 }
 
 export interface ResolvedModel {

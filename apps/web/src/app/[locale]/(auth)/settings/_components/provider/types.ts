@@ -12,6 +12,16 @@ export interface Provider {
     | LucideIcon
     | ComponentType<{ size?: number; className?: string; type?: 'color' | 'mono' }>
     | null;
+  TextIcon?:
+    | IconType
+    | LucideIcon
+    | ComponentType<{ size?: number; className?: string; type?: 'color' | 'mono' }>
+    | null;
+  BrandIcon?:
+    | IconType
+    | LucideIcon
+    | ComponentType<{ size?: number; className?: string; type?: 'color' | 'mono' }>
+    | null;
   description: string;
   type: 'enabled' | 'disabled';
   tags: string[];

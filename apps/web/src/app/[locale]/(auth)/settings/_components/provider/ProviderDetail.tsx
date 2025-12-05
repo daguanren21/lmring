@@ -1,4 +1,4 @@
-import { Badge, Button, Input, Label, Separator, Switch } from '@lmring/ui';
+import { Badge, Button, cn, Input, Label, Separator, Switch } from '@lmring/ui';
 import { EyeIcon, EyeOffIcon } from 'lucide-react';
 import { useState } from 'react';
 import type { Provider } from './types';
@@ -16,14 +16,30 @@ export function ProviderDetail({ provider, onToggle }: ProviderDetailProps) {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
           {provider.CombineIcon ? (
-            <provider.CombineIcon size={40} className="text-foreground" />
+            <provider.CombineIcon
+              size={25}
+              type={provider.connected ? 'color' : undefined}
+              className={cn('text-foreground', !provider.connected && 'grayscale opacity-70')}
+            />
+          ) : provider.TextIcon ? (
+            <provider.TextIcon
+              size={20}
+              type={provider.connected ? 'color' : undefined}
+              className={cn('text-foreground', !provider.connected && 'grayscale opacity-70')}
+            />
+          ) : provider.BrandIcon ? (
+            <provider.BrandIcon
+              size={25}
+              type={provider.connected ? 'color' : undefined}
+              className={cn('text-foreground', !provider.connected && 'grayscale opacity-70')}
+            />
           ) : (
-            <>
-              <div className="h-16 w-16 flex items-center justify-center rounded-2xl bg-muted/20 text-4xl">
-                {provider.Icon ? <provider.Icon size={40} /> : provider.name[0]}
-              </div>
-              <h2 className="text-2xl font-bold">{provider.name}</h2>
-            </>
+            provider.Icon && (
+              <provider.Icon
+                size={25}
+                className={cn('text-foreground', !provider.connected && 'grayscale opacity-70')}
+              />
+            )
           )}
         </div>
         <Switch checked={provider.connected} onCheckedChange={() => onToggle(provider.id)} />

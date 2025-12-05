@@ -12,12 +12,13 @@
   },
   "exports": {
     ".": "./src/index.ts",
-    "./metadata": "./src/metadata.ts",
     "./plugins": "./src/core/plugins/index.ts",
     "./built-in/plugins": "./src/core/plugins/built-in/index.ts",
-    "./providers": "./src/providers/index.ts"
+    "./providers": "./src/providers/index.ts",
+    "./models": "./src/providers/models.ts"
   },
   "dependencies": {
+    "@lmring/model-depot": "workspace:*",
     "@ai-sdk/amazon-bedrock": "^3.0.62",
     "@ai-sdk/anthropic": "^2.0.50",
     "@ai-sdk/azure": "^2.0.76",

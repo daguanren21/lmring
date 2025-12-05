@@ -26,6 +26,7 @@
     "@lmring/ai-hub": "workspace:*",
     "@lmring/auth": "workspace:*",
     "@lmring/database": "workspace:*",
+    "@lmring/model-depot": "workspace:*",
     "@lmring/env": "workspace:*",
     "@lmring/i18n": "workspace:*",
     "@lmring/ui": "workspace:*",

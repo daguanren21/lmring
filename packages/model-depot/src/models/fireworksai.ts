@@ -1,0 +1,210 @@
+import type { ChatModelCard } from '../types';
+
+const fireworksaiModels: ChatModelCard[] = [
+  {
+    id: 'accounts/fireworks/models/llama-v3p3-70b-instruct',
+    displayName: 'Llama 3.3 70B Instruct',
+    description: 'Llama 3.3 70B增强版，工具调用和编程能力更强。',
+    type: 'chat',
+    contextWindowTokens: 131_072,
+    enabled: true,
+    pricing: {
+      input: 0.9,
+      output: 0.9,
+    },
+  },
+  {
+    id: 'accounts/fireworks/models/llama-v3p2-3b-instruct',
+    displayName: 'Llama 3.2 3B Instruct',
+    description: 'Meta轻量级多语言模型，延迟低成本优势明显。',
+    type: 'chat',
+    contextWindowTokens: 131_072,
+    enabled: true,
+    pricing: {
+      input: 0.1,
+      output: 0.1,
+    },
+  },
+  {
+    id: 'accounts/fireworks/models/llama-v3p2-11b-vision-instruct',
+    displayName: 'Llama 3.2 11B Vision Instruct',
+    description: 'Meta 11B视觉模型，图像推理和字幕生成出色。',
+    type: 'chat',
+    contextWindowTokens: 131_072,
+    enabled: true,
+    abilities: {
+      vision: true,
+    },
+    pricing: {
+      input: 0.2,
+      output: 0.2,
+    },
+  },
+  {
+    id: 'accounts/fireworks/models/llama-v3p2-90b-vision-instruct',
+    displayName: 'Llama 3.2 90B Vision Instruct',
+    description: 'Meta 90B视觉模型，理解图表和复杂视觉数据。',
+    type: 'chat',
+    contextWindowTokens: 131_072,
+    enabled: true,
+    abilities: {
+      vision: true,
+    },
+    pricing: {
+      input: 0.9,
+      output: 0.9,
+    },
+  },
+  {
+    id: 'accounts/fireworks/models/llama-v3p1-70b-instruct',
+    displayName: 'Llama 3.1 70B Instruct',
+    description: 'Meta Llama 3.1 70B多语言对话模型。',
+    type: 'chat',
+    contextWindowTokens: 131_072,
+    abilities: {
+      functionCall: true,
+    },
+    pricing: {
+      input: 0.9,
+      output: 0.9,
+    },
+  },
+  {
+    id: 'accounts/fireworks/models/llama-v3p1-405b-instruct',
+    displayName: 'Llama 3.1 405B Instruct',
+    description: 'Llama 3.1家族最强模型，FP8推理高度匹配。',
+    type: 'chat',
+    contextWindowTokens: 131_072,
+    abilities: {
+      functionCall: true,
+    },
+    pricing: {
+      input: 3,
+      output: 3,
+    },
+  },
+  {
+    id: 'accounts/fireworks/models/mistral-small-24b-instruct-2501',
+    displayName: 'Mistral Small 3 Instruct',
+    description: 'Mistral 24B模型，最先进能力媲美更大模型。',
+    type: 'chat',
+    contextWindowTokens: 32_768,
+    enabled: true,
+    pricing: {
+      input: 0.9,
+      output: 0.9,
+    },
+  },
+  {
+    id: 'accounts/fireworks/models/mixtral-8x22b-instruct',
+    displayName: 'Mixtral MoE 8x22B Instruct',
+    description: 'Mixtral 8x22B指令微调版，支持函数调用。',
+    type: 'chat',
+    contextWindowTokens: 65_536,
+    abilities: {
+      functionCall: true,
+    },
+    pricing: {
+      input: 1.2,
+      output: 1.2,
+    },
+  },
+  {
+    id: 'accounts/fireworks/models/phi-3-vision-128k-instruct',
+    displayName: 'Phi 3.5 Vision Instruct',
+    description: 'Microsoft轻量多模态模型，128K上下文支持。',
+    type: 'chat',
+    contextWindowTokens: 32_064,
+    enabled: true,
+    abilities: {
+      vision: true,
+    },
+    pricing: {
+      input: 0.2,
+      output: 0.2,
+    },
+  },
+  {
+    id: 'accounts/fireworks/models/deepseek-v3',
+    displayName: 'DeepSeek V3',
+    description: 'DeepSeek强大MoE模型，总参数671B，每token激活37B。',
+    type: 'chat',
+    contextWindowTokens: 131_072,
+    enabled: true,
+    pricing: {
+      input: 0.9,
+      output: 0.9,
+    },
+  },
+  {
+    id: 'accounts/fireworks/models/deepseek-r1',
+    displayName: 'DeepSeek R1',
+    description: 'DeepSeek最先进推理模型，数学和编程能力出色。',
+    type: 'chat',
+    contextWindowTokens: 163_840,
+    enabled: true,
+    abilities: {
+      reasoning: true,
+    },
+    pricing: {
+      input: 8,
+      output: 8,
+    },
+  },
+  {
+    id: 'accounts/fireworks/models/qwen-qwq-32b-preview',
+    displayName: 'Qwen QwQ 32B Preview',
+    description: 'Qwen推理模型，分析推理能力媲美o1。',
+    type: 'chat',
+    contextWindowTokens: 32_768,
+    enabled: true,
+    abilities: {
+      reasoning: true,
+    },
+    pricing: {
+      input: 0.9,
+      output: 0.9,
+    },
+  },
+  {
+    id: 'accounts/fireworks/models/qwen2p5-72b-instruct',
+    displayName: 'Qwen2.5 72B Instruct',
+    description: 'Qwen团队和阿里云开发的72B指令模型。',
+    type: 'chat',
+    contextWindowTokens: 32_768,
+    enabled: true,
+    pricing: {
+      input: 0.9,
+      output: 0.9,
+    },
+  },
+  {
+    id: 'accounts/fireworks/models/qwen2-vl-72b-instruct',
+    displayName: 'Qwen2 VL 72B Instruct',
+    description: 'Qwen视觉语言模型72B版本，阿里巴巴最新迭代。',
+    type: 'chat',
+    contextWindowTokens: 32_768,
+    enabled: true,
+    abilities: {
+      vision: true,
+    },
+    pricing: {
+      input: 0.9,
+      output: 0.9,
+    },
+  },
+  {
+    id: 'accounts/yi-01-ai/models/yi-large',
+    displayName: 'Yi-Large',
+    description: '零一万物顶尖大模型，多语言能力卓越。',
+    type: 'chat',
+    contextWindowTokens: 32_768,
+    enabled: true,
+    pricing: {
+      input: 3,
+      output: 3,
+    },
+  },
+];
+
+export default fireworksaiModels;

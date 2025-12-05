@@ -1,0 +1,83 @@
+import type { ChatModelCard } from '../types';
+
+const cerebrasModels: ChatModelCard[] = [
+  {
+    id: 'zai-glm-4.6',
+    displayName: 'GLM-4.6',
+    description: '编程推理任务表现优良，支持工具调用和agentic场景。',
+    type: 'chat',
+    contextWindowTokens: 131_072,
+    maxOutput: 40_000,
+    enabled: true,
+    abilities: {
+      functionCall: true,
+      reasoning: true,
+      structuredOutput: true,
+    },
+    pricing: {
+      input: 2.25,
+      output: 2.75,
+    },
+  },
+  {
+    id: 'gpt-oss-120b',
+    displayName: 'GPT OSS 120B',
+    description: 'GPT开源120B模型，Cerebras高速推理。',
+    type: 'chat',
+    contextWindowTokens: 131_072,
+    enabled: true,
+    abilities: {
+      functionCall: true,
+      reasoning: true,
+    },
+    pricing: {
+      input: 0.35,
+      output: 0.75,
+    },
+  },
+  {
+    id: 'qwen-3-32b',
+    displayName: 'Qwen 3 32B',
+    description: 'Qwen系列多语言编码任务表现优良。',
+    type: 'chat',
+    contextWindowTokens: 131_072,
+    abilities: {
+      functionCall: true,
+      reasoning: true,
+    },
+    pricing: {
+      input: 0.4,
+      output: 0.8,
+    },
+  },
+  {
+    id: 'llama-3.3-70b',
+    displayName: 'Llama 3.3 70B',
+    description: 'Llama中大型模型，兼顾推理能力与吞吐。',
+    type: 'chat',
+    contextWindowTokens: 131_072,
+    abilities: {
+      functionCall: true,
+    },
+    pricing: {
+      input: 0.85,
+      output: 1.2,
+    },
+  },
+  {
+    id: 'llama3.1-8b',
+    displayName: 'Llama 3.1 8B',
+    description: 'Llama小体量低延迟变体，适合轻量在线推理。',
+    type: 'chat',
+    contextWindowTokens: 32_768,
+    abilities: {
+      functionCall: true,
+    },
+    pricing: {
+      input: 0.1,
+      output: 0.1,
+    },
+  },
+];
+
+export default cerebrasModels;

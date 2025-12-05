@@ -1,0 +1,85 @@
+import type { ChatModelCard } from '../types';
+
+const sparkModels: ChatModelCard[] = [
+  {
+    id: 'spark-x',
+    displayName: 'Spark X1.5',
+    description: '星火深度推理模型，支持动态思考模式，64K上下文。',
+    type: 'chat',
+    contextWindowTokens: 65_535,
+    maxOutput: 65_535,
+    enabled: true,
+    abilities: {
+      functionCall: true,
+      reasoning: true,
+      search: true,
+    },
+  },
+  {
+    id: 'lite',
+    displayName: 'Spark Lite',
+    description: '星火轻量模型，完全免费，快速响应，支持实时搜索。',
+    type: 'chat',
+    contextWindowTokens: 12_288,
+    maxOutput: 4096,
+    enabled: true,
+  },
+  {
+    id: 'generalv3',
+    displayName: 'Spark Pro',
+    description: '星火专业版，针对数学、编程、医疗等领域优化。',
+    type: 'chat',
+    contextWindowTokens: 16_384,
+    maxOutput: 8192,
+    abilities: {
+      search: true,
+    },
+  },
+  {
+    id: 'pro-128k',
+    displayName: 'Spark Pro 128K',
+    description: '星火专业版长文本，支持128K上下文处理。',
+    type: 'chat',
+    contextWindowTokens: 131_072,
+    maxOutput: 131_072,
+  },
+  {
+    id: 'generalv3.5',
+    displayName: 'Spark Max',
+    description: '星火功能最全版本，支持联网搜索和函数调用。',
+    type: 'chat',
+    contextWindowTokens: 16_384,
+    maxOutput: 8192,
+    abilities: {
+      functionCall: true,
+      search: true,
+    },
+  },
+  {
+    id: 'max-32k',
+    displayName: 'Spark Max 32K',
+    description: '星火Max大上下文版本，增强理解和推理能力。',
+    type: 'chat',
+    contextWindowTokens: 65_536,
+    maxOutput: 32_768,
+    abilities: {
+      functionCall: true,
+      search: true,
+    },
+  },
+  {
+    id: '4.0Ultra',
+    displayName: 'Spark 4.0 Ultra',
+    description: '星火系列最强版本，升级联网搜索和内容理解能力。',
+    type: 'chat',
+    contextWindowTokens: 65_536,
+    maxOutput: 32_768,
+    abilities: {
+      functionCall: true,
+      reasoning: true,
+      search: true,
+    },
+  },
+];
+
+export default sparkModels;

@@ -1,0 +1,172 @@
+import type { ChatModelCard } from '../types';
+
+const sambanovaModels: ChatModelCard[] = [
+  {
+    id: 'Meta-Llama-3.3-70B-Instruct',
+    displayName: 'Meta Llama 3.3 70B Instruct',
+    description: 'Llama系列多语言开源模型，以低成本体验405B性能。',
+    type: 'chat',
+    contextWindowTokens: 16_000,
+    enabled: true,
+    abilities: {
+      functionCall: true,
+    },
+    pricing: {
+      input: 0.6,
+      output: 1.2,
+    },
+  },
+  {
+    id: 'Meta-Llama-3.2-3B-Instruct',
+    displayName: 'Meta Llama 3.2 3B Instruct',
+    description: '先进小型语言模型，具备卓越推理和文本生成。',
+    type: 'chat',
+    contextWindowTokens: 8000,
+    pricing: {
+      input: 0.08,
+      output: 0.16,
+    },
+  },
+  {
+    id: 'Llama-3.2-11B-Vision-Instruct',
+    displayName: 'Meta Llama 3.2 11B Vision Instruct',
+    description: 'Llama视觉模型，高分辨率图像推理能力出色。',
+    type: 'chat',
+    contextWindowTokens: 4000,
+    enabled: true,
+    abilities: {
+      vision: true,
+    },
+    pricing: {
+      input: 0.15,
+      output: 0.3,
+    },
+  },
+  {
+    id: 'Llama-3.2-90B-Vision-Instruct',
+    displayName: 'Meta Llama 3.2 90B Vision Instruct',
+    description: 'Llama大规模视觉模型，适用于视觉理解代理应用。',
+    type: 'chat',
+    contextWindowTokens: 4000,
+    enabled: true,
+    abilities: {
+      vision: true,
+    },
+    pricing: {
+      input: 0.8,
+      output: 1.6,
+    },
+  },
+  {
+    id: 'Meta-Llama-3.1-8B-Instruct',
+    displayName: 'Meta Llama 3.1 8B Instruct',
+    description: 'Llama 3.1指令调优模型，多语言对话场景优化。',
+    type: 'chat',
+    contextWindowTokens: 16_000,
+    abilities: {
+      functionCall: true,
+    },
+    pricing: {
+      input: 0.1,
+      output: 0.2,
+    },
+  },
+  {
+    id: 'Meta-Llama-3.1-70B-Instruct',
+    displayName: 'Meta Llama 3.1 70B Instruct',
+    description: 'Llama 3.1 70B指令模型，128K上下文支持。',
+    type: 'chat',
+    contextWindowTokens: 128_000,
+    abilities: {
+      functionCall: true,
+    },
+    pricing: {
+      input: 0.6,
+      output: 1.2,
+    },
+  },
+  {
+    id: 'Meta-Llama-3.1-405B-Instruct',
+    displayName: 'Meta Llama 3.1 405B Instruct',
+    description: 'Llama 3.1 405B最强指令模型。',
+    type: 'chat',
+    contextWindowTokens: 16_000,
+    abilities: {
+      functionCall: true,
+    },
+    pricing: {
+      input: 5,
+      output: 10,
+    },
+  },
+  {
+    id: 'DeepSeek-R1',
+    displayName: 'DeepSeek R1',
+    description: '最先进高效LLM，擅长推理、数学和编程。',
+    type: 'chat',
+    contextWindowTokens: 4000,
+    abilities: {
+      reasoning: true,
+    },
+    pricing: {
+      input: 5,
+      output: 7,
+    },
+  },
+  {
+    id: 'DeepSeek-R1-Distill-Llama-70B',
+    displayName: 'DeepSeek R1 Distill Llama 70B',
+    description: 'DeepSeek R1蒸馏版，在数学和事实任务上更强。',
+    type: 'chat',
+    contextWindowTokens: 32_000,
+    enabled: true,
+    abilities: {
+      reasoning: true,
+    },
+    pricing: {
+      input: 0.7,
+      output: 1.4,
+    },
+  },
+  {
+    id: 'QwQ-32B-Preview',
+    displayName: 'QwQ 32B Preview',
+    description: 'Qwen实验研究模型，专注提升AI推理能力。',
+    type: 'chat',
+    contextWindowTokens: 16_000,
+    enabled: true,
+    abilities: {
+      reasoning: true,
+    },
+    pricing: {
+      input: 1.5,
+      output: 3,
+    },
+  },
+  {
+    id: 'Qwen2.5-72B-Instruct',
+    displayName: 'Qwen2.5 72B Instruct',
+    description: 'Qwen面向中英文的大模型，编程推理能力强。',
+    type: 'chat',
+    contextWindowTokens: 16_000,
+    enabled: true,
+    pricing: {
+      input: 2,
+      output: 4,
+    },
+  },
+  {
+    id: 'Qwen2.5-Coder-32B-Instruct',
+    displayName: 'Qwen2.5 Coder 32B Instruct',
+    description: 'Qwen高级代码模型，支持代码生成和修复。',
+    type: 'chat',
+    contextWindowTokens: 16_000,
+    enabled: true,
+    pricing: {
+      input: 1.5,
+      output: 3,
+    },
+  },
+];
+
+export default sambanovaModels;

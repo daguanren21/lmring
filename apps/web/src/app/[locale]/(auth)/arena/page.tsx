@@ -38,7 +38,7 @@ export default function ArenaPage() {
       if (provider.models) {
         for (const model of provider.models) {
           models.push({
-            id: model.id,
+            id: `${provider.id}:${model.id}`,
             name: model.name,
             provider: provider.name,
             providerId: provider.id,

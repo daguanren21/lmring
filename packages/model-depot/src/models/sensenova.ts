@@ -1,10 +1,12 @@
 import type { ChatModelCard } from '../types';
 
 const sensenovaModels: ChatModelCard[] = [
+  // SenseNova V6.5 Series (Latest)
   {
     id: 'SenseNova-V6-5-Pro',
     displayName: 'SenseNova V6.5 Pro',
-    description: '商汤多模态推理模型，在OCR与IP识别等任务中表现卓越。',
+    description:
+      '通过对多模态、语言及推理数据的全面更新与训练策略的优化，新模型在多模态推理和泛化指令跟随能力上实现了显著提升，支持高达128k的上下文窗口，并在OCR与文旅IP识别等专项任务中表现卓越。',
     type: 'chat',
     contextWindowTokens: 131_072,
     enabled: true,
@@ -13,15 +15,17 @@ const sensenovaModels: ChatModelCard[] = [
       vision: true,
     },
     pricing: {
-      currency: 'CNY',
       input: 3,
       output: 9,
+      currency: 'CNY',
     },
+    releasedAt: '2025-07-23',
   },
   {
     id: 'SenseNova-V6-5-Turbo',
     displayName: 'SenseNova V6.5 Turbo',
-    description: '商汤多模态模型高速版，性价比更高。',
+    description:
+      '通过对多模态、语言及推理数据的全面更新与训练策略的优化，新模型在多模态推理和泛化指令跟随能力上实现了显著提升，支持高达128k的上下文窗口，并在OCR与文旅IP识别等专项任务中表现卓越。',
     type: 'chat',
     contextWindowTokens: 131_072,
     enabled: true,
@@ -30,15 +34,115 @@ const sensenovaModels: ChatModelCard[] = [
       vision: true,
     },
     pricing: {
-      currency: 'CNY',
       input: 1.5,
       output: 4.5,
+      currency: 'CNY',
+    },
+    releasedAt: '2025-07-23',
+  },
+
+  // Third-party Models on SenseNova
+  {
+    id: 'Qwen3-235B',
+    displayName: 'Qwen3 235B A22B',
+    description:
+      'Qwen3-235B-A22B，MoE（混合专家模型）模型,引入了"混合推理模式"，支持用户在"思考模式"和"非思考模式"之间无缝切换，支持119种语言和方言理解与推理，并具备强大的工具调用能力。',
+    type: 'chat',
+    contextWindowTokens: 32_768,
+    abilities: {
+      reasoning: true,
+    },
+    pricing: {
+      input: 0,
+      output: 0,
+      currency: 'CNY',
+    },
+    releasedAt: '2025-05-27',
+  },
+  {
+    id: 'Qwen3-32B',
+    displayName: 'Qwen3 32B',
+    description:
+      'Qwen3-32B，稠密模型（Dense Model）,引入了"混合推理模式"，支持用户在"思考模式"和"非思考模式"之间无缝切换，由于模型架构改进、训练数据增加以及更有效的训练方法，整体性能与Qwen2.5-72B表现相当。',
+    type: 'chat',
+    contextWindowTokens: 32_768,
+    abilities: {
+      reasoning: true,
+    },
+    pricing: {
+      input: 0,
+      output: 0,
+      currency: 'CNY',
+    },
+    releasedAt: '2025-05-27',
+  },
+  {
+    id: 'DeepSeek-V3',
+    displayName: 'DeepSeek V3',
+    description:
+      'DeepSeek-V3 是一款由深度求索公司自研的MoE模型。DeepSeek-V3 多项评测成绩超越了 Qwen2.5-72B 和 Llama-3.1-405B 等其他开源模型，并在性能上和世界顶尖的闭源模型 GPT-4o 以及 Claude-3.5-Sonnet 不分伯仲。',
+    type: 'chat',
+    contextWindowTokens: 32_768,
+    pricing: {
+      input: 2,
+      output: 8,
+      currency: 'CNY',
     },
   },
   {
+    id: 'DeepSeek-R1',
+    displayName: 'DeepSeek R1',
+    description:
+      'DeepSeek-R1 在后训练阶段大规模使用了强化学习技术，在仅有极少标注数据的情况下，极大提升了模型推理能力。在数学、代码、自然语言推理等任务上，性能比肩 OpenAI o1 正式版。',
+    type: 'chat',
+    contextWindowTokens: 32_768,
+    abilities: {
+      reasoning: true,
+    },
+    pricing: {
+      input: 4,
+      output: 16,
+      currency: 'CNY',
+    },
+  },
+  {
+    id: 'DeepSeek-R1-Distill-Qwen-14B',
+    displayName: 'DeepSeek R1 Distill Qwen 14B',
+    description:
+      'DeepSeek-R1-Distill 模型是在开源模型的基础上通过微调训练得到的，训练过程中使用了由 DeepSeek-R1 生成的样本数据。',
+    type: 'chat',
+    contextWindowTokens: 32_768,
+    abilities: {
+      reasoning: true,
+    },
+    pricing: {
+      input: 0,
+      output: 0,
+      currency: 'CNY',
+    },
+  },
+  {
+    id: 'DeepSeek-R1-Distill-Qwen-32B',
+    displayName: 'DeepSeek R1 Distill Qwen 32B',
+    description:
+      'DeepSeek-R1-Distill 模型是在开源模型的基础上通过微调训练得到的，训练过程中使用了由 DeepSeek-R1 生成的样本数据。',
+    type: 'chat',
+    contextWindowTokens: 8_192,
+    abilities: {
+      reasoning: true,
+    },
+    pricing: {
+      input: 0,
+      output: 0,
+      currency: 'CNY',
+    },
+  },
+
+  // SenseNova V6 Series
+  {
     id: 'SenseNova-V6-Reasoner',
     displayName: 'SenseNova V6 Reasoner',
-    description: '商汤视觉语言深度推理模型，支持慢思考和完整思维链。',
+    description: '兼顾视觉、语言深度推理，实现慢思考和深度推理，呈现完整的思维链过程。',
     type: 'chat',
     contextWindowTokens: 32_768,
     abilities: {
@@ -46,30 +150,98 @@ const sensenovaModels: ChatModelCard[] = [
       vision: true,
     },
     pricing: {
-      currency: 'CNY',
       input: 4,
       output: 16,
+      currency: 'CNY',
     },
+    releasedAt: '2025-04-14',
   },
   {
-    id: 'SenseNova-V6-Pro',
-    displayName: 'SenseNova V6 Pro',
-    description: '商汤原生统一多模态模型，OpenCompass和SuperCLUE双冠军。',
+    id: 'SenseNova-V6-Turbo',
+    displayName: 'SenseNova V6 Turbo',
+    description:
+      '实现图片、文本、视频能力的原生统一，突破传统多模态分立局限，在多模基础能力、语言基础能力等核心维度全面领先，文理兼修，在多项测评中多次位列国内外第一梯队水平。',
     type: 'chat',
     contextWindowTokens: 32_768,
     abilities: {
       vision: true,
     },
     pricing: {
+      input: 1.5,
+      output: 4.5,
       currency: 'CNY',
+    },
+    releasedAt: '2025-04-14',
+  },
+  {
+    id: 'SenseNova-V6-Pro',
+    displayName: 'SenseNova V6 Pro',
+    description:
+      '实现图片、文本、视频能力的原生统一，突破传统多模态分立局限，在OpenCompass和SuperCLUE评测中斩获双冠军。',
+    type: 'chat',
+    contextWindowTokens: 32_768,
+    abilities: {
+      vision: true,
+    },
+    pricing: {
       input: 3,
       output: 9,
+      currency: 'CNY',
     },
+    releasedAt: '2025-04-14',
+  },
+
+  // SenseChat 5.5 Series
+  {
+    id: 'SenseChat-5-beta',
+    displayName: 'SenseChat 5.5 Beta',
+    description: '部分性能优于 SenseCat-5-1202。',
+    type: 'chat',
+    contextWindowTokens: 32_768,
+    pricing: {
+      input: 8,
+      output: 20,
+      currency: 'CNY',
+    },
+  },
+  {
+    id: 'SenseChat-5-1202',
+    displayName: 'SenseChat 5.5 1202',
+    description:
+      '是基于V5.5的最新版本，较上版本在中英文基础能力，聊天，理科知识，文科知识，写作，数理逻辑，字数控制等几个维度的表现有显著提升。',
+    type: 'chat',
+    contextWindowTokens: 32_768,
+    abilities: {
+      functionCall: true,
+    },
+    pricing: {
+      input: 8,
+      output: 20,
+      currency: 'CNY',
+    },
+    releasedAt: '2024-12-30',
+  },
+  {
+    id: 'SenseChat-Turbo-1202',
+    displayName: 'SenseChat Turbo 1202',
+    description: '是最新的轻量版本模型，达到全量模型90%以上能力，显著降低推理成本。',
+    type: 'chat',
+    contextWindowTokens: 32_768,
+    abilities: {
+      functionCall: true,
+    },
+    pricing: {
+      input: 0.3,
+      output: 0.6,
+      currency: 'CNY',
+    },
+    releasedAt: '2024-12-30',
   },
   {
     id: 'SenseChat-5',
     displayName: 'SenseChat 5.5',
-    description: '商汤最新版本模型，128K上下文，比肩GPT-4o。',
+    description:
+      '最新版本模型 (V5.5)，128K上下文长度，在数学推理、英文对话、指令跟随以及长文本理解等领域能力显著提升，比肩GPT-4o。',
     type: 'chat',
     contextWindowTokens: 131_072,
     maxOutput: 131_072,
@@ -77,31 +249,16 @@ const sensenovaModels: ChatModelCard[] = [
       functionCall: true,
     },
     pricing: {
-      currency: 'CNY',
       input: 8,
       output: 20,
-    },
-  },
-  {
-    id: 'SenseChat-Turbo',
-    displayName: 'SenseChat 5.0 Turbo',
-    description: '商汤快速问答模型，适用于快速问答和模型微调。',
-    type: 'chat',
-    contextWindowTokens: 32_768,
-    maxOutput: 32_768,
-    abilities: {
-      functionCall: true,
-    },
-    pricing: {
       currency: 'CNY',
-      input: 0.3,
-      output: 0.6,
     },
   },
   {
     id: 'SenseChat-Vision',
     displayName: 'SenseChat 5.5 Vision',
-    description: '商汤多模态模型，支持多图输入和视觉理解。',
+    description:
+      '最新版本模型 (V5.5)，支持多图的输入，全面实现模型基础能力优化，在对象属性识别、空间关系、动作事件识别、场景理解、情感识别、逻辑常识推理和文本理解生成上都实现了较大提升。',
     type: 'chat',
     contextWindowTokens: 16_384,
     maxOutput: 16_384,
@@ -109,9 +266,109 @@ const sensenovaModels: ChatModelCard[] = [
       vision: true,
     },
     pricing: {
-      currency: 'CNY',
       input: 10,
       output: 60,
+      currency: 'CNY',
+    },
+    releasedAt: '2024-09-12',
+  },
+  {
+    id: 'SenseChat-Turbo',
+    displayName: 'SenseChat 5.0 Turbo',
+    description: '适用于快速问答、模型微调场景。',
+    type: 'chat',
+    contextWindowTokens: 32_768,
+    maxOutput: 32_768,
+    abilities: {
+      functionCall: true,
+    },
+    pricing: {
+      input: 0.3,
+      output: 0.6,
+      currency: 'CNY',
+    },
+  },
+
+  // SenseChat 4.0 Series
+  {
+    id: 'SenseChat-128K',
+    displayName: 'SenseChat 4.0 128K',
+    description: '基础版本模型 (V4)，128K上下文长度，在长文本理解及生成等任务中表现出色。',
+    type: 'chat',
+    contextWindowTokens: 131_072,
+    maxOutput: 131_072,
+    pricing: {
+      input: 60,
+      output: 60,
+      currency: 'CNY',
+    },
+  },
+  {
+    id: 'SenseChat-32K',
+    displayName: 'SenseChat 4.0 32K',
+    description: '基础版本模型 (V4)，32K上下文长度，灵活应用于各类场景。',
+    type: 'chat',
+    contextWindowTokens: 32_768,
+    maxOutput: 32_768,
+    pricing: {
+      input: 36,
+      output: 36,
+      currency: 'CNY',
+    },
+  },
+  {
+    id: 'SenseChat',
+    displayName: 'SenseChat 4.0 4K',
+    description: '基础版本模型 (V4)，4K上下文长度，通用能力强大。',
+    type: 'chat',
+    contextWindowTokens: 4_096,
+    maxOutput: 4_096,
+    pricing: {
+      input: 12,
+      output: 12,
+      currency: 'CNY',
+    },
+  },
+
+  // Specialized Models
+  {
+    id: 'SenseChat-5-Cantonese',
+    displayName: 'SenseChat 5.0 Cantonese',
+    description:
+      '专门为适应香港地区的对话习惯、俚语及本地知识而设计，在粤语的对话理解上超越了GPT-4，在知识、推理、数学及代码编写等多个领域均能与GPT-4 Turbo相媲美。',
+    type: 'chat',
+    contextWindowTokens: 32_768,
+    maxOutput: 32_768,
+    pricing: {
+      input: 27,
+      output: 27,
+      currency: 'CNY',
+    },
+  },
+  {
+    id: 'SenseChat-Character',
+    displayName: 'SenseChat Character',
+    description: '拟人对话标准版模型，8K上下文长度，高响应速度。',
+    type: 'chat',
+    contextWindowTokens: 8_192,
+    maxOutput: 1_024,
+    pricing: {
+      input: 12,
+      output: 12,
+      currency: 'CNY',
+    },
+  },
+  {
+    id: 'SenseChat-Character-Pro',
+    displayName: 'SenseChat Character Pro',
+    description: '拟人对话高级版模型，32K上下文长度，能力全面提升，支持中/英文对话。',
+    type: 'chat',
+    contextWindowTokens: 32_768,
+    maxOutput: 4_096,
+    pricing: {
+      input: 15,
+      output: 15,
+      currency: 'CNY',
     },
   },
 ];

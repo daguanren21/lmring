@@ -1,58 +1,121 @@
-import type { ChatModelCard } from '../types';
+import type { ChatModelCard, ImageModelCard } from '../types';
 
-const minimaxModels: ChatModelCard[] = [
+// ============================================================================
+// Chat Models
+// ============================================================================
+
+const minimaxChatModels: ChatModelCard[] = [
   {
-    id: 'abab6.5s-chat',
-    displayName: 'ABAB 6.5s Chat',
-    description: 'ABAB 6.5s 是 MiniMax 的旗舰模型，支持超长上下文。',
+    id: 'MiniMax-M2',
+    displayName: 'MiniMax M2',
+    description: '专为高效编码与Agent工作流而生',
     type: 'chat',
-    contextWindowTokens: 245_760,
-    maxOutput: 8_192,
+    contextWindowTokens: 204_800,
+    maxOutput: 131_072,
     enabled: true,
     abilities: {
       functionCall: true,
-      structuredOutput: true,
+      reasoning: true,
     },
     pricing: {
-      input: 30,
-      output: 30,
+      input: 2.1,
+      output: 8.4,
+      cachedInput: 0.21,
       currency: 'CNY',
     },
+    releasedAt: '2025-10-27',
   },
   {
-    id: 'abab6.5t-chat',
-    displayName: 'ABAB 6.5t Chat',
-    description: 'ABAB 6.5t 是高性能通用模型。',
+    id: 'MiniMax-M2-Stable',
+    displayName: 'MiniMax M2 Stable',
+    description: '专为高效编码与Agent工作流而生，更高并发，商业使用。',
     type: 'chat',
-    contextWindowTokens: 8_192,
-    maxOutput: 4_096,
+    contextWindowTokens: 204_800,
+    maxOutput: 131_072,
     abilities: {
       functionCall: true,
-      structuredOutput: true,
+      reasoning: true,
     },
     pricing: {
-      input: 10,
-      output: 10,
+      input: 2.1,
+      output: 8.4,
+      cachedInput: 0.21,
       currency: 'CNY',
     },
+    releasedAt: '2025-10-27',
   },
   {
-    id: 'abab6.5g-chat',
-    displayName: 'ABAB 6.5g Chat',
-    description: 'ABAB 6.5g 是经济实惠的选择。',
+    id: 'MiniMax-M1',
+    displayName: 'MiniMax M1',
+    description: '全新自研推理模型。全球领先：80K 思维链 x 1M 输入，效果比肩海外顶尖模型',
     type: 'chat',
-    contextWindowTokens: 8_192,
-    maxOutput: 4_096,
+    contextWindowTokens: 1_000_192,
+    maxOutput: 40_000,
+    enabled: true,
     abilities: {
       functionCall: true,
-      structuredOutput: true,
+      reasoning: true,
     },
     pricing: {
-      input: 5,
-      output: 5,
+      input: 1.2,
+      output: 16,
       currency: 'CNY',
     },
+    releasedAt: '2025-06-16',
+  },
+  {
+    id: 'MiniMax-Text-01',
+    displayName: 'MiniMax Text 01',
+    description:
+      '在 MiniMax-01系列模型中，我们做了大胆创新：首次大规模实现线性注意力机制，传统 Transformer架构不再是唯一的选择。这个模型的参数量高达4560亿，其中单次激活459亿。模型综合性能比肩海外顶尖模型，同时能够高效处理全球最长400万token的上下文，是GPT-4o的32倍，Claude-3.5-Sonnet的20倍。',
+    type: 'chat',
+    contextWindowTokens: 1_000_192,
+    maxOutput: 40_000,
+    abilities: {
+      functionCall: true,
+      vision: true,
+    },
+    pricing: {
+      input: 1,
+      output: 8,
+      currency: 'CNY',
+    },
+    releasedAt: '2025-01-15',
   },
 ];
 
-export default minimaxModels;
+// ============================================================================
+// Image Models
+// ============================================================================
+
+const minimaxImageModels: ImageModelCard[] = [
+  {
+    id: 'image-01',
+    displayName: 'Image 01',
+    description: '全新图像生成模型，画面表现细腻，支持文生图、图生图',
+    type: 'image',
+    enabled: true,
+    releasedAt: '2025-02-28',
+    resolutions: ['1:1', '16:9', '4:3', '3:2', '2:3', '3:4', '9:16', '21:9'],
+  },
+  {
+    id: 'image-01-live',
+    displayName: 'Image 01 Live',
+    description: '图像生成模型，画面表现细腻，支持文生图并进行画风设置',
+    type: 'image',
+    enabled: true,
+    releasedAt: '2025-02-28',
+    resolutions: ['1:1', '16:9', '4:3', '3:2', '2:3', '3:4', '9:16', '21:9'],
+  },
+];
+
+// ============================================================================
+// Exports
+// ============================================================================
+
+export const minimaxModels = {
+  chat: minimaxChatModels,
+  image: minimaxImageModels,
+};
+
+export default minimaxChatModels;

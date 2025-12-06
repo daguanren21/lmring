@@ -1,6 +1,7 @@
-import type { ModelAbilities } from '@lmring/model-depot';
+import type { AiModelType, ModelAbilities } from '@lmring/model-depot';
 import { getEndpointConfig, getModelsForProvider } from '@lmring/model-depot';
 import {
+  Badge,
   Button,
   cn,
   Input,
@@ -12,6 +13,10 @@ import {
   SelectValue,
   Separator,
   Switch,
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
   Tooltip,
   TooltipContent,
   TooltipProvider,
@@ -24,13 +29,31 @@ import {
   ImageIcon,
   Loader2Icon,
   LockIcon,
+  MessageSquareIcon,
+  MicIcon,
   PlusIcon,
+  RadioIcon,
   RotateCwIcon,
   SearchIcon,
+  VolumeIcon,
   WrenchIcon,
+  ZapIcon,
 } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import type { Provider } from './types';
+
+// Model type labels and icons
+const MODEL_TYPE_CONFIG: Record<
+  AiModelType,
+  { label: string; icon: React.ElementType; color: string }
+> = {
+  chat: { label: 'Chat', icon: MessageSquareIcon, color: 'text-blue-500' },
+  embedding: { label: 'Embedding', icon: ZapIcon, color: 'text-purple-500' },
+  image: { label: 'Image', icon: ImageIcon, color: 'text-green-500' },
+  tts: { label: 'TTS', icon: VolumeIcon, color: 'text-orange-500' },
+  stt: { label: 'STT', icon: MicIcon, color: 'text-pink-500' },
+  realtime: { label: 'Realtime', icon: RadioIcon, color: 'text-red-500' },
+};
 
 interface ProviderDetailProps {
   provider: Provider;
@@ -55,6 +78,23 @@ export function ProviderDetail({ provider, onToggle }: ProviderDetailProps) {
         model.displayName?.toLowerCase().includes(searchQuery.toLowerCase()),
     );
   }, [models, searchQuery]);
+
+  // Group models by type
+  const modelsByType = useMemo(() => {
+    const grouped: Partial<Record<AiModelType, typeof filteredModels>> = {};
+    for (const model of filteredModels) {
+      const type = model.type || 'chat';
+      if (!grouped[type]) grouped[type] = [];
+      grouped[type].push(model);
+    }
+    return grouped;
+  }, [filteredModels]);
+
+  // Get sorted model types (chat first, then others)
+  const sortedModelTypes = useMemo(() => {
+    const typeOrder: AiModelType[] = ['chat', 'image', 'embedding', 'tts', 'stt', 'realtime'];
+    return typeOrder.filter((type) => modelsByType[type] && modelsByType[type].length > 0);
+  }, [modelsByType]);
 
   const defaultUrl = useMemo(() => {
     const endpoint = getEndpointConfig(provider.id.toLowerCase());
@@ -231,9 +271,11 @@ export function ProviderDetail({ provider, onToggle }: ProviderDetailProps) {
 
       <div className="space-y-4 pt-2">
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-          <div className="flex items-baseline gap-2">
-            <Label className="text-base">Model List</Label>
-            <span className="text-sm text-muted-foreground">{models.length} models available</span>
+          <div className="flex flex-col gap-1">
+            <h3 className="text-lg font-medium leading-none">Model List</h3>
+            <p className="text-sm text-muted-foreground">
+              {models.length} models available across {sortedModelTypes.length} categories
+            </p>
           </div>
           <div className="flex items-center gap-2 w-full md:w-auto">
             <div className="relative flex-1 md:w-64">
@@ -254,45 +296,82 @@ export function ProviderDetail({ provider, onToggle }: ProviderDetailProps) {
           </div>
         </div>
 
-        <div className="space-y-1">
-          {filteredModels.length > 0 ? (
-            filteredModels.map((model) => (
-              <div
-                key={model.id}
-                className="group flex items-center justify-between p-4 rounded-lg hover:bg-muted/50 transition-colors"
-              >
-                <div className="flex items-start gap-4">
-                  <div className="mt-1">{renderModelListIcon(20)}</div>
-                  <div className="space-y-1">
-                    <div className="flex items-center gap-2">
-                      <span className="font-medium">{model.displayName || model.id}</span>
-                    </div>
-                    <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground">
-                      {model.releasedAt && <span>Released at {model.releasedAt}</span>}
-                      {model.pricing?.input && (
-                        <span>Input ${(model.pricing.input || 0).toFixed(2)}/M</span>
-                      )}
-                      {model.pricing?.output && (
-                        <span>Output ${(model.pricing.output || 0).toFixed(2)}/M</span>
-                      )}
-                      {model.contextWindowTokens && (
-                        <span>{(model.contextWindowTokens / 1000).toFixed(0)}K</span>
-                      )}
-                    </div>
-                  </div>
-                </div>
-                <div className="flex items-center gap-4">
-                  {model.abilities && renderAbilityIcons(model.abilities)}
-                  <Switch defaultChecked={model.enabled} />
-                </div>
-              </div>
-            ))
-          ) : (
-            <div className="p-8 text-center border rounded-lg border-dashed text-muted-foreground">
-              No models found matching your search
+        {sortedModelTypes.length > 0 ? (
+          <Tabs defaultValue={sortedModelTypes[0]} className="w-full">
+            <div className="overflow-x-auto pb-2 -mx-1 px-1">
+              <TabsList className="h-auto w-full justify-start gap-2 bg-transparent p-0 flex-nowrap md:flex-wrap">
+                {sortedModelTypes.map((type) => {
+                  const config = MODEL_TYPE_CONFIG[type];
+                  const TypeIcon = config.icon;
+                  const typeModels = modelsByType[type] || [];
+                  return (
+                    <TabsTrigger
+                      key={type}
+                      value={type}
+                      className="group w-auto flex-none rounded-full border border-transparent bg-transparent data-[state=active]:bg-secondary data-[state=active]:text-secondary-foreground hover:bg-muted/50 px-4 py-2 transition-all"
+                    >
+                      <TypeIcon className={cn('mr-2 h-4 w-4', config.color)} />
+                      <span>{config.label}</span>
+                      <Badge
+                        variant="secondary"
+                        className="ml-2 h-5 min-w-5 px-1 justify-center bg-muted text-muted-foreground group-data-[state=active]:bg-background/50 group-data-[state=active]:text-foreground"
+                      >
+                        {typeModels.length}
+                      </Badge>
+                    </TabsTrigger>
+                  );
+                })}
+              </TabsList>
             </div>
-          )}
-        </div>
+
+            {sortedModelTypes.map((type) => {
+              const typeModels = modelsByType[type] || [];
+              return (
+                <TabsContent key={type} value={type} className="space-y-2 mt-4">
+                  {typeModels.map((model) => (
+                    <div
+                      key={model.id}
+                      className="group flex items-center justify-between p-3 rounded-lg border border-transparent bg-transparent hover:bg-card hover:border-border hover:shadow-sm transition-all duration-200"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="opacity-70 group-hover:opacity-100 transition-opacity">
+                          {renderModelListIcon(32)}
+                        </div>
+                        <div className="flex flex-col gap-0.5">
+                          <div className="flex items-center gap-2">
+                            <span className="font-medium leading-tight">
+                              {model.displayName || model.id}
+                            </span>
+                          </div>
+                          <div className="flex flex-wrap gap-x-3 text-xs text-muted-foreground leading-tight">
+                            {model.releasedAt && <span>{model.releasedAt}</span>}
+                            {model.pricing?.input && (
+                              <span>Input ${(model.pricing.input || 0).toFixed(2)}/M</span>
+                            )}
+                            {model.pricing?.output && (
+                              <span>Output ${(model.pricing.output || 0).toFixed(2)}/M</span>
+                            )}
+                            {model.contextWindowTokens && (
+                              <span>{(model.contextWindowTokens / 1000).toFixed(0)}K</span>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-4">
+                        {model.abilities && renderAbilityIcons(model.abilities)}
+                        <Switch defaultChecked={model.enabled} />
+                      </div>
+                    </div>
+                  ))}
+                </TabsContent>
+              );
+            })}
+          </Tabs>
+        ) : (
+          <div className="p-8 text-center border rounded-lg border-dashed text-muted-foreground">
+            No models found matching your search
+          </div>
+        )}
       </div>
     </div>
   );

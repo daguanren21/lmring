@@ -49,11 +49,11 @@ export function ProviderLayout({
           </div>
         </div>
         <div className="flex-1 overflow-y-auto px-2 pb-4">
-          <div className="space-y-1">
+          <div className="space-y-0.5">
             <button
               type="button"
               onClick={() => setSelectedId(null)}
-              className={`w-full flex items-center gap-3 px-3 py-2 rounded-md text-sm transition-colors ${
+              className={`w-full flex items-center gap-3 px-3 py-1.5 rounded-md text-sm transition-colors ${
                 selectedId === null
                   ? 'bg-secondary text-secondary-foreground font-medium'
                   : 'text-muted-foreground hover:bg-muted/50 hover:text-foreground'
@@ -74,7 +74,7 @@ export function ProviderLayout({
                   key={provider.id}
                   type="button"
                   onClick={() => setSelectedId(provider.id)}
-                  className={`w-full flex items-center gap-3 px-3 py-2 rounded-md text-sm transition-colors ${
+                  className={`w-full flex items-center gap-3 px-3 py-1.5 rounded-md text-sm transition-colors ${
                     selectedId === provider.id
                       ? 'bg-secondary text-secondary-foreground font-medium'
                       : 'text-muted-foreground hover:bg-muted/50 hover:text-foreground'

@@ -1,70 +1,78 @@
-import type { ChatModelCard } from '../types';
+import type { ChatModelCard, ImageModelCard } from '../types';
 
-const stepfunModels: ChatModelCard[] = [
+// ============================================================================
+// Chat Models
+// ============================================================================
+
+const stepfunChatModels: ChatModelCard[] = [
+  // Step 3 (Latest)
   {
-    id: 'step-1-128k',
-    displayName: 'Step 1 128K',
-    description: 'Step 1 128K 支持超长上下文，适合复杂任务。',
+    id: 'step-3',
+    displayName: 'Step 3',
+    description:
+      '该模型拥有强大的视觉感知和复杂推理能力。可准确完成跨领域的复杂知识理解、数学与视觉信息的交叉分析，以及日常生活中的各类视觉分析问题。',
     type: 'chat',
-    contextWindowTokens: 128_000,
-    maxOutput: 8_192,
+    contextWindowTokens: 64_000,
     enabled: true,
     abilities: {
-      functionCall: true,
-      structuredOutput: true,
-    },
-    pricing: {
-      input: 60,
-      output: 150,
-      currency: 'CNY',
-    },
-  },
-  {
-    id: 'step-1-32k',
-    displayName: 'Step 1 32K',
-    description: 'Step 1 32K 是平衡上下文和成本的选择。',
-    type: 'chat',
-    contextWindowTokens: 32_768,
-    maxOutput: 8_192,
-    enabled: true,
-    abilities: {
-      functionCall: true,
-      structuredOutput: true,
-    },
-    pricing: {
-      input: 24,
-      output: 60,
-      currency: 'CNY',
-    },
-  },
-  {
-    id: 'step-1v-32k',
-    displayName: 'Step 1V 32K',
-    description: 'Step 1V 32K 支持视觉理解。',
-    type: 'chat',
-    contextWindowTokens: 32_768,
-    maxOutput: 8_192,
-    abilities: {
-      functionCall: true,
+      reasoning: true,
       vision: true,
-      structuredOutput: true,
     },
     pricing: {
-      input: 24,
-      output: 60,
+      input: 4,
+      output: 8,
       currency: 'CNY',
     },
+  },
+
+  // Step R1 Series (Reasoning)
+  {
+    id: 'step-r1-v-mini',
+    displayName: 'Step R1 V Mini',
+    description:
+      '该模型是拥有强大的图像理解能力的推理大模型，能够处理图像和文字信息，经过深度思考后输出文本生成文本内容。该模型在视觉推理领域表现突出，同时拥有第一梯队的数学、代码、文本推理能力。上下文长度为100k。',
+    type: 'chat',
+    contextWindowTokens: 100_000,
+    abilities: {
+      reasoning: true,
+      vision: true,
+    },
+    pricing: {
+      input: 2.5,
+      output: 8,
+      currency: 'CNY',
+    },
+  },
+
+  // Step 2 Series
+  {
+    id: 'step-2-mini',
+    displayName: 'Step 2 Mini',
+    description:
+      '基于新一代自研Attention架构MFA的极速大模型，用极低成本达到和step1类似的效果，同时保持了更高的吞吐和更快响应时延。能够处理通用任务，在代码能力上具备特长。',
+    type: 'chat',
+    contextWindowTokens: 8_000,
+    enabled: true,
+    abilities: {
+      functionCall: true,
+      search: true,
+    },
+    pricing: {
+      input: 1,
+      output: 2,
+      currency: 'CNY',
+    },
+    releasedAt: '2025-01-14',
   },
   {
     id: 'step-2-16k',
     displayName: 'Step 2 16K',
-    description: 'Step 2 16K 是新一代模型，性能更强。',
+    description: '支持大规模上下文交互，适合复杂对话场景。',
     type: 'chat',
-    contextWindowTokens: 16_384,
-    maxOutput: 8_192,
+    contextWindowTokens: 16_000,
     abilities: {
       functionCall: true,
-      structuredOutput: true,
+      search: true,
     },
     pricing: {
       input: 38,
@@ -72,6 +80,192 @@ const stepfunModels: ChatModelCard[] = [
       currency: 'CNY',
     },
   },
+  {
+    id: 'step-2-16k-exp',
+    displayName: 'Step 2 16K Exp',
+    description: 'step-2模型的实验版本，包含最新的特性，滚动更新中。不推荐在正式生产环境使用。',
+    type: 'chat',
+    contextWindowTokens: 16_000,
+    abilities: {
+      functionCall: true,
+      search: true,
+    },
+    pricing: {
+      input: 38,
+      output: 120,
+      currency: 'CNY',
+    },
+    releasedAt: '2025-01-15',
+  },
+
+  // Step 1 Series
+  {
+    id: 'step-1-8k',
+    displayName: 'Step 1 8K',
+    description: '小型模型，适合轻量级任务。',
+    type: 'chat',
+    contextWindowTokens: 8_000,
+    abilities: {
+      functionCall: true,
+      search: true,
+    },
+    pricing: {
+      input: 5,
+      output: 20,
+      currency: 'CNY',
+    },
+  },
+  {
+    id: 'step-1-32k',
+    displayName: 'Step 1 32K',
+    description: '支持中等长度的对话，适用于多种应用场景。',
+    type: 'chat',
+    contextWindowTokens: 32_000,
+    abilities: {
+      functionCall: true,
+      search: true,
+    },
+    pricing: {
+      input: 15,
+      output: 70,
+      currency: 'CNY',
+    },
+  },
+  {
+    id: 'step-1-256k',
+    displayName: 'Step 1 256K',
+    description: '具备超长上下文处理能力，尤其适合长文档分析。',
+    type: 'chat',
+    contextWindowTokens: 256_000,
+    abilities: {
+      functionCall: true,
+      search: true,
+    },
+    pricing: {
+      input: 95,
+      output: 300,
+      currency: 'CNY',
+    },
+  },
+
+  // Step 1V Series (Vision)
+  {
+    id: 'step-1v-8k',
+    displayName: 'Step 1V 8K',
+    description: '小型视觉模型，适合基本的图文任务。',
+    type: 'chat',
+    contextWindowTokens: 8_000,
+    abilities: {
+      functionCall: true,
+      search: true,
+      vision: true,
+    },
+    pricing: {
+      input: 5,
+      output: 20,
+      currency: 'CNY',
+    },
+  },
+  {
+    id: 'step-1v-32k',
+    displayName: 'Step 1V 32K',
+    description: '支持视觉输入，增强多模态交互体验。',
+    type: 'chat',
+    contextWindowTokens: 32_000,
+    abilities: {
+      functionCall: true,
+      search: true,
+      vision: true,
+    },
+    pricing: {
+      input: 15,
+      output: 70,
+      currency: 'CNY',
+    },
+  },
+
+  // Step 1o Series (Vision Enhanced)
+  {
+    id: 'step-1o-vision-32k',
+    displayName: 'Step 1o Vision 32K',
+    description: '该模型拥有强大的图像理解能力。相比于 step-1v 系列模型，拥有更强的视觉性能。',
+    type: 'chat',
+    contextWindowTokens: 32_000,
+    enabled: true,
+    abilities: {
+      vision: true,
+    },
+    pricing: {
+      input: 15,
+      output: 70,
+      currency: 'CNY',
+    },
+    releasedAt: '2025-01-22',
+  },
+  {
+    id: 'step-1o-turbo-vision',
+    displayName: 'Step 1o Turbo Vision',
+    description:
+      '该模型拥有强大的图像理解能力，在数理、代码领域强于1o。模型比1o更小，输出速度更快。',
+    type: 'chat',
+    contextWindowTokens: 32_000,
+    enabled: true,
+    abilities: {
+      vision: true,
+    },
+    pricing: {
+      input: 2.5,
+      output: 8,
+      currency: 'CNY',
+    },
+    releasedAt: '2025-02-14',
+  },
 ];
 
-export default stepfunModels;
+// ============================================================================
+// Image Models
+// ============================================================================
+
+const stepfunImageModels: ImageModelCard[] = [
+  {
+    id: 'step-2x-large',
+    displayName: 'Step 2X Large',
+    description:
+      '阶跃星辰新一代生图模型,该模型专注于图像生成任务,能够根据用户提供的文本描述,生成高质量的图像。新模型生成图片质感更真实，中英文文字生成能力更强。',
+    type: 'image',
+    enabled: true,
+    releasedAt: '2024-08-07',
+    resolutions: ['256x256', '512x512', '768x768', '1024x1024', '1280x800', '800x1280'],
+  },
+  {
+    id: 'step-1x-medium',
+    displayName: 'Step 1X Medium',
+    description:
+      '该模型拥有强大的图像生成能力，支持文本描述作为输入方式。具备原生的中文支持，能够更好的理解和处理中文文本描述，并且能够更准确地捕捉文本描述中的语义信息，并将其转化为图像特征，从而实现更精准的图像生成。',
+    type: 'image',
+    enabled: true,
+    releasedAt: '2025-07-15',
+    resolutions: ['256x256', '512x512', '768x768', '1024x1024', '1280x800', '800x1280'],
+  },
+  {
+    id: 'step-1x-edit',
+    displayName: 'Step 1X Edit',
+    description:
+      '该模型专注于图像编辑任务，能够根据用户提供的图片和文本描述，对图片进行修改和增强。支持多种输入格式，包括文本描述和示例图像。',
+    type: 'image',
+    enabled: true,
+    releasedAt: '2025-03-04',
+    resolutions: ['512x512', '768x768', '1024x1024'],
+  },
+];
+
+// ============================================================================
+// Exports
+// ============================================================================
+
+export const stepfunModels = {
+  chat: stepfunChatModels,
+  image: stepfunImageModels,
+};
+
+export default stepfunChatModels;

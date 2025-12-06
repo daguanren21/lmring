@@ -1,80 +1,1487 @@
-import type { ChatModelCard } from '../types';
+import type { ChatModelCard, ImageModelCard } from '../types';
 
-const dashscopeModels: ChatModelCard[] = [
+// ============================================================================
+// Chat Models
+// ============================================================================
+
+const dashscopeChatModels: ChatModelCard[] = [
   {
-    id: 'qwen-max',
-    displayName: 'Qwen Max',
-    description: 'Qwen Max 是通义千问系列最强大的模型。',
+    id: 'qwen3-vl-plus',
+    displayName: 'Qwen3 VL Plus',
+    description:
+      '通义千问VL是具有视觉（图像）理解能力的文本生成模型，不仅能进行OCR（图片文字识别），还能进一步总结和推理。',
     type: 'chat',
-    contextWindowTokens: 32_768,
-    maxOutput: 8_192,
+    contextWindowTokens: 262_144,
+    maxOutput: 32_768,
     enabled: true,
     abilities: {
-      functionCall: true,
+      reasoning: true,
       vision: true,
-      structuredOutput: true,
     },
     pricing: {
-      input: 20,
-      output: 60,
+      input: 1,
+      output: 10,
+      currency: 'CNY',
+    },
+    releasedAt: '2025-09-23',
+  },
+  {
+    id: 'qwen3-vl-flash',
+    displayName: 'Qwen3 VL Flash',
+    description: 'Qwen3 VL Flash：轻量化高速推理版本，适合对延迟敏感或大批量请求场景。',
+    type: 'chat',
+    contextWindowTokens: 262_144,
+    maxOutput: 32_768,
+    abilities: {
+      reasoning: true,
+      vision: true,
+    },
+    pricing: {
+      input: 0.15,
+      output: 1.5,
+      currency: 'CNY',
+    },
+    releasedAt: '2025-10-15',
+  },
+  {
+    id: 'qwen3-vl-235b-a22b-thinking',
+    displayName: 'Qwen3 VL 235B A22B Thinking',
+    description:
+      'Qwen3 VL 235B A22B 思考模式（开源版），针对高难度强推理与长视频理解场景，提供顶尖的视觉+文本推理能力。',
+    type: 'chat',
+    contextWindowTokens: 131_072,
+    maxOutput: 32_768,
+    abilities: {
+      reasoning: true,
+      vision: true,
+    },
+    pricing: {
+      input: 2,
+      output: 20,
       currency: 'CNY',
     },
   },
   {
-    id: 'qwen-plus',
-    displayName: 'Qwen Plus',
-    description: 'Qwen Plus 在性能和成本之间取得平衡。',
+    id: 'qwen3-vl-235b-a22b-instruct',
+    displayName: 'Qwen3 VL 235B A22B Instruct',
+    description:
+      'Qwen3 VL 235B A22B 非思考模式（Instruct），适用于非思考指令场景，保持强大的视觉理解能力。',
     type: 'chat',
-    contextWindowTokens: 32_768,
-    maxOutput: 8_192,
+    contextWindowTokens: 131_072,
+    maxOutput: 32_768,
+    abilities: {
+      vision: true,
+    },
+    pricing: {
+      input: 2,
+      output: 8,
+      currency: 'CNY',
+    },
+  },
+  {
+    id: 'qwen3-vl-32b-thinking',
+    displayName: 'Qwen3 VL 32B Thinking',
+    description: 'Qwen3 VL 32B 思考模式（开源版），针对高难度强推理与长视频理解场景。',
+    type: 'chat',
+    contextWindowTokens: 131_072,
+    maxOutput: 32_768,
+    abilities: {
+      reasoning: true,
+      vision: true,
+    },
+    pricing: {
+      input: 2,
+      output: 20,
+      currency: 'CNY',
+    },
+  },
+  {
+    id: 'qwen3-vl-32b-instruct',
+    displayName: 'Qwen3 VL 32B Instruct',
+    description: 'Qwen3 VL 32B 非思考模式（Instruct），适用于非思考指令场景。',
+    type: 'chat',
+    contextWindowTokens: 131_072,
+    maxOutput: 32_768,
+    abilities: {
+      vision: true,
+    },
+    pricing: {
+      input: 2,
+      output: 8,
+      currency: 'CNY',
+    },
+  },
+  {
+    id: 'qwen3-vl-30b-a3b-thinking',
+    displayName: 'Qwen3 VL 30B A3B Thinking',
+    description: 'Qwen3 VL 30B A3B 思考模式，面向轻量级多模态推理与交互场景。',
+    type: 'chat',
+    contextWindowTokens: 131_072,
+    maxOutput: 32_768,
+    abilities: {
+      reasoning: true,
+      vision: true,
+    },
+    pricing: {
+      input: 0.75,
+      output: 7.5,
+      currency: 'CNY',
+    },
+  },
+  {
+    id: 'qwen3-vl-30b-a3b-instruct',
+    displayName: 'Qwen3 VL 30B A3B Instruct',
+    description: 'Qwen3 VL 30B A3B 非思考模式（Instruct）。',
+    type: 'chat',
+    contextWindowTokens: 131_072,
+    maxOutput: 32_768,
+    abilities: {
+      vision: true,
+    },
+    pricing: {
+      input: 0.75,
+      output: 3,
+      currency: 'CNY',
+    },
+  },
+  {
+    id: 'qwen3-vl-8b-thinking',
+    displayName: 'Qwen3 VL 8B Thinking',
+    description: 'Qwen3 VL 8B 思考模式，面向轻量级多模态推理与交互场景。',
+    type: 'chat',
+    contextWindowTokens: 131_072,
+    maxOutput: 32_768,
+    abilities: {
+      reasoning: true,
+      vision: true,
+    },
+    pricing: {
+      input: 0.5,
+      output: 5,
+      currency: 'CNY',
+    },
+  },
+  {
+    id: 'qwen3-vl-8b-instruct',
+    displayName: 'Qwen3 VL 8B Instruct',
+    description: 'Qwen3 VL 8B 非思考模式（Instruct），适合常规多模态生成与识别任务。',
+    type: 'chat',
+    contextWindowTokens: 131_072,
+    maxOutput: 32_768,
+    abilities: {
+      vision: true,
+    },
+    pricing: {
+      input: 0.5,
+      output: 2,
+      currency: 'CNY',
+    },
+  },
+  {
+    id: 'qwen3-max',
+    displayName: 'Qwen3 Max',
+    description:
+      '通义千问3系列Max模型，相较2.5系列整体通用能力有大幅度提升，在智能体编程与工具调用方向进行了专项升级。',
+    type: 'chat',
+    contextWindowTokens: 262_144,
+    maxOutput: 65_536,
     enabled: true,
     abilities: {
       functionCall: true,
-      vision: true,
-      structuredOutput: true,
+      search: true,
+    },
+    pricing: {
+      input: 3.2,
+      output: 12.8,
+      cachedInput: 0.64,
+      currency: 'CNY',
+    },
+    releasedAt: '2025-09-23',
+  },
+  {
+    id: 'qwen3-max-preview',
+    displayName: 'Qwen3 Max Preview',
+    description: '通义千问系列效果最好的模型，适合复杂、多步骤的任务。预览版已支持思考。',
+    type: 'chat',
+    contextWindowTokens: 262_144,
+    maxOutput: 65_536,
+    abilities: {
+      functionCall: true,
+      reasoning: true,
+      search: true,
+    },
+    pricing: {
+      input: 6,
+      output: 24,
+      cachedInput: 1.2,
+      currency: 'CNY',
+    },
+    releasedAt: '2025-10-30',
+  },
+  {
+    id: 'qwen3-235b-a22b-thinking-2507',
+    displayName: 'Qwen3 235B A22B Thinking 2507',
+    description:
+      '基于Qwen3的思考模式开源模型，相较上一版本逻辑能力、通用能力、知识增强及创作能力均有大幅提升，适用于高难度强推理场景。',
+    type: 'chat',
+    contextWindowTokens: 131_072,
+    maxOutput: 32_768,
+    enabled: true,
+    abilities: {
+      functionCall: true,
+      reasoning: true,
+    },
+    pricing: {
+      input: 2,
+      output: 20,
+      currency: 'CNY',
+    },
+    releasedAt: '2025-07-25',
+  },
+  {
+    id: 'qwen3-235b-a22b-instruct-2507',
+    displayName: 'Qwen3 235B A22B Instruct 2507',
+    description:
+      '基于Qwen3的非思考模式开源模型，相较上一版本主观创作能力与模型安全性均有小幅度提升。',
+    type: 'chat',
+    contextWindowTokens: 131_072,
+    maxOutput: 32_768,
+    enabled: true,
+    abilities: {
+      functionCall: true,
+    },
+    pricing: {
+      input: 2,
+      output: 8,
+      currency: 'CNY',
+    },
+    releasedAt: '2025-07-22',
+  },
+  {
+    id: 'qwen3-235b-a22b',
+    displayName: 'Qwen3 235B A22B',
+    description:
+      'Qwen3是一款能力大幅提升的新一代通义千问大模型，在推理、通用、Agent和多语言等多个核心能力上均达到业界领先水平，并支持思考模式切换。',
+    type: 'chat',
+    contextWindowTokens: 131_072,
+    maxOutput: 8_192,
+    abilities: {
+      functionCall: true,
+      reasoning: true,
+    },
+    pricing: {
+      input: 2,
+      output: 20,
+      currency: 'CNY',
+    },
+    releasedAt: '2025-04-28',
+  },
+  {
+    id: 'qwen3-next-80b-a3b-thinking',
+    displayName: 'Qwen3 Next 80B A3B Thinking',
+    description:
+      '基于 Qwen3 的新一代思考模式开源模型，相较上一版本指令遵循能力有提升、模型总结回复更加精简。',
+    type: 'chat',
+    contextWindowTokens: 131_072,
+    maxOutput: 32_768,
+    abilities: {
+      functionCall: true,
+      reasoning: true,
+    },
+    pricing: {
+      input: 1,
+      output: 10,
+      currency: 'CNY',
+    },
+    releasedAt: '2025-09-12',
+  },
+  {
+    id: 'qwen3-next-80b-a3b-instruct',
+    displayName: 'Qwen3 Next 80B A3B Instruct',
+    description:
+      '基于 Qwen3 的新一代非思考模式开源模型，相较上一版本中文文本理解能力更佳、逻辑推理能力有增强。',
+    type: 'chat',
+    contextWindowTokens: 131_072,
+    maxOutput: 32_768,
+    abilities: {
+      functionCall: true,
+    },
+    pricing: {
+      input: 1,
+      output: 4,
+      currency: 'CNY',
+    },
+    releasedAt: '2025-09-12',
+  },
+  {
+    id: 'qwen3-32b',
+    displayName: 'Qwen3 32B',
+    description: 'Qwen3是一款能力大幅提升的新一代通义千问大模型，并支持思考模式切换。',
+    type: 'chat',
+    contextWindowTokens: 131_072,
+    maxOutput: 8_192,
+    abilities: {
+      functionCall: true,
+      reasoning: true,
+    },
+    pricing: {
+      input: 2,
+      output: 20,
+      currency: 'CNY',
+    },
+    releasedAt: '2025-04-28',
+  },
+  {
+    id: 'qwen3-30b-a3b',
+    displayName: 'Qwen3 30B A3B',
+    description: 'Qwen3是一款能力大幅提升的新一代通义千问大模型，并支持思考模式切换。',
+    type: 'chat',
+    contextWindowTokens: 131_072,
+    maxOutput: 8_192,
+    abilities: {
+      functionCall: true,
+      reasoning: true,
+    },
+    pricing: {
+      input: 0.75,
+      output: 7.5,
+      currency: 'CNY',
+    },
+    releasedAt: '2025-04-28',
+  },
+  {
+    id: 'qwen3-14b',
+    displayName: 'Qwen3 14B',
+    description: 'Qwen3是一款能力大幅提升的新一代通义千问大模型，并支持思考模式切换。',
+    type: 'chat',
+    contextWindowTokens: 131_072,
+    maxOutput: 8_192,
+    abilities: {
+      functionCall: true,
+      reasoning: true,
+    },
+    pricing: {
+      input: 1,
+      output: 10,
+      currency: 'CNY',
+    },
+    releasedAt: '2025-04-28',
+  },
+  {
+    id: 'qwen3-8b',
+    displayName: 'Qwen3 8B',
+    description: 'Qwen3是一款能力大幅提升的新一代通义千问大模型，并支持思考模式切换。',
+    type: 'chat',
+    contextWindowTokens: 131_072,
+    maxOutput: 8_192,
+    abilities: {
+      functionCall: true,
+      reasoning: true,
+    },
+    pricing: {
+      input: 0.5,
+      output: 5,
+      currency: 'CNY',
+    },
+    releasedAt: '2025-04-28',
+  },
+  {
+    id: 'qwen3-4b',
+    displayName: 'Qwen3 4B',
+    description: 'Qwen3是一款能力大幅提升的新一代通义千问大模型，并支持思考模式切换。',
+    type: 'chat',
+    contextWindowTokens: 131_072,
+    maxOutput: 8_192,
+    abilities: {
+      functionCall: true,
+      reasoning: true,
+    },
+    pricing: {
+      input: 0.3,
+      output: 3,
+      currency: 'CNY',
+    },
+    releasedAt: '2025-04-28',
+  },
+  {
+    id: 'qwen3-1.7b',
+    displayName: 'Qwen3 1.7B',
+    description: 'Qwen3是一款能力大幅提升的新一代通义千问大模型，并支持思考模式切换。',
+    type: 'chat',
+    contextWindowTokens: 32_768,
+    maxOutput: 8_192,
+    abilities: {
+      functionCall: true,
+      reasoning: true,
+    },
+    pricing: {
+      input: 0.3,
+      output: 3,
+      currency: 'CNY',
+    },
+    releasedAt: '2025-04-28',
+  },
+  {
+    id: 'qwen3-0.6b',
+    displayName: 'Qwen3 0.6B',
+    description: 'Qwen3是一款能力大幅提升的新一代通义千问大模型，并支持思考模式切换。',
+    type: 'chat',
+    contextWindowTokens: 32_768,
+    maxOutput: 8_192,
+    abilities: {
+      functionCall: true,
+      reasoning: true,
+    },
+    pricing: {
+      input: 0.3,
+      output: 3,
+      currency: 'CNY',
+    },
+    releasedAt: '2025-04-28',
+  },
+  {
+    id: 'qwen3-coder-plus',
+    displayName: 'Qwen3 Coder Plus',
+    description:
+      '通义千问代码模型。最新的 Qwen3-Coder 系列模型是基于 Qwen3 的代码生成模型，具有强大的Coding Agent能力。',
+    type: 'chat',
+    contextWindowTokens: 1_000_000,
+    maxOutput: 65_536,
+    enabled: true,
+    abilities: {
+      functionCall: true,
+    },
+    pricing: {
+      input: 4,
+      output: 16,
+      cachedInput: 0.8,
+      currency: 'CNY',
+    },
+  },
+  {
+    id: 'qwen3-coder-flash',
+    displayName: 'Qwen3 Coder Flash',
+    description: '通义千问代码模型轻量版，具有强大的Coding Agent能力，擅长工具调用和环境交互。',
+    type: 'chat',
+    contextWindowTokens: 1_000_000,
+    maxOutput: 65_536,
+    abilities: {
+      functionCall: true,
+    },
+    pricing: {
+      input: 1,
+      output: 4,
+      cachedInput: 0.2,
+      currency: 'CNY',
+    },
+  },
+  {
+    id: 'qwen3-coder-480b-a35b-instruct',
+    displayName: 'Qwen3 Coder 480B A35B',
+    description: '通义千问代码模型开源版，具有强大的Coding Agent能力，擅长工具调用和环境交互。',
+    type: 'chat',
+    contextWindowTokens: 262_144,
+    maxOutput: 65_536,
+    abilities: {
+      functionCall: true,
+    },
+    pricing: {
+      input: 6,
+      output: 24,
+      currency: 'CNY',
+    },
+  },
+  {
+    id: 'qwen3-coder-30b-a3b-instruct',
+    displayName: 'Qwen3 Coder 30B A3B',
+    description: '通义千问代码模型开源版，具有强大的Coding Agent能力，擅长工具调用和环境交互。',
+    type: 'chat',
+    contextWindowTokens: 262_144,
+    maxOutput: 65_536,
+    abilities: {
+      functionCall: true,
+    },
+    pricing: {
+      input: 1.5,
+      output: 6,
+      currency: 'CNY',
+    },
+  },
+  {
+    id: 'qwen-flash',
+    displayName: 'Qwen Flash',
+    description: '通义千问系列速度最快、成本极低的模型，适合简单任务。',
+    type: 'chat',
+    contextWindowTokens: 1_000_000,
+    maxOutput: 32_768,
+    enabled: true,
+    abilities: {
+      functionCall: true,
+      reasoning: true,
+      search: true,
+    },
+    pricing: {
+      input: 0.15,
+      output: 1.5,
+      cachedInput: 0.03,
+      currency: 'CNY',
+    },
+    releasedAt: '2025-07-28',
+  },
+  {
+    id: 'qwen-plus',
+    displayName: 'Qwen Plus',
+    description: '通义千问超大规模语言模型增强版，支持中文、英文等不同语言输入。',
+    type: 'chat',
+    contextWindowTokens: 1_000_000,
+    maxOutput: 32_768,
+    enabled: true,
+    abilities: {
+      functionCall: true,
+      reasoning: true,
+      search: true,
     },
     pricing: {
       input: 0.8,
       output: 2,
+      cachedInput: 0.16,
       currency: 'CNY',
     },
   },
   {
     id: 'qwen-turbo',
     displayName: 'Qwen Turbo',
-    description: 'Qwen Turbo 是快速、经济的选择。',
+    description: '通义千问 Turbo，通义千问超大规模语言模型，支持中文、英文等不同语言输入。',
     type: 'chat',
-    contextWindowTokens: 8_192,
-    maxOutput: 2_048,
-    enabled: true,
+    contextWindowTokens: 1_000_000,
+    maxOutput: 16_384,
     abilities: {
       functionCall: true,
-      structuredOutput: true,
+      reasoning: true,
+      search: true,
     },
     pricing: {
       input: 0.3,
-      output: 0.6,
+      output: 3,
+      cachedInput: 0.06,
+      currency: 'CNY',
+    },
+    releasedAt: '2025-07-15',
+  },
+  {
+    id: 'qwen-max',
+    displayName: 'Qwen Max',
+    description: '通义千问千亿级别超大规模语言模型，支持中文、英文等不同语言输入。',
+    type: 'chat',
+    contextWindowTokens: 131_072,
+    maxOutput: 8_192,
+    enabled: true,
+    abilities: {
+      functionCall: true,
+      search: true,
+    },
+    pricing: {
+      input: 2.4,
+      output: 9.6,
+      cachedInput: 0.48,
+      currency: 'CNY',
+    },
+  },
+  {
+    id: 'qwen-long',
+    displayName: 'Qwen Long',
+    description:
+      '通义千问超大规模语言模型，支持长文本上下文，以及基于长文档、多文档等多个场景的对话功能。',
+    type: 'chat',
+    contextWindowTokens: 10_000_000,
+    maxOutput: 32_768,
+    abilities: {
+      functionCall: true,
+    },
+    pricing: {
+      input: 0.5,
+      output: 2,
+      currency: 'CNY',
+    },
+  },
+  {
+    id: 'qwen-vl-plus',
+    displayName: 'Qwen VL Plus',
+    description:
+      '通义千问大规模视觉语言模型增强版。大幅提升细节识别能力和文字识别能力，支持超百万像素分辨率和任意长宽比规格的图像。',
+    type: 'chat',
+    contextWindowTokens: 131_072,
+    maxOutput: 8_192,
+    abilities: {
+      vision: true,
+    },
+    pricing: {
+      input: 0.8,
+      output: 2,
+      cachedInput: 0.16,
       currency: 'CNY',
     },
   },
   {
     id: 'qwen-vl-max',
     displayName: 'Qwen VL Max',
-    description: 'Qwen VL Max 是视觉理解能力最强的千问模型。',
+    description:
+      '通义千问超大规模视觉语言模型。相比增强版，再次提升视觉推理能力和指令遵循能力，提供更高的视觉感知和认知水平。',
+    type: 'chat',
+    contextWindowTokens: 131_072,
+    maxOutput: 8_192,
+    enabled: true,
+    abilities: {
+      vision: true,
+    },
+    pricing: {
+      input: 1.6,
+      output: 4,
+      cachedInput: 0.32,
+      currency: 'CNY',
+    },
+  },
+  {
+    id: 'qwen-vl-ocr',
+    displayName: 'Qwen VL OCR',
+    description:
+      '通义千问OCR是文字提取专有模型，专注于文档、表格、试题、手写体文字等类型图像的文字提取能力。',
+    type: 'chat',
+    contextWindowTokens: 34_096,
+    maxOutput: 4_096,
+    abilities: {
+      vision: true,
+    },
+    pricing: {
+      input: 5,
+      output: 5,
+      currency: 'CNY',
+    },
+  },
+  {
+    id: 'qwen3-omni-flash',
+    displayName: 'Qwen3 Omni Flash',
+    description:
+      'Qwen-Omni 模型能够接收文本、图片、音频、视频等多种模态的组合输入，并生成文本或语音形式的回复。',
+    type: 'chat',
+    contextWindowTokens: 65_536,
+    maxOutput: 16_384,
+    abilities: {
+      reasoning: true,
+      vision: true,
+    },
+    pricing: {
+      input: 1.8,
+      output: 6.9,
+      currency: 'CNY',
+    },
+    releasedAt: '2025-09-15',
+  },
+  {
+    id: 'qwen-omni-turbo',
+    displayName: 'Qwen Omni Turbo',
+    description:
+      'Qwen-Omni 系列模型支持输入多种模态的数据，包括视频、音频、图片、文本，并输出音频与文本。',
     type: 'chat',
     contextWindowTokens: 32_768,
+    maxOutput: 2_048,
+    abilities: {
+      vision: true,
+    },
+    pricing: {
+      input: 1.5,
+      output: 4.5,
+      currency: 'CNY',
+    },
+  },
+  {
+    id: 'qwen2.5-omni-7b',
+    displayName: 'Qwen2.5 Omni 7B',
+    description:
+      'Qwen-Omni 系列模型支持输入多种模态的数据，包括视频、音频、图片、文本，并输出音频与文本。',
+    type: 'chat',
+    contextWindowTokens: 32_768,
+    maxOutput: 2_048,
+    abilities: {
+      vision: true,
+    },
+    pricing: {
+      input: 2,
+      output: 6,
+      currency: 'CNY',
+    },
+  },
+  {
+    id: 'qwq-plus',
+    displayName: 'QwQ Plus',
+    description:
+      '基于 Qwen2.5 模型训练的 QwQ 推理模型，通过强化学习大幅度提升了模型推理能力。模型数学代码等核心指标达到DeepSeek-R1 满血版水平。',
+    type: 'chat',
+    contextWindowTokens: 131_072,
+    maxOutput: 8_192,
+    enabled: true,
+    abilities: {
+      functionCall: true,
+      reasoning: true,
+      search: true,
+    },
+    pricing: {
+      input: 1.6,
+      output: 4,
+      currency: 'CNY',
+    },
+    releasedAt: '2025-03-05',
+  },
+  {
+    id: 'qwq-32b',
+    displayName: 'QwQ 32B',
+    description:
+      '基于 Qwen2.5-32B 模型训练的 QwQ 推理模型，通过强化学习大幅度提升了模型推理能力。各指标均显著超过同样基于 Qwen2.5-32B 的 DeepSeek-R1-Distill-Qwen-32B。',
+    type: 'chat',
+    contextWindowTokens: 131_072,
+    maxOutput: 8_192,
+    abilities: {
+      reasoning: true,
+      search: true,
+    },
+    pricing: {
+      input: 2,
+      output: 6,
+      currency: 'CNY',
+    },
+    releasedAt: '2025-03-06',
+  },
+  {
+    id: 'qwq-32b-preview',
+    displayName: 'QwQ 32B Preview',
+    description: 'QwQ模型是由 Qwen 团队开发的实验性研究模型，专注于增强 AI 推理能力。',
+    type: 'chat',
+    contextWindowTokens: 32_768,
+    maxOutput: 16_384,
+    abilities: {
+      reasoning: true,
+    },
+    pricing: {
+      input: 2,
+      output: 6,
+      currency: 'CNY',
+    },
+    releasedAt: '2024-11-28',
+  },
+  {
+    id: 'qvq-max',
+    displayName: 'QVQ Max',
+    description:
+      '通义千问QVQ视觉推理模型，支持视觉输入及思维链输出，在数学、编程、视觉分析、创作以及通用任务上都表现了更强的能力。',
+    type: 'chat',
+    contextWindowTokens: 131_072,
+    maxOutput: 8_192,
+    enabled: true,
+    abilities: {
+      reasoning: true,
+      vision: true,
+    },
+    pricing: {
+      input: 8,
+      output: 32,
+      currency: 'CNY',
+    },
+    releasedAt: '2025-05-15',
+  },
+  {
+    id: 'qvq-plus',
+    displayName: 'QVQ Plus',
+    description:
+      '视觉推理模型。支持视觉输入及思维链输出，继qvq-max模型后推出的plus版本，相较于qvq-max模型，qvq-plus系列模型推理速度更快，效果和成本更均衡。',
+    type: 'chat',
+    contextWindowTokens: 131_072,
+    maxOutput: 8_192,
+    abilities: {
+      reasoning: true,
+      vision: true,
+    },
+    pricing: {
+      input: 2,
+      output: 5,
+      currency: 'CNY',
+    },
+    releasedAt: '2025-05-15',
+  },
+  {
+    id: 'qvq-72b-preview',
+    displayName: 'QVQ 72B Preview',
+    description:
+      'QVQ模型是由 Qwen 团队开发的实验性研究模型，专注于提升视觉推理能力，尤其在数学推理领域。',
+    type: 'chat',
+    contextWindowTokens: 32_768,
+    maxOutput: 16_384,
+    abilities: {
+      reasoning: true,
+      vision: true,
+    },
+    pricing: {
+      input: 12,
+      output: 36,
+      currency: 'CNY',
+    },
+    releasedAt: '2024-12-25',
+  },
+  {
+    id: 'qwen2.5-72b-instruct',
+    displayName: 'Qwen2.5 72B',
+    description: '通义千问2.5对外开源的72B规模的模型。',
+    type: 'chat',
+    contextWindowTokens: 131_072,
     maxOutput: 8_192,
     abilities: {
       functionCall: true,
-      vision: true,
-      structuredOutput: true,
     },
     pricing: {
-      input: 20,
-      output: 60,
+      input: 4,
+      output: 12,
+      currency: 'CNY',
+    },
+  },
+  {
+    id: 'qwen2.5-32b-instruct',
+    displayName: 'Qwen2.5 32B',
+    description: '通义千问2.5对外开源的32B规模的模型。',
+    type: 'chat',
+    contextWindowTokens: 131_072,
+    maxOutput: 8_192,
+    abilities: {
+      functionCall: true,
+    },
+    pricing: {
+      input: 2,
+      output: 6,
+      currency: 'CNY',
+    },
+  },
+  {
+    id: 'qwen2.5-14b-instruct',
+    displayName: 'Qwen2.5 14B',
+    description: '通义千问2.5对外开源的14B规模的模型。',
+    type: 'chat',
+    contextWindowTokens: 131_072,
+    maxOutput: 8_192,
+    abilities: {
+      functionCall: true,
+    },
+    pricing: {
+      input: 1,
+      output: 3,
+      currency: 'CNY',
+    },
+  },
+  {
+    id: 'qwen2.5-14b-instruct-1m',
+    displayName: 'Qwen2.5 14B 1M',
+    description: '通义千问2.5对外开源的14B规模的模型，支持1M上下文。',
+    type: 'chat',
+    contextWindowTokens: 1_000_000,
+    maxOutput: 8_192,
+    abilities: {
+      functionCall: true,
+    },
+    pricing: {
+      input: 1,
+      output: 3,
+      currency: 'CNY',
+    },
+    releasedAt: '2025-01-27',
+  },
+  {
+    id: 'qwen2.5-7b-instruct',
+    displayName: 'Qwen2.5 7B',
+    description: '通义千问2.5对外开源的7B规模的模型。',
+    type: 'chat',
+    contextWindowTokens: 131_072,
+    maxOutput: 8_192,
+    abilities: {
+      functionCall: true,
+    },
+    pricing: {
+      input: 0.5,
+      output: 1,
+      currency: 'CNY',
+    },
+  },
+  {
+    id: 'qwen2.5-vl-72b-instruct',
+    displayName: 'Qwen2.5 VL 72B',
+    description:
+      '指令跟随、数学、解题、代码整体提升，万物识别能力提升，支持长视频文件理解和秒级别的事件时刻定位。',
+    type: 'chat',
+    contextWindowTokens: 131_072,
+    maxOutput: 8_192,
+    abilities: {
+      vision: true,
+    },
+    pricing: {
+      input: 16,
+      output: 48,
+      currency: 'CNY',
+    },
+    releasedAt: '2025-01-27',
+  },
+  {
+    id: 'qwen2.5-vl-32b-instruct',
+    displayName: 'Qwen2.5 VL 32B',
+    description:
+      'Qwen2.5VL系列模型，在math和学科问题解答达到了接近Qwen2.5VL-72B的水平，回复风格面向人类偏好进行大幅调整。',
+    type: 'chat',
+    contextWindowTokens: 131_072,
+    maxOutput: 8_192,
+    abilities: {
+      vision: true,
+    },
+    pricing: {
+      input: 8,
+      output: 24,
+      currency: 'CNY',
+    },
+    releasedAt: '2025-03-24',
+  },
+  {
+    id: 'qwen2.5-vl-7b-instruct',
+    displayName: 'Qwen2.5 VL 7B',
+    description: 'Qwen2.5VL 7B 版本。',
+    type: 'chat',
+    contextWindowTokens: 131_072,
+    maxOutput: 8_192,
+    abilities: {
+      vision: true,
+    },
+    pricing: {
+      input: 2,
+      output: 5,
+      currency: 'CNY',
+    },
+    releasedAt: '2025-01-27',
+  },
+  {
+    id: 'qwen2.5-coder-32b-instruct',
+    displayName: 'Qwen2.5 Coder 32B',
+    description: '通义千问代码模型开源版。',
+    type: 'chat',
+    contextWindowTokens: 131_072,
+    maxOutput: 8_192,
+    pricing: {
+      input: 2,
+      output: 6,
+      currency: 'CNY',
+    },
+  },
+  {
+    id: 'qwen2.5-coder-14b-instruct',
+    displayName: 'Qwen2.5 Coder 14B',
+    description: '通义千问代码模型开源版。',
+    type: 'chat',
+    contextWindowTokens: 131_072,
+    maxOutput: 8_192,
+    pricing: {
+      input: 2,
+      output: 6,
+      currency: 'CNY',
+    },
+  },
+  {
+    id: 'qwen2.5-coder-7b-instruct',
+    displayName: 'Qwen2.5 Coder 7B',
+    description: '通义千问代码模型开源版。',
+    type: 'chat',
+    contextWindowTokens: 131_072,
+    maxOutput: 8_192,
+    pricing: {
+      input: 1,
+      output: 2,
+      currency: 'CNY',
+    },
+  },
+  {
+    id: 'qwen2.5-math-72b-instruct',
+    displayName: 'Qwen2.5 Math 72B',
+    description: 'Qwen-Math 模型具有强大的数学解题能力。',
+    type: 'chat',
+    contextWindowTokens: 4_096,
+    maxOutput: 3_072,
+    pricing: {
+      input: 4,
+      output: 12,
+      currency: 'CNY',
+    },
+    releasedAt: '2025-07-23',
+  },
+  {
+    id: 'qwen2.5-math-7b-instruct',
+    displayName: 'Qwen2.5 Math 7B',
+    description: 'Qwen-Math 模型具有强大的数学解题能力。',
+    type: 'chat',
+    contextWindowTokens: 4_096,
+    maxOutput: 3_072,
+    pricing: {
+      input: 1,
+      output: 2,
+      currency: 'CNY',
+    },
+  },
+  {
+    id: 'qwen-math-plus',
+    displayName: 'Qwen Math Plus',
+    description: '通义千问数学模型是专门用于数学解题的语言模型。',
+    type: 'chat',
+    contextWindowTokens: 4_096,
+    maxOutput: 3_072,
+    pricing: {
+      input: 4,
+      output: 12,
+      currency: 'CNY',
+    },
+  },
+  {
+    id: 'qwen-math-turbo',
+    displayName: 'Qwen Math Turbo',
+    description: '通义千问数学模型是专门用于数学解题的语言模型。',
+    type: 'chat',
+    contextWindowTokens: 4_096,
+    maxOutput: 3_072,
+    pricing: {
+      input: 2,
+      output: 6,
+      currency: 'CNY',
+    },
+  },
+  {
+    id: 'qwen-coder-plus',
+    displayName: 'Qwen Coder Plus',
+    description: '通义千问代码模型。',
+    type: 'chat',
+    contextWindowTokens: 131_072,
+    maxOutput: 8_192,
+    pricing: {
+      input: 3.5,
+      output: 7,
+      currency: 'CNY',
+    },
+  },
+  {
+    id: 'qwen-coder-turbo',
+    displayName: 'Qwen Coder Turbo',
+    description: '通义千问代码模型。',
+    type: 'chat',
+    contextWindowTokens: 131_072,
+    maxOutput: 8_192,
+    pricing: {
+      input: 2,
+      output: 6,
+      currency: 'CNY',
+    },
+  },
+  {
+    id: 'deepseek-v3.2-exp',
+    displayName: 'DeepSeek V3.2 Exp',
+    description:
+      'deepseek-v3.2-exp 引入稀疏注意力机制，旨在提升处理长文本时的训练与推理效率，价格低于 deepseek-v3.1。',
+    type: 'chat',
+    contextWindowTokens: 131_072,
+    maxOutput: 65_536,
+    abilities: {
+      reasoning: true,
+      search: true,
+    },
+    pricing: {
+      input: 2,
+      output: 3,
+      currency: 'CNY',
+    },
+  },
+  {
+    id: 'deepseek-v3.1',
+    displayName: 'DeepSeek V3.1',
+    description: 'DeepSeek V3.1 模型为混合推理架构模型，同时支持思考模式与非思考模式。',
+    type: 'chat',
+    contextWindowTokens: 131_072,
+    maxOutput: 65_536,
+    enabled: true,
+    abilities: {
+      reasoning: true,
+      search: true,
+    },
+    pricing: {
+      input: 4,
+      output: 12,
+      currency: 'CNY',
+    },
+  },
+  {
+    id: 'deepseek-v3',
+    displayName: 'DeepSeek V3',
+    description:
+      'DeepSeek-V3 为自研 MoE 模型，671B 参数，激活 37B，在长文本、代码、数学、百科、中文能力上表现优秀。',
+    type: 'chat',
+    contextWindowTokens: 65_536,
+    maxOutput: 8_192,
+    abilities: {
+      functionCall: true,
+      search: true,
+    },
+    pricing: {
+      input: 2,
+      output: 8,
+      currency: 'CNY',
+    },
+    releasedAt: '2025-01-27',
+  },
+  {
+    id: 'deepseek-r1-0528',
+    displayName: 'DeepSeek R1 0528',
+    description:
+      '685B 满血版模型，2025年5月28日发布。DeepSeek-R1 在后训练阶段大规模使用了强化学习技术，极大提升了模型推理能力。',
+    type: 'chat',
+    contextWindowTokens: 131_072,
+    maxOutput: 16_384,
+    enabled: true,
+    abilities: {
+      functionCall: true,
+      reasoning: true,
+      search: true,
+    },
+    pricing: {
+      input: 4,
+      output: 16,
+      currency: 'CNY',
+    },
+    releasedAt: '2025-05-28',
+  },
+  {
+    id: 'deepseek-r1-distill-qwen-32b',
+    displayName: 'DeepSeek R1 Distill Qwen 32B',
+    description: 'DeepSeek-R1-Distill-Qwen-32B 是一个基于 Qwen2.5-32B 的蒸馏大型语言模型。',
+    type: 'chat',
+    contextWindowTokens: 32_768,
+    maxOutput: 16_384,
+    abilities: {
+      reasoning: true,
+    },
+    pricing: {
+      input: 2,
+      output: 6,
+      currency: 'CNY',
+    },
+  },
+  {
+    id: 'deepseek-r1-distill-qwen-14b',
+    displayName: 'DeepSeek R1 Distill Qwen 14B',
+    description: 'DeepSeek-R1-Distill-Qwen-14B 是一个基于 Qwen2.5-14B 的蒸馏大型语言模型。',
+    type: 'chat',
+    contextWindowTokens: 32_768,
+    maxOutput: 16_384,
+    abilities: {
+      reasoning: true,
+    },
+    pricing: {
+      input: 1,
+      output: 3,
+      currency: 'CNY',
+    },
+  },
+  {
+    id: 'deepseek-r1-distill-qwen-7b',
+    displayName: 'DeepSeek R1 Distill Qwen 7B',
+    description: 'DeepSeek-R1-Distill-Qwen-7B 是一个基于 Qwen2.5-Math-7B 的蒸馏大型语言模型。',
+    type: 'chat',
+    contextWindowTokens: 32_768,
+    maxOutput: 16_384,
+    abilities: {
+      reasoning: true,
+    },
+    pricing: {
+      input: 0.5,
+      output: 1,
+      currency: 'CNY',
+    },
+  },
+  {
+    id: 'deepseek-r1-distill-qwen-1.5b',
+    displayName: 'DeepSeek R1 Distill Qwen 1.5B',
+    description: 'DeepSeek-R1-Distill-Qwen-1.5B 是一个基于 Qwen2.5-Math-1.5B 的蒸馏大型语言模型。',
+    type: 'chat',
+    contextWindowTokens: 32_768,
+    maxOutput: 16_384,
+    abilities: {
+      reasoning: true,
+    },
+    pricing: {
+      input: 0,
+      output: 0,
+      currency: 'CNY',
+    },
+  },
+  {
+    id: 'deepseek-r1-distill-llama-70b',
+    displayName: 'DeepSeek R1 Distill Llama 70B',
+    description:
+      'DeepSeek-R1-Distill-Llama-70B 是一个基于 Llama-3.3-70B-Instruct 的蒸馏大型语言模型。',
+    type: 'chat',
+    contextWindowTokens: 32_768,
+    maxOutput: 16_384,
+    abilities: {
+      reasoning: true,
+    },
+    pricing: {
+      input: 0,
+      output: 0,
+      currency: 'CNY',
+    },
+  },
+  {
+    id: 'deepseek-r1-distill-llama-8b',
+    displayName: 'DeepSeek R1 Distill Llama 8B',
+    description: 'DeepSeek-R1-Distill-Llama-8B 是一个基于 Llama-3.1-8B 的蒸馏大型语言模型。',
+    type: 'chat',
+    contextWindowTokens: 32_768,
+    maxOutput: 16_384,
+    abilities: {
+      reasoning: true,
+    },
+    pricing: {
+      input: 0,
+      output: 0,
+      currency: 'CNY',
+    },
+  },
+  {
+    id: 'kimi-k2-thinking',
+    displayName: 'Kimi K2 Thinking',
+    description:
+      'kimi-k2-thinking模型是月之暗面提供的具有通用 Agentic能力和推理能力的思考模型，它擅长深度推理，并可通过多步工具调用，帮助解决各类难题。',
+    type: 'chat',
+    contextWindowTokens: 262_144,
+    maxOutput: 16_384,
+    abilities: {
+      functionCall: true,
+      reasoning: true,
+    },
+    pricing: {
+      input: 4,
+      output: 16,
+      currency: 'CNY',
+    },
+    releasedAt: '2025-11-10',
+  },
+  {
+    id: 'Moonshot-Kimi-K2-Instruct',
+    displayName: 'Kimi K2 Instruct',
+    description:
+      '总参数 1T，激活参数 32B。非思维模型中，在前沿知识、数学和编码方面达到了顶尖水平，更擅长通用 Agent 任务。',
+    type: 'chat',
+    contextWindowTokens: 131_072,
+    maxOutput: 8_192,
+    abilities: {
+      functionCall: true,
+      search: true,
+    },
+    pricing: {
+      input: 4,
+      output: 16,
+      currency: 'CNY',
+    },
+    releasedAt: '2025-07-17',
+  },
+  {
+    id: 'glm-4.6',
+    displayName: 'GLM-4.6',
+    description: 'GLM系列模型是智谱AI专为智能体设计的混合推理模型，提供思考与非思考两种模式。',
+    type: 'chat',
+    contextWindowTokens: 202_752,
+    maxOutput: 16_384,
+    abilities: {
+      functionCall: true,
+      reasoning: true,
+    },
+    pricing: {
+      input: 3,
+      output: 14,
+      currency: 'CNY',
+    },
+  },
+  {
+    id: 'glm-4.5',
+    displayName: 'GLM-4.5',
+    description: 'GLM-4.5系列模型是智谱AI专为智能体设计的混合推理模型，提供思考与非思考两种模式。',
+    type: 'chat',
+    contextWindowTokens: 131_072,
+    maxOutput: 16_384,
+    abilities: {
+      functionCall: true,
+      reasoning: true,
+    },
+    pricing: {
+      input: 3,
+      output: 14,
+      currency: 'CNY',
+    },
+  },
+  {
+    id: 'glm-4.5-air',
+    displayName: 'GLM-4.5-Air',
+    description: 'GLM-4.5系列模型是智谱AI专为智能体设计的混合推理模型，提供思考与非思考两种模式。',
+    type: 'chat',
+    contextWindowTokens: 131_072,
+    maxOutput: 16_384,
+    abilities: {
+      functionCall: true,
+      reasoning: true,
+    },
+    pricing: {
+      input: 0.8,
+      output: 6,
       currency: 'CNY',
     },
   },
 ];
 
-export default dashscopeModels;
+// ============================================================================
+// Image Models
+// ============================================================================
+
+const dashscopeImageModels: ImageModelCard[] = [
+  {
+    id: 'qwen-image',
+    displayName: 'Qwen Image',
+    description:
+      'Qwen-Image 是一款通用图像生成模型，支持多种艺术风格，尤其擅长复杂文本渲染，特别是中英文文本渲染。',
+    type: 'image',
+    enabled: true,
+    releasedAt: '2025-08-13',
+    resolutions: ['1664x928', '1472x1140', '1328x1328', '1140x1472', '928x1664'],
+  },
+  {
+    id: 'qwen-image-edit',
+    displayName: 'Qwen Image Edit',
+    description: 'Qwen Image Edit 是一款图生图模型，支持基于输入图像和文本提示进行图像编辑和修改。',
+    type: 'image',
+    enabled: true,
+    releasedAt: '2025-09-18',
+  },
+  {
+    id: 'wan2.2-t2i-flash',
+    displayName: 'Wanxiang 2.2 T2I Flash',
+    description:
+      '万相2.2极速版，当前最新模型。在创意性、稳定性、写实质感上全面升级，生成速度快，性价比高。',
+    type: 'image',
+    enabled: true,
+    releasedAt: '2025-07-28',
+  },
+  {
+    id: 'wan2.2-t2i-plus',
+    displayName: 'Wanxiang 2.2 T2I Plus',
+    description:
+      '万相2.2专业版，当前最新模型。在创意性、稳定性、写实质感上全面升级，生成细节丰富。',
+    type: 'image',
+    enabled: true,
+    releasedAt: '2025-07-28',
+  },
+  {
+    id: 'wanx2.1-t2i-turbo',
+    displayName: 'Wanxiang 2.1 T2I Turbo',
+    description: '全面升级版本。生成速度快、效果全面、综合性价比高。对应通义万相官网2.1极速模型。',
+    type: 'image',
+    releasedAt: '2025-01-08',
+  },
+  {
+    id: 'wanx2.1-t2i-plus',
+    displayName: 'Wanxiang 2.1 T2I Plus',
+    description: '全面升级版本。生成图像细节更丰富，速度稍慢。对应通义万相官网2.1专业模型。',
+    type: 'image',
+    releasedAt: '2025-01-08',
+  },
+  {
+    id: 'wanx2.0-t2i-turbo',
+    displayName: 'Wanxiang 2.0 T2I Turbo',
+    description: '擅长质感人像，速度中等、成本较低。对应通义万相官网2.0极速模型。',
+    type: 'image',
+    releasedAt: '2025-01-17',
+  },
+  {
+    id: 'wanx-v1',
+    displayName: 'Wanxiang v1',
+    description: '基础文生图模型。对应通义万相官网1.0通用模型。',
+    type: 'image',
+    releasedAt: '2024-05-22',
+  },
+  {
+    id: 'flux-schnell',
+    displayName: 'FLUX.1 [schnell]',
+    description:
+      'FLUX.1 [schnell] 作为目前开源最先进的少步模型，不仅超越了同类竞争者，甚至还优于诸如 Midjourney v6.0 和 DALL·E 3 (HD) 等强大的非精馏模型。',
+    type: 'image',
+    enabled: true,
+    releasedAt: '2024-08-07',
+    resolutions: ['512x1024', '768x512', '768x1024', '1024x576', '576x1024', '1024x1024'],
+  },
+  {
+    id: 'flux-dev',
+    displayName: 'FLUX.1 [dev]',
+    description:
+      'FLUX.1 [dev] 是一款面向非商业应用的开源权重、精炼模型。在保持了与FLUX专业版相近的图像质量和指令遵循能力的同时，具备更高的运行效率。',
+    type: 'image',
+    enabled: true,
+    releasedAt: '2024-08-07',
+    resolutions: ['512x1024', '768x512', '768x1024', '1024x576', '576x1024', '1024x1024'],
+  },
+  {
+    id: 'flux-merged',
+    displayName: 'FLUX.1-merged',
+    description:
+      'FLUX.1-merged 模型结合了 "DEV" 在开发阶段探索的深度特性和 "Schnell" 所代表的高速执行优势。',
+    type: 'image',
+    enabled: true,
+    releasedAt: '2024-08-22',
+    resolutions: ['512x1024', '768x512', '768x1024', '1024x576', '576x1024', '1024x1024'],
+  },
+  {
+    id: 'stable-diffusion-3.5-large',
+    displayName: 'StableDiffusion 3.5 Large',
+    description:
+      'stable-diffusion-3.5-large 是一个具有8亿参数的多模态扩散变压器（MMDiT）文本到图像生成模型。',
+    type: 'image',
+    releasedAt: '2024-10-25',
+  },
+  {
+    id: 'stable-diffusion-3.5-large-turbo',
+    displayName: 'StableDiffusion 3.5 Large Turbo',
+    description:
+      'stable-diffusion-3.5-large-turbo 是在 stable-diffusion-3.5-large 的基础上采用对抗性扩散蒸馏（ADD）技术的模型，具备更快的速度。',
+    type: 'image',
+    releasedAt: '2024-10-25',
+  },
+  {
+    id: 'stable-diffusion-xl',
+    displayName: 'StableDiffusion XL',
+    description:
+      'stable-diffusion-xl 相比于 v1.5 做了重大的改进，与当前开源的文生图 SOTA 模型 midjourney 效果相当。',
+    type: 'image',
+    releasedAt: '2024-04-09',
+  },
+  {
+    id: 'stable-diffusion-v1.5',
+    displayName: 'StableDiffusion v1.5',
+    description:
+      'stable-diffusion-v1.5 是以 stable-diffusion-v1.2 检查点的权重进行初始化，并在 "laion-aesthetics v2 5+" 上进行了微调。',
+    type: 'image',
+    releasedAt: '2024-04-09',
+  },
+];
+
+// ============================================================================
+// Exports
+// ============================================================================
+
+export const dashscopeModels = {
+  chat: dashscopeChatModels,
+  image: dashscopeImageModels,
+};
+
+export default dashscopeChatModels;

@@ -8,13 +8,15 @@ import type { Provider } from './types';
 
 interface ProviderLayoutProps {
   providers: Provider[];
-  onToggleProvider: (id: string) => void;
+  onToggleProvider: (id: string, enabled?: boolean, apiKeyId?: string) => void;
+  onSaveProvider?: (providerId: string, apiKeyId: string) => void;
   onAddProvider: (provider: Provider) => void;
 }
 
 export function ProviderLayout({
   providers,
   onToggleProvider,
+  onSaveProvider,
   onAddProvider,
 }: ProviderLayoutProps) {
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -99,7 +101,11 @@ export function ProviderLayout({
 
       <div className="flex-1 h-full overflow-y-auto bg-background">
         {selectedProvider ? (
-          <ProviderDetail provider={selectedProvider} onToggle={onToggleProvider} />
+          <ProviderDetail
+            provider={selectedProvider}
+            onToggle={onToggleProvider}
+            onSave={onSaveProvider}
+          />
         ) : (
           <ProviderGrid
             providers={filteredProviders}

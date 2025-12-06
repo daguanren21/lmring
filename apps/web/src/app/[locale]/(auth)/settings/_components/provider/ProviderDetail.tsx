@@ -23,7 +23,9 @@ import {
   TooltipTrigger,
 } from '@lmring/ui';
 import {
+  AlertCircleIcon,
   BrainCircuitIcon,
+  CheckCircle2Icon,
   EyeIcon,
   EyeOffIcon,
   ImageIcon,
@@ -39,10 +41,10 @@ import {
   WrenchIcon,
   ZapIcon,
 } from 'lucide-react';
-import { useMemo, useState } from 'react';
-import type { Provider } from './types';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { toast } from 'sonner';
+import type { ConnectionCheckResponse, Provider, SaveApiKeyResponse } from './types';
 
-// Model type labels and icons
 const MODEL_TYPE_CONFIG: Record<
   AiModelType,
   { label: string; icon: React.ElementType; color: string }
@@ -57,14 +59,44 @@ const MODEL_TYPE_CONFIG: Record<
 
 interface ProviderDetailProps {
   provider: Provider;
-  onToggle: (id: string) => void;
+  onToggle: (id: string, enabled: boolean, apiKeyId?: string) => void;
+  onSave?: (providerId: string, apiKeyId: string) => void;
 }
 
-export function ProviderDetail({ provider, onToggle }: ProviderDetailProps) {
+type CheckStatus = 'idle' | 'checking' | 'success' | 'error';
+
+export function ProviderDetail({ provider, onToggle, onSave }: ProviderDetailProps) {
+  const [apiKey, setApiKey] = useState('');
+  const [proxyUrl, setProxyUrl] = useState('');
   const [showKey, setShowKey] = useState(false);
   const [selectedModel, setSelectedModel] = useState<string>('');
   const [searchQuery, setSearchQuery] = useState('');
-  const [isChecking, setIsChecking] = useState(false);
+
+  const [checkStatus, setCheckStatus] = useState<CheckStatus>('idle');
+  const [checkError, setCheckError] = useState<string>('');
+  const [responseTime, setResponseTime] = useState<number | null>(null);
+
+  const [isSaving, setIsSaving] = useState(false);
+  const [isToggling, setIsToggling] = useState(false);
+
+  const [modelEnabledStates, setModelEnabledStates] = useState<Record<string, boolean>>({});
+
+  // biome-ignore lint/correctness/useExhaustiveDependencies: provider.id is intentionally included to reset form when provider changes
+  useEffect(() => {
+    if (provider.apiKey) {
+      setApiKey(provider.apiKey);
+    } else {
+      setApiKey('');
+    }
+    if (provider.proxyUrl) {
+      setProxyUrl(provider.proxyUrl);
+    } else {
+      setProxyUrl('');
+    }
+    setCheckStatus('idle');
+    setCheckError('');
+    setResponseTime(null);
+  }, [provider.id, provider.apiKey, provider.proxyUrl]);
 
   const models = useMemo(() => {
     return getModelsForProvider(provider.id.toLowerCase());
@@ -79,7 +111,6 @@ export function ProviderDetail({ provider, onToggle }: ProviderDetailProps) {
     );
   }, [models, searchQuery]);
 
-  // Group models by type
   const modelsByType = useMemo(() => {
     const grouped: Partial<Record<AiModelType, typeof filteredModels>> = {};
     for (const model of filteredModels) {
@@ -90,7 +121,6 @@ export function ProviderDetail({ provider, onToggle }: ProviderDetailProps) {
     return grouped;
   }, [filteredModels]);
 
-  // Get sorted model types (chat first, then others)
   const sortedModelTypes = useMemo(() => {
     const typeOrder: AiModelType[] = ['chat', 'image', 'embedding', 'tts', 'stt', 'realtime'];
     return typeOrder.filter((type) => modelsByType[type] && modelsByType[type].length > 0);
@@ -101,11 +131,176 @@ export function ProviderDetail({ provider, onToggle }: ProviderDetailProps) {
     return endpoint?.baseURL || '';
   }, [provider.id]);
 
-  const handleCheck = async () => {
-    setIsChecking(true);
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    setIsChecking(false);
-  };
+  const handleSave = useCallback(async () => {
+    if (!apiKey.trim()) return;
+
+    setIsSaving(true);
+    try {
+      const response = await fetch('/api/settings/api-keys', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          providerName: provider.id.toLowerCase(),
+          apiKey: apiKey.trim(),
+          proxyUrl: proxyUrl.trim() || undefined,
+          enabled: provider.connected,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to save API key');
+      }
+
+      const result: SaveApiKeyResponse = await response.json();
+
+      onSave?.(provider.id, result.id);
+
+      toast.success('Saved', {
+        description: 'API key configuration saved successfully',
+      });
+    } catch (error) {
+      toast.error('Save Failed', {
+        description: error instanceof Error ? error.message : 'Failed to save configuration',
+      });
+    } finally {
+      setIsSaving(false);
+    }
+  }, [apiKey, proxyUrl, provider.id, provider.connected, onSave]);
+
+  const handleCheck = useCallback(async () => {
+    if (!apiKey.trim()) {
+      toast.error('API Key Required', {
+        description: 'Please enter your API key before testing the connection.',
+      });
+      return;
+    }
+
+    if (!selectedModel) {
+      toast.error('Model Required', {
+        description: 'Please select a model to test the connection.',
+      });
+      return;
+    }
+
+    setCheckStatus('checking');
+    setCheckError('');
+    setResponseTime(null);
+
+    try {
+      const response = await fetch('/api/settings/api-keys/check', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          providerName: provider.id.toLowerCase(),
+          apiKey: apiKey.trim(),
+          proxyUrl: proxyUrl.trim() || undefined,
+          model: selectedModel,
+        }),
+      });
+
+      const result: ConnectionCheckResponse = await response.json();
+
+      if (result.success) {
+        setCheckStatus('success');
+        setResponseTime(result.responseTimeMs ?? null);
+        toast.success('Connection Successful', {
+          description: `Connected in ${result.responseTimeMs}ms`,
+        });
+
+        await handleSave();
+      } else {
+        setCheckStatus('error');
+        setCheckError(result.message || 'Connection failed');
+        toast.error('Connection Failed', {
+          description: result.message || 'Unable to connect to the provider',
+        });
+      }
+    } catch (error) {
+      setCheckStatus('error');
+      const errorMessage = error instanceof Error ? error.message : 'Network error';
+      setCheckError(errorMessage);
+      toast.error('Connection Error', {
+        description: errorMessage,
+      });
+    }
+  }, [apiKey, proxyUrl, selectedModel, provider.id, handleSave]);
+
+  const handleToggle = useCallback(async () => {
+    const newEnabled = !provider.connected;
+
+    if (newEnabled && !apiKey.trim() && !provider.apiKeyId) {
+      onToggle(provider.id, newEnabled);
+      return;
+    }
+
+    setIsToggling(true);
+    try {
+      if (provider.apiKeyId) {
+        const response = await fetch(`/api/settings/api-keys/${provider.apiKeyId}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ enabled: newEnabled }),
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to update provider status');
+        }
+
+        onToggle(provider.id, newEnabled, provider.apiKeyId);
+      } else if (apiKey.trim()) {
+        const response = await fetch('/api/settings/api-keys', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            providerName: provider.id.toLowerCase(),
+            apiKey: apiKey.trim(),
+            proxyUrl: proxyUrl.trim() || undefined,
+            enabled: newEnabled,
+          }),
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to save provider configuration');
+        }
+
+        const result: SaveApiKeyResponse = await response.json();
+        onToggle(provider.id, newEnabled, result.id);
+        onSave?.(provider.id, result.id);
+      } else {
+        onToggle(provider.id, newEnabled);
+      }
+    } catch (error) {
+      toast.error('Error', {
+        description: error instanceof Error ? error.message : 'Failed to update status',
+      });
+    } finally {
+      setIsToggling(false);
+    }
+  }, [provider.id, provider.connected, provider.apiKeyId, apiKey, proxyUrl, onToggle, onSave]);
+
+  const handleModelToggle = useCallback(
+    async (modelId: string, enabled: boolean) => {
+      setModelEnabledStates((prev) => ({ ...prev, [modelId]: enabled }));
+
+      if (provider.apiKeyId) {
+        try {
+          await fetch(`/api/settings/api-keys/${provider.apiKeyId}/models`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              models: [{ modelId, enabled }],
+            }),
+          });
+        } catch {
+          setModelEnabledStates((prev) => ({ ...prev, [modelId]: !enabled }));
+          toast.error('Error', {
+            description: 'Failed to update model status',
+          });
+        }
+      }
+    },
+    [provider.apiKeyId],
+  );
 
   const renderProviderIcon = (size = 20, className?: string) => {
     if (provider.Icon) {
@@ -180,6 +375,26 @@ export function ProviderDetail({ provider, onToggle }: ProviderDetailProps) {
     );
   };
 
+  const renderCheckStatus = () => {
+    if (checkStatus === 'success') {
+      return (
+        <div className="flex items-center gap-2 text-sm text-green-600 dark:text-green-400">
+          <CheckCircle2Icon className="h-4 w-4" />
+          <span>Connected{responseTime ? ` in ${responseTime}ms` : ''}</span>
+        </div>
+      );
+    }
+    if (checkStatus === 'error') {
+      return (
+        <div className="flex items-center gap-2 text-sm text-red-600 dark:text-red-400">
+          <AlertCircleIcon className="h-4 w-4" />
+          <span>{checkError || 'Connection failed'}</span>
+        </div>
+      );
+    }
+    return null;
+  };
+
   return (
     <div className="space-y-8 p-4 md:p-8 max-w-5xl mx-auto">
       <div className="flex items-center justify-between">
@@ -192,18 +407,20 @@ export function ProviderDetail({ provider, onToggle }: ProviderDetailProps) {
             )}
           </div>
         </div>
-        <Switch checked={provider.connected} onCheckedChange={() => onToggle(provider.id)} />
+        <Switch checked={provider.connected} onCheckedChange={handleToggle} disabled={isToggling} />
       </div>
 
       <Separator />
 
       <div className="space-y-6">
         <div className="space-y-3">
-          <Label>API Key</Label>
+          <Label htmlFor="api-key">API Key</Label>
           <div className="relative">
             <Input
+              id="api-key"
               type={showKey ? 'text' : 'password'}
-              defaultValue={provider.connected ? 'sk-xxxxxxxxxxxxxxxx' : ''}
+              value={apiKey}
+              onChange={(e) => setApiKey(e.target.value)}
               placeholder="Enter API Key"
               className="pr-10 h-9"
             />
@@ -218,8 +435,14 @@ export function ProviderDetail({ provider, onToggle }: ProviderDetailProps) {
         </div>
 
         <div className="space-y-3">
-          <Label>API Proxy URL</Label>
-          <Input placeholder={defaultUrl || 'https://api.example.com/v1'} className="h-9" />
+          <Label htmlFor="proxy-url">API Proxy URL</Label>
+          <Input
+            id="proxy-url"
+            value={proxyUrl}
+            onChange={(e) => setProxyUrl(e.target.value)}
+            placeholder={defaultUrl || 'https://api.example.com/v1'}
+            className="h-9"
+          />
         </div>
 
         <div className="space-y-3">
@@ -227,10 +450,7 @@ export function ProviderDetail({ provider, onToggle }: ProviderDetailProps) {
           <div className="flex gap-3 w-full items-start">
             <Select value={selectedModel} onValueChange={setSelectedModel}>
               <SelectTrigger className="flex-1 h-9">
-                <div className="flex items-center gap-2">
-                  {selectedModel && renderModelListIcon(16)}
-                  <SelectValue placeholder="Select model to check" />
-                </div>
+                <SelectValue placeholder="Select model to check" />
               </SelectTrigger>
               <SelectContent>
                 {models.map((model) => (
@@ -247,9 +467,9 @@ export function ProviderDetail({ provider, onToggle }: ProviderDetailProps) {
               variant="outline"
               className="gap-2 h-9 min-w-[100px] transition-all hover:border-blue-500 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-950/30 dark:hover:text-blue-400 dark:hover:border-blue-500"
               onClick={handleCheck}
-              disabled={isChecking}
+              disabled={checkStatus === 'checking' || isSaving}
             >
-              {isChecking ? (
+              {checkStatus === 'checking' ? (
                 <>
                   <Loader2Icon className="h-4 w-4 animate-spin" />
                   Checking
@@ -259,6 +479,9 @@ export function ProviderDetail({ provider, onToggle }: ProviderDetailProps) {
               )}
             </Button>
           </div>
+
+          {renderCheckStatus()}
+
           <div className="flex items-center justify-center gap-2 text-[0.8rem] text-muted-foreground pt-2">
             <LockIcon className="h-3 w-3" />
             <span>
@@ -328,41 +551,47 @@ export function ProviderDetail({ provider, onToggle }: ProviderDetailProps) {
               const typeModels = modelsByType[type] || [];
               return (
                 <TabsContent key={type} value={type} className="space-y-2 mt-4">
-                  {typeModels.map((model) => (
-                    <div
-                      key={model.id}
-                      className="group flex items-center justify-between p-3 rounded-lg border border-transparent bg-transparent hover:bg-card hover:border-border hover:shadow-sm transition-all duration-200"
-                    >
-                      <div className="flex items-center gap-3">
-                        <div className="opacity-70 group-hover:opacity-100 transition-opacity">
-                          {renderModelListIcon(32)}
+                  {typeModels.map((model) => {
+                    const isEnabled = modelEnabledStates[model.id] ?? model.enabled ?? false;
+                    return (
+                      <div
+                        key={model.id}
+                        className="group flex items-center justify-between p-3 rounded-lg border border-transparent bg-transparent hover:bg-card hover:border-border hover:shadow-sm transition-all duration-200"
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className="opacity-70 group-hover:opacity-100 transition-opacity">
+                            {renderModelListIcon(32)}
+                          </div>
+                          <div className="flex flex-col gap-0.5">
+                            <div className="flex items-center gap-2">
+                              <span className="font-medium leading-tight">
+                                {model.displayName || model.id}
+                              </span>
+                            </div>
+                            <div className="flex flex-wrap gap-x-3 text-xs text-muted-foreground leading-tight">
+                              {model.releasedAt && <span>{model.releasedAt}</span>}
+                              {model.pricing?.input && (
+                                <span>Input ${(model.pricing.input || 0).toFixed(2)}/M</span>
+                              )}
+                              {model.pricing?.output && (
+                                <span>Output ${(model.pricing.output || 0).toFixed(2)}/M</span>
+                              )}
+                              {model.contextWindowTokens && (
+                                <span>{(model.contextWindowTokens / 1000).toFixed(0)}K</span>
+                              )}
+                            </div>
+                          </div>
                         </div>
-                        <div className="flex flex-col gap-0.5">
-                          <div className="flex items-center gap-2">
-                            <span className="font-medium leading-tight">
-                              {model.displayName || model.id}
-                            </span>
-                          </div>
-                          <div className="flex flex-wrap gap-x-3 text-xs text-muted-foreground leading-tight">
-                            {model.releasedAt && <span>{model.releasedAt}</span>}
-                            {model.pricing?.input && (
-                              <span>Input ${(model.pricing.input || 0).toFixed(2)}/M</span>
-                            )}
-                            {model.pricing?.output && (
-                              <span>Output ${(model.pricing.output || 0).toFixed(2)}/M</span>
-                            )}
-                            {model.contextWindowTokens && (
-                              <span>{(model.contextWindowTokens / 1000).toFixed(0)}K</span>
-                            )}
-                          </div>
+                        <div className="flex items-center gap-4">
+                          {model.abilities && renderAbilityIcons(model.abilities)}
+                          <Switch
+                            checked={isEnabled}
+                            onCheckedChange={(checked) => handleModelToggle(model.id, checked)}
+                          />
                         </div>
                       </div>
-                      <div className="flex items-center gap-4">
-                        {model.abilities && renderAbilityIcons(model.abilities)}
-                        <Switch defaultChecked={model.enabled} />
-                      </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </TabsContent>
               );
             })}

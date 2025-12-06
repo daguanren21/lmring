@@ -35,7 +35,7 @@ export const messageSchema = z.object({
 });
 
 export const modelResponseSchema = z.object({
-  messageId: z.string().uuid('Invalid message ID'),
+  messageId: z.uuid('Invalid message ID'),
   modelName: z.string().min(1).max(100),
   providerName: z.string().min(1).max(100),
   responseContent: z.string().trim().min(1).max(50000),
@@ -44,14 +44,14 @@ export const modelResponseSchema = z.object({
 });
 
 export const voteSchema = z.object({
-  messageId: z.string().uuid('Invalid message ID'),
-  modelResponseId: z.string().uuid('Invalid model response ID'),
+  messageId: z.uuid('Invalid message ID'),
+  modelResponseId: z.uuid('Invalid model response ID'),
   voteType: z.enum(['like', 'dislike', 'neutral']),
 });
 
 export const apiKeySchema = z.object({
-  providerName: z.enum(SUPPORTED_PROVIDERS),
-  apiKey: z.string().min(10).max(500),
+  providerName: z.string().min(1).max(100),
+  apiKey: z.string().min(1).max(500),
   proxyUrl: z
     .string()
     .max(500)
@@ -60,6 +60,37 @@ export const apiKeySchema = z.object({
       'Must be a valid URL starting with http:// or https://',
     )
     .optional(),
+  enabled: z.boolean().optional(),
+});
+
+export const apiKeyPatchSchema = z.object({
+  enabled: z.boolean().optional(),
+});
+
+export const connectionCheckSchema = z.object({
+  providerName: z.string().min(1).max(100),
+  apiKey: z.string().min(1).max(500),
+  proxyUrl: z
+    .string()
+    .max(500)
+    .refine(
+      (val) => val === '' || /^https?:\/\/.+/.test(val),
+      'Must be a valid URL starting with http:// or https://',
+    )
+    .optional(),
+  model: z.string().min(1).max(200),
+});
+
+export const modelEnableSchema = z.object({
+  models: z
+    .array(
+      z.object({
+        modelId: z.string().min(1).max(200),
+        enabled: z.boolean(),
+      }),
+    )
+    .min(1)
+    .max(100),
 });
 
 export const userPreferencesSchema = z.object({
@@ -74,7 +105,7 @@ export const shareSchema = z.object({
 });
 
 export const arenaModelSchema = z.object({
-  keyId: z.string().uuid('Invalid API key ID'),
+  keyId: z.uuid('Invalid API key ID'),
   modelId: z.string().min(1).max(200),
   options: z
     .object({
@@ -104,18 +135,19 @@ export const arenaCompareSchema = z.object({
     .optional(),
 });
 
-// Type exports
 export type ConversationInput = z.infer<typeof conversationSchema>;
 export type MessageInput = z.infer<typeof messageSchema>;
 export type ModelResponseInput = z.infer<typeof modelResponseSchema>;
 export type VoteInput = z.infer<typeof voteSchema>;
 export type ApiKeyInput = z.infer<typeof apiKeySchema>;
+export type ApiKeyPatchInput = z.infer<typeof apiKeyPatchSchema>;
+export type ConnectionCheckInput = z.infer<typeof connectionCheckSchema>;
+export type ModelEnableInput = z.infer<typeof modelEnableSchema>;
 export type UserPreferencesInput = z.infer<typeof userPreferencesSchema>;
 export type ShareInput = z.infer<typeof shareSchema>;
 export type ArenaModelInput = z.infer<typeof arenaModelSchema>;
 export type ArenaCompareInput = z.infer<typeof arenaCompareSchema>;
 
-// Utility functions
 export function maskApiKey(apiKey: string): string {
   if (apiKey.length <= 8) {
     return '*'.repeat(apiKey.length);

@@ -15,6 +15,13 @@
       "when": 1733097600000,
       "tag": "0001_add_proxy_url",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1749225600000,
+      "tag": "0002_add_provider_enabled",
+      "breakpoints": true
     }
   ]
 }

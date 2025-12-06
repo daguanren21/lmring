@@ -88,8 +88,9 @@ import {
 import { useTheme } from 'next-themes';
 import * as React from 'react';
 import { useProviderMetadata } from '@/hooks/use-provider-metadata';
+import { maskApiKey } from '@/libs/validation';
 import { ProviderLayout } from './_components/provider/ProviderLayout';
-import type { Provider } from './_components/provider/types';
+import type { ApiKeyRecord, Provider } from './_components/provider/types';
 
 // biome-ignore lint/suspicious/noExplicitAny: @lobehub/icons has incompatible CompoundedIcon types per icon
 const ICON_MAP: Record<string, any> = {
@@ -167,24 +168,47 @@ export default function SettingsPage() {
   const [mounted, setMounted] = React.useState(false);
   const [activeTab, setActiveTab] = React.useState<Tab>('general');
   const [telemetryEnabled, setTelemetryEnabled] = React.useState(false);
+  const [apiKeysLoaded, setApiKeysLoaded] = React.useState(false);
+  const [savedApiKeys, setSavedApiKeys] = React.useState<ApiKeyRecord[]>([]);
   const providerMetadata = useProviderMetadata();
 
   React.useEffect(() => {
     setMounted(true);
   }, []);
 
-  const initialProviders: Provider[] = React.useMemo(
-    () =>
-      providerMetadata.map((p) => ({
+  React.useEffect(() => {
+    const loadApiKeys = async () => {
+      try {
+        const response = await fetch('/api/settings/api-keys');
+        if (response.ok) {
+          const data = await response.json();
+          setSavedApiKeys(data.keys || []);
+        }
+      } catch (error) {
+        console.error('Failed to load API keys:', error);
+      } finally {
+        setApiKeysLoaded(true);
+      }
+    };
+
+    loadApiKeys();
+  }, []);
+
+  const initialProviders: Provider[] = React.useMemo(() => {
+    const savedKeysMap = new Map(savedApiKeys.map((key) => [key.providerName.toLowerCase(), key]));
+
+    return providerMetadata.map((p) => {
+      const savedKey = savedKeysMap.get(p.id.toLowerCase());
+      return {
         id: p.id,
         name: p.name,
-        connected: false,
+        connected: savedKey?.enabled ?? false,
         Icon: ICON_MAP[p.id]?.Avatar || ICON_MAP[p.id],
         CombineIcon: ICON_MAP[p.id]?.Combine,
         TextIcon: ICON_MAP[p.id]?.Text,
         BrandIcon: ICON_MAP[p.id]?.Brand || ICON_MAP[p.id]?.BrandColor,
         description: p.description,
-        type: 'disabled' as const,
+        type: savedKey?.enabled ? ('enabled' as const) : ('disabled' as const),
         tags: [p.name],
         models: p.models.map((m) => ({
           id: m.id,
@@ -192,25 +216,64 @@ export default function SettingsPage() {
           contextLength: m.contextWindowTokens,
           maxOutputTokens: m.maxOutput,
         })),
-      })),
-    [providerMetadata],
-  );
+        apiKeyId: savedKey?.id,
+        apiKey: savedKey ? maskApiKey('sk-xxxxxxxxxxxx') : undefined,
+        proxyUrl: savedKey?.proxyUrl,
+      };
+    });
+  }, [providerMetadata, savedApiKeys]);
 
   const [providers, setProviders] = React.useState<Provider[]>([]);
 
   React.useEffect(() => {
-    setProviders(initialProviders);
-  }, [initialProviders]);
+    if (apiKeysLoaded) {
+      setProviders(initialProviders);
+    }
+  }, [initialProviders, apiKeysLoaded]);
 
-  const handleToggleProvider = (id: string) => {
-    setProviders((prev) =>
-      prev.map((p) =>
-        p.id === id
-          ? { ...p, connected: !p.connected, type: p.connected ? 'disabled' : 'enabled' }
-          : p,
-      ),
-    );
-  };
+  const handleToggleProvider = React.useCallback(
+    (id: string, enabled?: boolean, apiKeyId?: string) => {
+      setProviders((prev) =>
+        prev.map((p) => {
+          if (p.id === id) {
+            const newEnabled = enabled !== undefined ? enabled : !p.connected;
+            return {
+              ...p,
+              connected: newEnabled,
+              type: newEnabled ? 'enabled' : 'disabled',
+              apiKeyId: apiKeyId || p.apiKeyId,
+            };
+          }
+          return p;
+        }),
+      );
+    },
+    [],
+  );
+
+  const handleSaveProvider = React.useCallback((providerId: string, apiKeyId: string) => {
+    setProviders((prev) => prev.map((p) => (p.id === providerId ? { ...p, apiKeyId } : p)));
+    setSavedApiKeys((prev) => {
+      const existing = prev.find((k) => k.providerName.toLowerCase() === providerId.toLowerCase());
+      if (existing) {
+        return prev.map((k) =>
+          k.providerName.toLowerCase() === providerId.toLowerCase() ? { ...k, id: apiKeyId } : k,
+        );
+      }
+      return [
+        ...prev,
+        {
+          id: apiKeyId,
+          providerName: providerId,
+          proxyUrl: '',
+          enabled: false,
+          configSource: 'manual',
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        },
+      ];
+    });
+  }, []);
 
   const handleAddProvider = (provider: Provider) => {
     setProviders((prev) => [provider, ...prev]);
@@ -261,6 +324,7 @@ export default function SettingsPage() {
           <ProviderLayout
             providers={providers}
             onToggleProvider={handleToggleProvider}
+            onSaveProvider={handleSaveProvider}
             onAddProvider={handleAddProvider}
           />
         ) : (

@@ -23,6 +23,7 @@ export async function GET(request: Request) {
         id: apiKeys.id,
         providerName: apiKeys.providerName,
         proxyUrl: apiKeys.proxyUrl,
+        enabled: apiKeys.enabled,
         configSource: apiKeys.configSource,
         createdAt: apiKeys.createdAt,
         updatedAt: apiKeys.updatedAt,
@@ -30,7 +31,6 @@ export async function GET(request: Request) {
       .from(apiKeys)
       .where(eq(apiKeys.userId, userId));
 
-    // Add default URL fallback for each key
     const keysWithDefaults = keys.map((key) => ({
       ...key,
       proxyUrl: key.proxyUrl ?? getDefaultProviderUrl(key.providerName),
@@ -74,19 +74,22 @@ export async function POST(request: Request) {
 
     const encryptedKey = encrypt(body.apiKey);
 
-    // Normalize empty string to null for storage
     const proxyUrlToStore = body.proxyUrl?.trim() || null;
+
+    const enabledValue = body.enabled ?? false;
 
     const [existingKey] = existing;
     if (existingKey) {
-      await db
+      const [updated] = await db
         .update(apiKeys)
         .set({
           encryptedKey,
           proxyUrl: proxyUrlToStore,
+          enabled: enabledValue,
           updatedAt: new Date(),
         })
-        .where(eq(apiKeys.id, existingKey.id));
+        .where(eq(apiKeys.id, existingKey.id))
+        .returning();
 
       return NextResponse.json(
         {
@@ -94,6 +97,7 @@ export async function POST(request: Request) {
           id: existingKey.id,
           providerName: body.providerName,
           proxyUrl: proxyUrlToStore ?? getDefaultProviderUrl(body.providerName),
+          enabled: updated?.enabled ?? enabledValue,
         },
         { status: 200 },
       );
@@ -106,6 +110,7 @@ export async function POST(request: Request) {
         providerName: body.providerName,
         encryptedKey,
         proxyUrl: proxyUrlToStore,
+        enabled: enabledValue,
         configSource: 'manual',
       })
       .returning();
@@ -116,6 +121,7 @@ export async function POST(request: Request) {
         id: newKey?.id,
         providerName: body.providerName,
         proxyUrl: proxyUrlToStore ?? getDefaultProviderUrl(body.providerName),
+        enabled: newKey?.enabled ?? enabledValue,
       },
       { status: 201 },
     );

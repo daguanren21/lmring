@@ -91,12 +91,37 @@ export const apiKeys = pgTable(
     providerName: text('provider_name').notNull(),
     encryptedKey: text('encrypted_key').notNull(),
     proxyUrl: text('proxy_url'), // Custom proxy URL (nullable, plain text)
+    enabled: boolean('enabled').default(false).notNull(), // Whether this provider is enabled
     configSource: configSourceEnum('config_source').default('manual'),
     createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
     updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
   },
   (table) => [
     index('api_keys_user_id_idx').on(table.userId),
+    unique('api_keys_user_provider_unique').on(table.userId, table.providerName),
+  ],
+);
+
+// User enabled models - tracks which models are enabled for each API key
+export const userEnabledModels = pgTable(
+  'user_enabled_models',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    userId: uuid('user_id')
+      .references(() => users.id, { onDelete: 'cascade' })
+      .notNull(),
+    apiKeyId: uuid('api_key_id')
+      .references(() => apiKeys.id, { onDelete: 'cascade' })
+      .notNull(),
+    modelId: text('model_id').notNull(), // Model identifier like "gpt-4o"
+    enabled: boolean('enabled').default(true).notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
+  },
+  (table) => [
+    index('user_enabled_models_user_id_idx').on(table.userId),
+    index('user_enabled_models_api_key_id_idx').on(table.apiKeyId),
+    unique('user_enabled_models_api_key_model_unique').on(table.apiKeyId, table.modelId),
   ],
 );
 
@@ -312,6 +337,7 @@ export const verification = pgTable(
 export const usersRelations = relations(users, ({ one, many }) => ({
   preferences: one(userPreferences),
   apiKeys: many(apiKeys),
+  enabledModels: many(userEnabledModels),
   conversations: many(conversations),
   votes: many(userVotes),
   files: many(files),
@@ -326,10 +352,22 @@ export const userPreferencesRelations = relations(userPreferences, ({ one }) => 
   }),
 }));
 
-export const apiKeysRelations = relations(apiKeys, ({ one }) => ({
+export const apiKeysRelations = relations(apiKeys, ({ one, many }) => ({
   user: one(users, {
     fields: [apiKeys.userId],
     references: [users.id],
+  }),
+  enabledModels: many(userEnabledModels),
+}));
+
+export const userEnabledModelsRelations = relations(userEnabledModels, ({ one }) => ({
+  user: one(users, {
+    fields: [userEnabledModels.userId],
+    references: [users.id],
+  }),
+  apiKey: one(apiKeys, {
+    fields: [userEnabledModels.apiKeyId],
+    references: [apiKeys.id],
   }),
 }));
 
@@ -422,3 +460,5 @@ export type Account = typeof account.$inferSelect;
 export type NewAccount = typeof account.$inferInsert;
 export type Verification = typeof verification.$inferSelect;
 export type NewVerification = typeof verification.$inferInsert;
+export type UserEnabledModel = typeof userEnabledModels.$inferSelect;
+export type NewUserEnabledModel = typeof userEnabledModels.$inferInsert;

@@ -1,4 +1,4 @@
-import type { AiModelType, ModelAbilities } from '@lmring/model-depot';
+import type { AiModelType, DefaultModelListItem, ModelAbilities } from '@lmring/model-depot';
 import { getEndpointConfig, getModelsForProvider } from '@lmring/model-depot';
 import {
   Badge,
@@ -33,7 +33,6 @@ import {
   LockIcon,
   MessageSquareIcon,
   MicIcon,
-  PlusIcon,
   RadioIcon,
   RotateCwIcon,
   SearchIcon,
@@ -43,6 +42,7 @@ import {
 } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
+import { AddModelDialog } from './AddModelDialog';
 import type { ConnectionCheckResponse, Provider, SaveApiKeyResponse } from './types';
 
 const MODEL_TYPE_CONFIG: Record<
@@ -83,6 +83,7 @@ export function ProviderDetail({ provider, onToggle, onSave }: ProviderDetailPro
   const [fetchedApiKey, setFetchedApiKey] = useState<string | null>(null);
 
   const [modelEnabledStates, setModelEnabledStates] = useState<Record<string, boolean>>({});
+  const [customModels, setCustomModels] = useState<DefaultModelListItem[]>([]);
 
   const hasExistingApiKey = Boolean(provider.apiKeyId);
 
@@ -135,8 +136,32 @@ export function ProviderDetail({ provider, onToggle, onSave }: ProviderDetailPro
   }, [provider.apiKeyId]);
 
   const models = useMemo(() => {
-    return getModelsForProvider(provider.id.toLowerCase());
-  }, [provider.id]);
+    const staticModels = getModelsForProvider(provider.id.toLowerCase());
+    const staticIds = new Set(staticModels.map((m) => m.id));
+
+    const dbCustomModels = Object.keys(modelEnabledStates)
+      .filter((id) => !staticIds.has(id))
+      .map((id) => ({
+        id,
+        displayName: id,
+        type: 'chat' as const,
+        abilities: {},
+      }));
+
+    const mergedCustomModelsMap = new Map();
+
+    for (const model of dbCustomModels) {
+      mergedCustomModelsMap.set(model.id, model);
+    }
+
+    for (const model of customModels) {
+      mergedCustomModelsMap.set(model.id, {
+        ...model,
+      });
+    }
+
+    return [...staticModels, ...mergedCustomModelsMap.values()] as typeof staticModels;
+  }, [provider.id, modelEnabledStates, customModels]);
 
   const filteredModels = useMemo(() => {
     if (!searchQuery) return models;
@@ -336,6 +361,25 @@ export function ProviderDetail({ provider, onToggle, onSave }: ProviderDetailPro
       }
     },
     [provider.apiKeyId],
+  );
+
+  const handleAddModel = useCallback(
+    async (model: { id: string; name: string }) => {
+      setCustomModels((prev) => [
+        ...prev,
+        {
+          id: model.id,
+          displayName: model.name,
+          type: 'chat' as const,
+          abilities: {},
+          providerId: provider.id.toLowerCase(),
+          source: 'custom' as const,
+        },
+      ]);
+      await handleModelToggle(model.id, true);
+      toast.success('Model Added');
+    },
+    [handleModelToggle, provider.id],
   );
 
   const handleShowKey = useCallback(async () => {
@@ -599,9 +643,7 @@ export function ProviderDetail({ provider, onToggle, onSave }: ProviderDetailPro
             <Button variant="outline" size="icon" className="h-9 w-9" title="Fetch models">
               <RotateCwIcon className="h-4 w-4" />
             </Button>
-            <Button variant="outline" size="icon" className="h-9 w-9" title="Add model">
-              <PlusIcon className="h-4 w-4" />
-            </Button>
+            <AddModelDialog onAdd={handleAddModel} />
           </div>
         </div>
 

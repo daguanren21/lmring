@@ -79,12 +79,19 @@ export function ProviderDetail({ provider, onToggle, onSave }: ProviderDetailPro
   const [isSaving, setIsSaving] = useState(false);
   const [isToggling, setIsToggling] = useState(false);
 
+  const [isFetchingKey, setIsFetchingKey] = useState(false);
+  const [fetchedApiKey, setFetchedApiKey] = useState<string | null>(null);
+
   const [modelEnabledStates, setModelEnabledStates] = useState<Record<string, boolean>>({});
+
+  const hasExistingApiKey = Boolean(provider.apiKeyId);
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: provider.id is intentionally included to reset form when provider changes
   useEffect(() => {
     if (provider.apiKey) {
       setApiKey(provider.apiKey);
+    } else if (provider.apiKeyId) {
+      setApiKey('');
     } else {
       setApiKey('');
     }
@@ -96,7 +103,36 @@ export function ProviderDetail({ provider, onToggle, onSave }: ProviderDetailPro
     setCheckStatus('idle');
     setCheckError('');
     setResponseTime(null);
-  }, [provider.id, provider.apiKey, provider.proxyUrl]);
+    setFetchedApiKey(null);
+    setShowKey(false);
+  }, [provider.id, provider.apiKey, provider.proxyUrl, provider.apiKeyId]);
+
+  useEffect(() => {
+    const fetchModelStates = async () => {
+      if (!provider.apiKeyId) {
+        setModelEnabledStates({});
+        return;
+      }
+
+      try {
+        // Use dedicated enabled-models endpoint that returns raw database records
+        // This ensures model IDs match exactly what was saved, regardless of provider API differences
+        const response = await fetch(`/api/settings/api-keys/${provider.apiKeyId}/enabled-models`);
+        if (response.ok) {
+          const data = await response.json();
+          const statesMap: Record<string, boolean> = {};
+          for (const model of data.models || []) {
+            statesMap[model.modelId] = model.enabled;
+          }
+          setModelEnabledStates(statesMap);
+        }
+      } catch (error) {
+        console.error('Failed to fetch model states:', error);
+      }
+    };
+
+    fetchModelStates();
+  }, [provider.apiKeyId]);
 
   const models = useMemo(() => {
     return getModelsForProvider(provider.id.toLowerCase());
@@ -302,6 +338,42 @@ export function ProviderDetail({ provider, onToggle, onSave }: ProviderDetailPro
     [provider.apiKeyId],
   );
 
+  const handleShowKey = useCallback(async () => {
+    if (showKey) {
+      setShowKey(false);
+      return;
+    }
+
+    if (fetchedApiKey) {
+      setShowKey(true);
+      return;
+    }
+
+    if (!provider.apiKeyId) {
+      setShowKey(true);
+      return;
+    }
+
+    setIsFetchingKey(true);
+    try {
+      const response = await fetch(`/api/settings/api-keys/${provider.apiKeyId}`);
+      if (response.ok) {
+        const data = await response.json();
+        setFetchedApiKey(data.apiKey);
+        setApiKey(data.apiKey);
+        setShowKey(true);
+      } else {
+        toast.error('Failed to fetch API key');
+      }
+    } catch (error) {
+      toast.error('Failed to fetch API key', {
+        description: error instanceof Error ? error.message : 'Network error',
+      });
+    } finally {
+      setIsFetchingKey(false);
+    }
+  }, [showKey, fetchedApiKey, provider.apiKeyId]);
+
   const renderProviderIcon = (size = 20, className?: string) => {
     if (provider.Icon) {
       return (
@@ -421,17 +493,31 @@ export function ProviderDetail({ provider, onToggle, onSave }: ProviderDetailPro
               type={showKey ? 'text' : 'password'}
               value={apiKey}
               onChange={(e) => setApiKey(e.target.value)}
-              placeholder="Enter API Key"
+              placeholder={
+                hasExistingApiKey ? 'API Key saved (enter new to replace)' : 'Enter API Key'
+              }
               className="pr-10 h-9"
             />
             <button
               type="button"
-              onClick={() => setShowKey(!showKey)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+              onClick={handleShowKey}
+              disabled={isFetchingKey}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground disabled:opacity-50"
             >
-              {showKey ? <EyeOffIcon className="h-4 w-4" /> : <EyeIcon className="h-4 w-4" />}
+              {isFetchingKey ? (
+                <Loader2Icon className="h-4 w-4 animate-spin" />
+              ) : showKey ? (
+                <EyeOffIcon className="h-4 w-4" />
+              ) : (
+                <EyeIcon className="h-4 w-4" />
+              )}
             </button>
           </div>
+          {hasExistingApiKey && !apiKey && (
+            <p className="text-xs text-muted-foreground">
+              Your API key is securely stored. Enter a new key to replace it.
+            </p>
+          )}
         </div>
 
         <div className="space-y-3">
@@ -548,11 +634,16 @@ export function ProviderDetail({ provider, onToggle, onSave }: ProviderDetailPro
             </div>
 
             {sortedModelTypes.map((type) => {
-              const typeModels = modelsByType[type] || [];
+              const typeModels = [...(modelsByType[type] || [])].sort((a, b) => {
+                const aEnabled = modelEnabledStates[a.id] ?? false;
+                const bEnabled = modelEnabledStates[b.id] ?? false;
+                if (aEnabled === bEnabled) return 0;
+                return aEnabled ? -1 : 1;
+              });
               return (
                 <TabsContent key={type} value={type} className="space-y-2 mt-4">
                   {typeModels.map((model) => {
-                    const isEnabled = modelEnabledStates[model.id] ?? model.enabled ?? false;
+                    const isEnabled = modelEnabledStates[model.id] ?? false;
                     return (
                       <div
                         key={model.id}

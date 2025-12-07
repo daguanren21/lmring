@@ -1,6 +1,14 @@
 import type { AiModelType, DefaultModelListItem, ModelAbilities } from '@lmring/model-depot';
 import { getEndpointConfig, getModelsForProvider } from '@lmring/model-depot';
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
   Badge,
   Button,
   cn,
@@ -85,6 +93,7 @@ export function ProviderDetail({ provider, onToggle, onSave }: ProviderDetailPro
 
   const [modelEnabledStates, setModelEnabledStates] = useState<Record<string, boolean>>({});
   const [customModels, setCustomModels] = useState<DefaultModelListItem[]>([]);
+  const [modelToDelete, setModelToDelete] = useState<string | null>(null);
 
   const hasExistingApiKey = Boolean(provider.apiKeyId);
 
@@ -429,7 +438,8 @@ export function ProviderDetail({ provider, onToggle, onSave }: ProviderDetailPro
             source: 'custom' as const,
           },
         ]);
-        setModelEnabledStates((prev) => ({ ...prev, [model.id]: true }));
+        // Do not auto-enable new models
+        // setModelEnabledStates((prev) => ({ ...prev, [model.id]: true }));
         toast.success('Model Added');
       } catch (error) {
         toast.error('Failed to add model', {
@@ -810,10 +820,10 @@ export function ProviderDetail({ provider, onToggle, onSave }: ProviderDetailPro
                           {model.abilities && renderAbilityIcons(model.abilities)}
                           {customModels.some((cm) => cm.id === model.id) && (
                             <Button
-                              variant="outline"
+                              variant="ghost"
                               size="icon"
-                              className="h-8 w-8 text-muted-foreground hover:text-destructive hover:border-destructive"
-                              onClick={() => handleDeleteCustomModel(model.id)}
+                              className="h-8 w-8 text-muted-foreground hover:text-destructive hover:border-destructive border border-transparent"
+                              onClick={() => setModelToDelete(model.id)}
                             >
                               <Trash2Icon className="h-4 w-4" />
                             </Button>
@@ -836,6 +846,29 @@ export function ProviderDetail({ provider, onToggle, onSave }: ProviderDetailPro
           </div>
         )}
       </div>
+
+      <AlertDialog open={!!modelToDelete} onOpenChange={(open) => !open && setModelToDelete(null)}>
+        <AlertDialogContent open={!!modelToDelete}>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Custom Model</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete this model? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setModelToDelete(null)}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={() => {
+                if (modelToDelete) handleDeleteCustomModel(modelToDelete);
+                setModelToDelete(null);
+              }}
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

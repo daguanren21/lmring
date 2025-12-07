@@ -184,7 +184,8 @@ describe('API Keys Management', () => {
 
       mockDbInstance.update.mockReturnValueOnce(mockDbInstance);
       mockDbInstance.set.mockReturnValueOnce(mockDbInstance);
-      mockDbInstance.where.mockResolvedValueOnce(undefined);
+      mockDbInstance.where.mockReturnValueOnce(mockDbInstance);
+      mockDbInstance.returning.mockResolvedValueOnce([{ ...mockApiKey, enabled: false }]);
 
       const request = createMockRequest('POST', 'http://localhost:3000/api/settings/api-keys', {
         providerName: 'openai',

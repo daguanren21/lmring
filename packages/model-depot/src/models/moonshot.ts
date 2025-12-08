@@ -1,10 +1,153 @@
 import type { ChatModelCard } from '../types';
 
 const moonshotModels: ChatModelCard[] = [
+  // Kimi K2 Series (Thinking)
+  {
+    id: 'kimi-k2-thinking',
+    displayName: 'Kimi K2 Thinking',
+    description: 'K2 长思考模型，支持 256k 上下文，支持多步工具调用与思考，擅长解决更复杂的问题。',
+    type: 'chat',
+    contextWindowTokens: 262_144,
+    maxOutput: 65_536,
+    enabled: true,
+    abilities: {
+      functionCall: true,
+      reasoning: true,
+      structuredOutput: true,
+    },
+    pricing: {
+      input: 4,
+      output: 16,
+      cachedInput: 1,
+      currency: 'CNY',
+    },
+    releasedAt: '2025-11-06',
+  },
+  {
+    id: 'kimi-k2-thinking-turbo',
+    displayName: 'Kimi K2 Thinking Turbo',
+    description:
+      'K2 长思考模型的高速版本，支持 256k 上下文，擅长深度推理，输出速度提升至每秒 60-100 tokens。',
+    type: 'chat',
+    contextWindowTokens: 262_144,
+    maxOutput: 65_536,
+    abilities: {
+      functionCall: true,
+      reasoning: true,
+      structuredOutput: true,
+    },
+    pricing: {
+      input: 8,
+      output: 58,
+      cachedInput: 1,
+      currency: 'CNY',
+    },
+    releasedAt: '2025-11-06',
+  },
+
+  // Kimi K2 Series (Standard)
+  {
+    id: 'kimi-k2-0905-preview',
+    displayName: 'Kimi K2 0905',
+    description:
+      'kimi-k2-0905-preview 模型上下文长度为 256k，具备更强的 Agentic Coding 能力、更突出的前端代码的美观度和实用性、以及更好的上下文理解能力。',
+    type: 'chat',
+    contextWindowTokens: 262_144,
+    enabled: true,
+    abilities: {
+      functionCall: true,
+      structuredOutput: true,
+    },
+    pricing: {
+      input: 4,
+      output: 16,
+      cachedInput: 1,
+      currency: 'CNY',
+    },
+    releasedAt: '2025-09-05',
+  },
+  {
+    id: 'kimi-k2-0711-preview',
+    displayName: 'Kimi K2 0711',
+    description:
+      'kimi-k2 是一款具备超强代码和 Agent 能力的 MoE 架构基础模型，总参数 1T，激活参数 32B。在通用知识推理、编程、数学、Agent 等主要类别的基准性能测试中，K2 模型的性能超过其他主流开源模型。',
+    type: 'chat',
+    contextWindowTokens: 131_072,
+    abilities: {
+      functionCall: true,
+    },
+    pricing: {
+      input: 4,
+      output: 16,
+      cachedInput: 1,
+      currency: 'CNY',
+    },
+    releasedAt: '2025-07-11',
+  },
+  {
+    id: 'kimi-k2-turbo-preview',
+    displayName: 'Kimi K2 0905 Turbo',
+    description:
+      'kimi-k2 是一款具备超强代码和 Agent 能力的 MoE 架构基础模型，总参数 1T，激活参数 32B。在通用知识推理、编程、数学、Agent 等主要类别的基准性能测试中，K2 模型的性能超过其他主流开源模型。',
+    type: 'chat',
+    contextWindowTokens: 262_144,
+    abilities: {
+      functionCall: true,
+    },
+    pricing: {
+      input: 8,
+      output: 58,
+      cachedInput: 1,
+      currency: 'CNY',
+    },
+    releasedAt: '2025-09-05',
+  },
+
+  // Kimi Latest
+  {
+    id: 'kimi-latest',
+    displayName: 'Kimi Latest',
+    description:
+      'Kimi 智能助手产品使用最新的 Kimi 大模型，可能包含尚未稳定的特性。支持图片理解，同时会自动根据请求的上下文长度选择 8k/32k/128k 模型作为计费模型。',
+    type: 'chat',
+    contextWindowTokens: 131_072,
+    enabled: true,
+    abilities: {
+      functionCall: true,
+      vision: true,
+    },
+    pricing: {
+      input: 10,
+      output: 30,
+      cachedInput: 1,
+      currency: 'CNY',
+    },
+    releasedAt: '2025-02-17',
+  },
+
+  // Moonshot V1 Series (Auto)
+  {
+    id: 'moonshot-v1-auto',
+    displayName: 'Moonshot V1 Auto',
+    description: 'Moonshot V1 Auto 可以根据当前上下文占用的 Tokens 数量来选择合适的模型。',
+    type: 'chat',
+    contextWindowTokens: 131_072,
+    abilities: {
+      functionCall: true,
+    },
+    pricing: {
+      input: 10,
+      output: 30,
+      currency: 'CNY',
+    },
+  },
+
+  // Moonshot V1 Series (Standard)
   {
     id: 'moonshot-v1-128k',
     displayName: 'Moonshot V1 128K',
-    description: 'Moonshot V1 128K 支持超长上下文，适合长文档处理。',
+    description:
+      'Moonshot V1 128K 是一款拥有超长上下文处理能力的模型，适用于生成超长文本，满足复杂的生成任务需求，能够处理多达128,000个tokens的内容，非常适合科研、学术和大型文档生成等应用场景。',
     type: 'chat',
     contextWindowTokens: 131_072,
     maxOutput: 4_096,
@@ -14,15 +157,16 @@ const moonshotModels: ChatModelCard[] = [
       structuredOutput: true,
     },
     pricing: {
-      input: 60,
-      output: 60,
+      input: 10,
+      output: 30,
       currency: 'CNY',
     },
   },
   {
     id: 'moonshot-v1-32k',
     displayName: 'Moonshot V1 32K',
-    description: 'Moonshot V1 32K 是平衡上下文和成本的选择。',
+    description:
+      'Moonshot V1 32K 提供中等长度的上下文处理能力，能够处理32,768个tokens，特别适合生成各种长文档和复杂对话，应用于内容创作、报告生成和对话系统等领域。',
     type: 'chat',
     contextWindowTokens: 32_768,
     maxOutput: 4_096,
@@ -32,15 +176,16 @@ const moonshotModels: ChatModelCard[] = [
       structuredOutput: true,
     },
     pricing: {
-      input: 24,
-      output: 24,
+      input: 5,
+      output: 20,
       currency: 'CNY',
     },
   },
   {
     id: 'moonshot-v1-8k',
     displayName: 'Moonshot V1 8K',
-    description: 'Moonshot V1 8K 是经济实惠的基础版本。',
+    description:
+      'Moonshot V1 8K 专为生成短文本任务设计，具有高效的处理性能，能够处理8,192个tokens，非常适合简短对话、速记和快速内容生成。',
     type: 'chat',
     contextWindowTokens: 8_192,
     maxOutput: 4_096,
@@ -49,10 +194,66 @@ const moonshotModels: ChatModelCard[] = [
       structuredOutput: true,
     },
     pricing: {
-      input: 12,
-      output: 12,
+      input: 2,
+      output: 10,
       currency: 'CNY',
     },
+  },
+
+  // Moonshot V1 Vision Series
+  {
+    id: 'moonshot-v1-8k-vision-preview',
+    displayName: 'Moonshot V1 8K Vision Preview',
+    description:
+      'Kimi 视觉模型能够理解图片内容，包括图片文字、图片颜色和物体形状等内容。8K 上下文版本。',
+    type: 'chat',
+    contextWindowTokens: 8_192,
+    abilities: {
+      functionCall: true,
+      vision: true,
+    },
+    pricing: {
+      input: 2,
+      output: 10,
+      currency: 'CNY',
+    },
+    releasedAt: '2025-01-14',
+  },
+  {
+    id: 'moonshot-v1-32k-vision-preview',
+    displayName: 'Moonshot V1 32K Vision Preview',
+    description:
+      'Kimi 视觉模型能够理解图片内容，包括图片文字、图片颜色和物体形状等内容。32K 上下文版本。',
+    type: 'chat',
+    contextWindowTokens: 32_768,
+    abilities: {
+      functionCall: true,
+      vision: true,
+    },
+    pricing: {
+      input: 5,
+      output: 20,
+      currency: 'CNY',
+    },
+    releasedAt: '2025-01-14',
+  },
+  {
+    id: 'moonshot-v1-128k-vision-preview',
+    displayName: 'Moonshot V1 128K Vision Preview',
+    description:
+      'Kimi 视觉模型能够理解图片内容，包括图片文字、图片颜色和物体形状等内容。128K 上下文版本。',
+    type: 'chat',
+    contextWindowTokens: 131_072,
+    abilities: {
+      functionCall: true,
+      vision: true,
+    },
+    pricing: {
+      input: 10,
+      output: 30,
+      currency: 'CNY',
+    },
+    releasedAt: '2025-01-14',
   },
 ];
 

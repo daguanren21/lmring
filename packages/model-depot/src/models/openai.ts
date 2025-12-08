@@ -1,31 +1,43 @@
-import type { ChatModelCard } from '../types';
+import type {
+  ChatModelCard,
+  EmbeddingModelCard,
+  ImageModelCard,
+  RealtimeModelCard,
+  STTModelCard,
+  TTSModelCard,
+} from '../types';
 
-const openaiModels: ChatModelCard[] = [
+// ============================================================================
+// Chat Models
+// ============================================================================
+
+const openaiChatModels: ChatModelCard[] = [
   {
-    id: 'gpt-4o',
-    displayName: 'GPT-4o',
-    description: 'GPT-4o 是 OpenAI 的旗舰多模态模型，支持文本和图像输入，适合各种复杂任务。',
+    id: 'gpt-5.1',
+    displayName: 'GPT-5.1',
+    description: 'GPT-5.1 针对编码和 agent 任务优化的旗舰模型，支持可配置的推理强度与更长上下文。',
     type: 'chat',
-    contextWindowTokens: 128_000,
-    maxOutput: 16_384,
+    contextWindowTokens: 400_000,
+    maxOutput: 128_000,
     enabled: true,
     abilities: {
       functionCall: true,
-      vision: true,
-      structuredOutput: true,
+      imageOutput: true,
+      reasoning: true,
       search: true,
+      vision: true,
     },
     pricing: {
-      input: 2.5,
+      input: 1.25,
       output: 10,
-      cachedInput: 1.25,
+      cachedInput: 0.125,
     },
-    releasedAt: '2024-05-13',
+    releasedAt: '2025-11-13',
   },
   {
-    id: 'gpt-4o-mini',
-    displayName: 'GPT-4o Mini',
-    description: 'GPT-4o mini 是性价比最高的小型模型，在聊天偏好上排名高于 GPT-4。',
+    id: 'gpt-5.1-chat-latest',
+    displayName: 'GPT-5.1 Chat',
+    description: 'GPT-5.1 Chat：用于 ChatGPT 的 GPT-5.1 变体，适合聊天场景。',
     type: 'chat',
     contextWindowTokens: 128_000,
     maxOutput: 16_384,
@@ -33,17 +45,328 @@ const openaiModels: ChatModelCard[] = [
     abilities: {
       functionCall: true,
       vision: true,
+    },
+    pricing: {
+      input: 1.25,
+      output: 10,
+      cachedInput: 0.125,
+    },
+    releasedAt: '2025-11-13',
+  },
+  {
+    id: 'gpt-5.1-codex',
+    displayName: 'GPT-5.1 Codex',
+    description: 'GPT-5.1 Codex：针对 agentic 编码任务优化的 GPT-5.1 版本。',
+    type: 'chat',
+    contextWindowTokens: 400_000,
+    maxOutput: 128_000,
+    abilities: {
+      functionCall: true,
+      imageOutput: true,
+      reasoning: true,
+      search: true,
+      vision: true,
+    },
+    pricing: {
+      input: 1.25,
+      output: 10,
+      cachedInput: 0.125,
+    },
+    releasedAt: '2025-11-13',
+  },
+  {
+    id: 'gpt-5.1-codex-mini',
+    displayName: 'GPT-5.1 Codex mini',
+    description: 'GPT-5.1 Codex mini：体积更小、成本更低的 Codex 变体。',
+    type: 'chat',
+    contextWindowTokens: 400_000,
+    maxOutput: 128_000,
+    abilities: {
+      functionCall: true,
+      imageOutput: true,
+      reasoning: true,
+      search: true,
+      vision: true,
+    },
+    pricing: {
+      input: 0.25,
+      output: 2,
+      cachedInput: 0.025,
+    },
+    releasedAt: '2025-11-13',
+  },
+  {
+    id: 'gpt-5',
+    displayName: 'GPT-5',
+    description: '跨领域编码和代理任务的最佳模型，在准确性、速度、推理、上下文识别方面实现了飞跃。',
+    type: 'chat',
+    contextWindowTokens: 400_000,
+    maxOutput: 128_000,
+    abilities: {
+      functionCall: true,
+      reasoning: true,
+      search: true,
       structuredOutput: true,
+      vision: true,
+    },
+    pricing: {
+      input: 1.25,
+      output: 10,
+      cachedInput: 0.125,
+    },
+    releasedAt: '2025-08-07',
+  },
+  {
+    id: 'gpt-5-pro',
+    displayName: 'GPT-5 pro',
+    description: 'GPT-5 pro 使用更多计算来更深入地思考，并持续提供更好的答案。',
+    type: 'chat',
+    contextWindowTokens: 400_000,
+    maxOutput: 272_000,
+    abilities: {
+      functionCall: true,
+      reasoning: true,
+      search: true,
+      vision: true,
+    },
+    pricing: {
+      input: 15,
+      output: 120,
+    },
+    releasedAt: '2025-10-06',
+  },
+  {
+    id: 'gpt-5-codex',
+    displayName: 'GPT-5 Codex',
+    description: 'GPT-5 Codex 针对 Codex 环境中的代理编码任务优化。',
+    type: 'chat',
+    contextWindowTokens: 400_000,
+    maxOutput: 128_000,
+    abilities: {
+      functionCall: true,
+      reasoning: true,
+      search: true,
+      vision: true,
+    },
+    pricing: {
+      input: 1.25,
+      output: 10,
+      cachedInput: 0.125,
+    },
+    releasedAt: '2024-09-15',
+  },
+  {
+    id: 'gpt-5-mini',
+    displayName: 'GPT-5 mini',
+    description: '更快、更经济高效的 GPT-5 版本，适用于明确定义的任务。',
+    type: 'chat',
+    contextWindowTokens: 400_000,
+    maxOutput: 128_000,
+    enabled: true,
+    abilities: {
+      functionCall: true,
+      reasoning: true,
+      search: true,
+      structuredOutput: true,
+      vision: true,
+    },
+    pricing: {
+      input: 0.25,
+      output: 2,
+      cachedInput: 0.025,
+    },
+    releasedAt: '2025-08-07',
+  },
+  {
+    id: 'gpt-5-nano',
+    displayName: 'GPT-5 nano',
+    description: '最快、最经济高效的 GPT-5 版本，适合需要快速响应且成本敏感的应用。',
+    type: 'chat',
+    contextWindowTokens: 400_000,
+    maxOutput: 128_000,
+    abilities: {
+      functionCall: true,
+      reasoning: true,
+      vision: true,
+    },
+    pricing: {
+      input: 0.05,
+      output: 0.4,
+      cachedInput: 0.005,
+    },
+    releasedAt: '2025-08-07',
+  },
+  {
+    id: 'gpt-5-chat-latest',
+    displayName: 'GPT-5 Chat',
+    description: 'ChatGPT 中使用的 GPT-5 模型，适合对话式交互应用。',
+    type: 'chat',
+    contextWindowTokens: 400_000,
+    maxOutput: 128_000,
+    abilities: {
+      vision: true,
+    },
+    pricing: {
+      input: 1.25,
+      output: 10,
+      cachedInput: 0.125,
+    },
+    releasedAt: '2025-08-07',
+  },
+  {
+    id: 'o4-mini',
+    displayName: 'o4-mini',
+    description: 'o4-mini 专为快速有效推理优化，在编码和视觉任务中表现出极高效率。',
+    type: 'chat',
+    contextWindowTokens: 200_000,
+    maxOutput: 100_000,
+    abilities: {
+      functionCall: true,
+      reasoning: true,
+      vision: true,
       search: true,
     },
     pricing: {
-      input: 0.15,
-      output: 0.6,
-      cachedInput: 0.075,
+      input: 1.1,
+      output: 4.4,
+      cachedInput: 0.275,
     },
-    releasedAt: '2024-07-18',
+    releasedAt: '2025-04-17',
   },
-
+  {
+    id: 'o4-mini-deep-research',
+    displayName: 'o4-mini Deep Research',
+    description: 'o4-mini-deep-research 是更快速、更实惠的深度研究模型。',
+    type: 'chat',
+    contextWindowTokens: 200_000,
+    maxOutput: 100_000,
+    abilities: {
+      functionCall: true,
+      reasoning: true,
+      search: true,
+      vision: true,
+    },
+    pricing: {
+      input: 2,
+      output: 8,
+      cachedInput: 0.5,
+    },
+    releasedAt: '2025-06-26',
+  },
+  {
+    id: 'o3-pro',
+    displayName: 'o3-pro',
+    description: 'o3-pro 模型使用更多的计算来更深入地思考并始终提供更好的答案。',
+    type: 'chat',
+    contextWindowTokens: 200_000,
+    maxOutput: 100_000,
+    abilities: {
+      functionCall: true,
+      reasoning: true,
+      search: true,
+      vision: true,
+    },
+    pricing: {
+      input: 20,
+      output: 80,
+    },
+    releasedAt: '2025-06-10',
+  },
+  {
+    id: 'o3',
+    displayName: 'o3',
+    description: 'o3 是全能强大的推理模型，在数学、科学、编程和视觉推理任务树立新标杆。',
+    type: 'chat',
+    contextWindowTokens: 200_000,
+    maxOutput: 100_000,
+    abilities: {
+      functionCall: true,
+      reasoning: true,
+      vision: true,
+      search: true,
+    },
+    pricing: {
+      input: 2,
+      output: 8,
+      cachedInput: 0.5,
+    },
+    releasedAt: '2025-04-16',
+  },
+  {
+    id: 'o3-deep-research',
+    displayName: 'o3 Deep Research',
+    description: 'o3-deep-research 是最先进的深度研究模型，专为处理复杂的多步骤研究任务。',
+    type: 'chat',
+    contextWindowTokens: 200_000,
+    maxOutput: 100_000,
+    abilities: {
+      functionCall: true,
+      reasoning: true,
+      search: true,
+      vision: true,
+    },
+    pricing: {
+      input: 10,
+      output: 40,
+      cachedInput: 2.5,
+    },
+    releasedAt: '2025-06-26',
+  },
+  {
+    id: 'o3-mini',
+    displayName: 'o3-mini',
+    description: 'o3-mini 是最新的小型推理模型，在相同成本下提供高智能。',
+    type: 'chat',
+    contextWindowTokens: 200_000,
+    maxOutput: 100_000,
+    abilities: {
+      functionCall: true,
+      reasoning: true,
+    },
+    pricing: {
+      input: 1.1,
+      output: 4.4,
+      cachedInput: 0.55,
+    },
+    releasedAt: '2025-01-31',
+  },
+  {
+    id: 'o1-pro',
+    displayName: 'o1-pro',
+    description: 'o1-pro 模型使用了更多计算资源，以进行更深入的思考，持续提供更优质回答。',
+    type: 'chat',
+    contextWindowTokens: 200_000,
+    maxOutput: 100_000,
+    abilities: {
+      functionCall: true,
+      reasoning: true,
+      vision: true,
+    },
+    pricing: {
+      input: 150,
+      output: 600,
+    },
+    releasedAt: '2025-03-19',
+  },
+  {
+    id: 'o1',
+    displayName: 'o1',
+    description: 'o1 是新的推理模型，支持图文输入，适用于需要复杂推理的任务。',
+    type: 'chat',
+    contextWindowTokens: 200_000,
+    maxOutput: 100_000,
+    abilities: {
+      functionCall: true,
+      reasoning: true,
+      vision: true,
+    },
+    pricing: {
+      input: 15,
+      output: 60,
+      cachedInput: 7.5,
+    },
+    releasedAt: '2024-12-17',
+  },
   {
     id: 'gpt-4.1',
     displayName: 'GPT-4.1',
@@ -100,85 +423,186 @@ const openaiModels: ChatModelCard[] = [
     },
     releasedAt: '2025-04-14',
   },
-
   {
-    id: 'o3',
-    displayName: 'o3',
-    description: 'o3 是全能强大的推理模型，在数学、科学、编程和视觉推理任务树立新标杆。',
+    id: 'gpt-4o',
+    displayName: 'GPT-4o',
+    description: 'GPT-4o 是 OpenAI 的旗舰多模态模型，支持文本和图像输入。',
     type: 'chat',
-    contextWindowTokens: 200_000,
-    maxOutput: 100_000,
+    contextWindowTokens: 128_000,
+    maxOutput: 16_384,
+    enabled: true,
     abilities: {
       functionCall: true,
-      reasoning: true,
       vision: true,
+      structuredOutput: true,
       search: true,
     },
     pricing: {
-      input: 2,
-      output: 8,
-      cachedInput: 0.5,
+      input: 2.5,
+      output: 10,
+      cachedInput: 1.25,
     },
-    releasedAt: '2025-04-16',
+    releasedAt: '2024-05-13',
   },
   {
-    id: 'o3-mini',
-    displayName: 'o3-mini',
-    description: 'o3-mini 是最新的小型推理模型，在相同成本下提供高智能。',
+    id: 'gpt-4o-2024-11-20',
+    displayName: 'GPT-4o 1120',
+    description: 'GPT-4o 2024-11-20 版本。',
     type: 'chat',
-    contextWindowTokens: 200_000,
-    maxOutput: 100_000,
+    contextWindowTokens: 128_000,
+    maxOutput: 16_384,
     abilities: {
       functionCall: true,
-      reasoning: true,
+      search: true,
+      vision: true,
     },
     pricing: {
-      input: 1.1,
-      output: 4.4,
-      cachedInput: 0.55,
+      input: 2.5,
+      output: 10,
+      cachedInput: 1.25,
     },
-    releasedAt: '2025-01-31',
+    releasedAt: '2024-11-20',
   },
   {
-    id: 'o4-mini',
-    displayName: 'o4-mini',
-    description: 'o4-mini 专为快速有效推理优化，在编码和视觉任务中表现出极高效率。',
+    id: 'gpt-4o-2024-05-13',
+    displayName: 'GPT-4o 0513',
+    description: 'GPT-4o 2024-05-13 版本。',
     type: 'chat',
-    contextWindowTokens: 200_000,
-    maxOutput: 100_000,
+    contextWindowTokens: 128_000,
+    maxOutput: 16_384,
     abilities: {
       functionCall: true,
-      reasoning: true,
+      search: true,
       vision: true,
+    },
+    pricing: {
+      input: 5,
+      output: 15,
+    },
+    releasedAt: '2024-05-13',
+  },
+  {
+    id: 'gpt-4o-search-preview',
+    displayName: 'GPT-4o Search Preview',
+    description: 'GPT-4o 搜索预览版，专门训练用于理解和执行网页搜索查询。',
+    type: 'chat',
+    contextWindowTokens: 128_000,
+    maxOutput: 16_384,
+    abilities: {
+      search: true,
+    },
+    settings: {
+      searchImpl: 'internal',
+    },
+    pricing: {
+      input: 2.5,
+      output: 10,
+    },
+    releasedAt: '2025-03-11',
+  },
+  {
+    id: 'gpt-4o-mini',
+    displayName: 'GPT-4o Mini',
+    description: 'GPT-4o mini 是性价比最高的小型模型，在聊天偏好上排名高于 GPT-4。',
+    type: 'chat',
+    contextWindowTokens: 128_000,
+    maxOutput: 16_384,
+    enabled: true,
+    abilities: {
+      functionCall: true,
+      vision: true,
+      structuredOutput: true,
       search: true,
     },
     pricing: {
-      input: 1.1,
-      output: 4.4,
-      cachedInput: 0.275,
+      input: 0.15,
+      output: 0.6,
+      cachedInput: 0.075,
     },
-    releasedAt: '2025-04-17',
+    releasedAt: '2024-07-18',
   },
   {
-    id: 'o1',
-    displayName: 'o1',
-    description: 'o1 是新的推理模型，支持图文输入，适用于需要复杂推理的任务。',
+    id: 'gpt-4o-mini-search-preview',
+    displayName: 'GPT-4o mini Search Preview',
+    description: 'GPT-4o mini 搜索预览版。',
     type: 'chat',
-    contextWindowTokens: 200_000,
-    maxOutput: 100_000,
+    contextWindowTokens: 128_000,
+    maxOutput: 16_384,
     abilities: {
-      functionCall: true,
-      reasoning: true,
+      search: true,
+    },
+    settings: {
+      searchImpl: 'internal',
+    },
+    pricing: {
+      input: 0.15,
+      output: 0.6,
+    },
+    releasedAt: '2025-03-11',
+  },
+  {
+    id: 'chatgpt-4o-latest',
+    displayName: 'ChatGPT-4o',
+    description: 'ChatGPT-4o 是动态模型，实时更新以保持当前最新版本。',
+    type: 'chat',
+    contextWindowTokens: 128_000,
+    abilities: {
       vision: true,
     },
     pricing: {
-      input: 15,
-      output: 60,
-      cachedInput: 7.5,
+      input: 5,
+      output: 15,
+    },
+    releasedAt: '2024-08-14',
+  },
+  {
+    id: 'gpt-audio',
+    displayName: 'GPT Audio',
+    description: 'GPT Audio 是面向音频输入输出的通用聊天模型。',
+    type: 'chat',
+    contextWindowTokens: 128_000,
+    maxOutput: 16_384,
+    abilities: {
+      functionCall: true,
+    },
+    pricing: {
+      input: 2.5,
+      output: 10,
+    },
+    releasedAt: '2025-08-28',
+  },
+  {
+    id: 'gpt-4o-audio-preview',
+    displayName: 'GPT-4o Audio Preview',
+    description: 'GPT-4o Audio Preview 模型，支持音频输入输出。',
+    type: 'chat',
+    contextWindowTokens: 128_000,
+    maxOutput: 16_384,
+    abilities: {
+      functionCall: true,
+    },
+    pricing: {
+      input: 2.5,
+      output: 10,
     },
     releasedAt: '2024-12-17',
   },
-
+  {
+    id: 'gpt-4o-mini-audio-preview',
+    displayName: 'GPT-4o mini Audio',
+    description: 'GPT-4o mini Audio 模型，支持音频输入输出。',
+    type: 'chat',
+    contextWindowTokens: 128_000,
+    maxOutput: 16_384,
+    abilities: {
+      functionCall: true,
+    },
+    pricing: {
+      input: 0.15,
+      output: 0.6,
+    },
+    releasedAt: '2024-12-17',
+  },
   {
     id: 'gpt-4-turbo',
     displayName: 'GPT-4 Turbo',
@@ -196,7 +620,96 @@ const openaiModels: ChatModelCard[] = [
     },
     releasedAt: '2024-04-09',
   },
-
+  {
+    id: 'gpt-4-turbo-2024-04-09',
+    displayName: 'GPT-4 Turbo Vision 0409',
+    description: 'GPT-4 Turbo 2024-04-09 版本，具备视觉功能。',
+    type: 'chat',
+    contextWindowTokens: 128_000,
+    maxOutput: 4_096,
+    abilities: {
+      functionCall: true,
+      vision: true,
+    },
+    pricing: {
+      input: 10,
+      output: 30,
+    },
+    releasedAt: '2024-04-09',
+  },
+  {
+    id: 'gpt-4-turbo-preview',
+    displayName: 'GPT-4 Turbo Preview',
+    description: 'GPT-4 Turbo Preview 版本。',
+    type: 'chat',
+    contextWindowTokens: 128_000,
+    abilities: {
+      functionCall: true,
+    },
+    pricing: {
+      input: 10,
+      output: 30,
+    },
+  },
+  {
+    id: 'gpt-4-0125-preview',
+    displayName: 'GPT-4 Turbo Preview 0125',
+    description: 'GPT-4 Turbo Preview 0125 版本。',
+    type: 'chat',
+    contextWindowTokens: 128_000,
+    abilities: {
+      functionCall: true,
+    },
+    pricing: {
+      input: 10,
+      output: 30,
+    },
+    releasedAt: '2024-01-25',
+  },
+  {
+    id: 'gpt-4-1106-preview',
+    displayName: 'GPT-4 Turbo Preview 1106',
+    description: 'GPT-4 Turbo Preview 1106 版本。',
+    type: 'chat',
+    contextWindowTokens: 128_000,
+    abilities: {
+      functionCall: true,
+    },
+    pricing: {
+      input: 10,
+      output: 30,
+    },
+    releasedAt: '2023-11-06',
+  },
+  {
+    id: 'gpt-4',
+    displayName: 'GPT-4',
+    description: 'GPT-4 提供了更大的上下文窗口，适用于需要广泛信息整合的场景。',
+    type: 'chat',
+    contextWindowTokens: 8192,
+    abilities: {
+      functionCall: true,
+    },
+    pricing: {
+      input: 30,
+      output: 60,
+    },
+  },
+  {
+    id: 'gpt-4-0613',
+    displayName: 'GPT-4 0613',
+    description: 'GPT-4 0613 版本。',
+    type: 'chat',
+    contextWindowTokens: 8192,
+    abilities: {
+      functionCall: true,
+    },
+    pricing: {
+      input: 30,
+      output: 60,
+    },
+    releasedAt: '2023-06-13',
+  },
   {
     id: 'gpt-3.5-turbo',
     displayName: 'GPT-3.5 Turbo',
@@ -212,6 +725,283 @@ const openaiModels: ChatModelCard[] = [
       output: 1.5,
     },
   },
+  {
+    id: 'gpt-3.5-turbo-0125',
+    displayName: 'GPT-3.5 Turbo 0125',
+    description: 'GPT-3.5 Turbo 0125 版本。',
+    type: 'chat',
+    contextWindowTokens: 16_384,
+    abilities: {
+      functionCall: true,
+    },
+    pricing: {
+      input: 0.5,
+      output: 1.5,
+    },
+    releasedAt: '2024-01-25',
+  },
+  {
+    id: 'gpt-3.5-turbo-1106',
+    displayName: 'GPT-3.5 Turbo 1106',
+    description: 'GPT-3.5 Turbo 1106 版本。',
+    type: 'chat',
+    contextWindowTokens: 16_384,
+    abilities: {
+      functionCall: true,
+    },
+    pricing: {
+      input: 1,
+      output: 2,
+    },
+    releasedAt: '2023-11-06',
+  },
+  {
+    id: 'gpt-3.5-turbo-instruct',
+    displayName: 'GPT-3.5 Turbo Instruct',
+    description: 'GPT-3.5 Turbo 对指令遵循的优化版本。',
+    type: 'chat',
+    contextWindowTokens: 4096,
+    pricing: {
+      input: 1.5,
+      output: 2,
+    },
+  },
+  {
+    id: 'codex-mini-latest',
+    displayName: 'Codex mini',
+    description: 'codex-mini-latest 是 o4-mini 的微调版本，专门用于 Codex CLI。',
+    type: 'chat',
+    contextWindowTokens: 200_000,
+    maxOutput: 100_000,
+    abilities: {
+      functionCall: true,
+      reasoning: true,
+      vision: true,
+    },
+    pricing: {
+      input: 1.5,
+      output: 6,
+      cachedInput: 0.375,
+    },
+    releasedAt: '2025-06-01',
+  },
+  {
+    id: 'computer-use-preview',
+    displayName: 'Computer Use Preview',
+    description: 'computer-use-preview 是专为计算机使用工具设计的专用模型。',
+    type: 'chat',
+    contextWindowTokens: 8192,
+    maxOutput: 1024,
+    abilities: {
+      functionCall: true,
+      reasoning: true,
+      vision: true,
+    },
+    pricing: {
+      input: 3,
+      output: 12,
+    },
+    releasedAt: '2025-03-11',
+  },
 ];
 
-export default openaiModels;
+// ============================================================================
+// Embedding Models
+// ============================================================================
+
+const openaiEmbeddingModels: EmbeddingModelCard[] = [
+  {
+    id: 'text-embedding-3-large',
+    displayName: 'Text Embedding 3 Large',
+    description: '最强大的向量化模型，适用于英文和非英文任务。',
+    type: 'embedding',
+    contextWindowTokens: 8192,
+    maxDimension: 3072,
+    pricing: {
+      input: 0.13,
+    },
+    releasedAt: '2024-01-25',
+  },
+  {
+    id: 'text-embedding-3-small',
+    displayName: 'Text Embedding 3 Small',
+    description: '高效且经济的新一代 Embedding 模型，适用于知识检索、RAG 应用等场景。',
+    type: 'embedding',
+    contextWindowTokens: 8192,
+    maxDimension: 1536,
+    pricing: {
+      input: 0.02,
+    },
+    releasedAt: '2024-01-25',
+  },
+];
+
+// ============================================================================
+// TTS Models
+// ============================================================================
+
+const openaiTTSModels: TTSModelCard[] = [
+  {
+    id: 'tts-1',
+    displayName: 'TTS-1',
+    description: '最新的文本转语音模型，针对实时场景优化速度。',
+    type: 'tts',
+  },
+  {
+    id: 'tts-1-hd',
+    displayName: 'TTS-1 HD',
+    description: '最新的文本转语音模型，针对质量进行优化。',
+    type: 'tts',
+  },
+  {
+    id: 'gpt-4o-mini-tts',
+    displayName: 'GPT-4o Mini TTS',
+    description: 'GPT-4o mini TTS 是基于 GPT-4o mini 构建的文本转语音模型。',
+    type: 'tts',
+  },
+];
+
+// ============================================================================
+// STT Models
+// ============================================================================
+
+const openaiSTTModels: STTModelCard[] = [
+  {
+    id: 'whisper-1',
+    displayName: 'Whisper',
+    description: '通用语音识别模型，支持多语言语音识别、语音翻译和语言识别。',
+    type: 'stt',
+  },
+  {
+    id: 'gpt-4o-transcribe',
+    displayName: 'GPT-4o Transcribe',
+    description: 'GPT-4o Transcribe 是使用 GPT-4o 转录音频的语音转文本模型。',
+    type: 'stt',
+    contextWindowTokens: 16_000,
+    maxOutput: 2000,
+    pricing: {
+      input: 2.5,
+      output: 10,
+    },
+  },
+  {
+    id: 'gpt-4o-mini-transcribe',
+    displayName: 'GPT-4o Mini Transcribe',
+    description: 'GPT-4o Mini Transcribe 是更快速的语音转文本模型。',
+    type: 'stt',
+    contextWindowTokens: 16_000,
+    maxOutput: 2000,
+    pricing: {
+      input: 1.25,
+      output: 5,
+    },
+  },
+];
+
+// ============================================================================
+// Image Models
+// ============================================================================
+
+const openaiImageModels: ImageModelCard[] = [
+  {
+    id: 'gpt-image-1',
+    displayName: 'GPT Image 1',
+    description: 'ChatGPT 原生多模态图片生成模型。',
+    type: 'image',
+    enabled: true,
+    resolutions: ['1024x1024', '1024x1536', '1536x1024'],
+  },
+  {
+    id: 'gpt-image-1-mini',
+    displayName: 'GPT Image 1 Mini',
+    description: '成本更低的 GPT Image 1 版本，原生支持文本与图像输入。',
+    type: 'image',
+    enabled: true,
+    resolutions: ['1024x1024', '1024x1536', '1536x1024'],
+    releasedAt: '2025-10-06',
+  },
+  {
+    id: 'dall-e-3',
+    displayName: 'DALL-E 3',
+    description: '最新的 DALL-E 模型，支持更真实、准确的图像生成。',
+    type: 'image',
+    resolutions: ['1024x1024', '1792x1024', '1024x1792'],
+  },
+  {
+    id: 'dall-e-2',
+    displayName: 'DALL-E 2',
+    description: '第二代 DALL-E 模型，分辨率是第一代的4倍。',
+    type: 'image',
+    resolutions: ['256x256', '512x512', '1024x1024'],
+  },
+];
+
+// ============================================================================
+// Realtime Models
+// ============================================================================
+
+const openaiRealtimeModels: RealtimeModelCard[] = [
+  {
+    id: 'gpt-realtime',
+    displayName: 'GPT Realtime',
+    description: '通用实时模型，支持文本与音频的实时输入输出，并支持图像输入。',
+    type: 'realtime',
+    contextWindowTokens: 32_000,
+    maxOutput: 4096,
+    abilities: {
+      functionCall: true,
+      vision: true,
+    },
+    releasedAt: '2025-08-28',
+  },
+  {
+    id: 'gpt-4o-realtime-preview',
+    displayName: 'GPT-4o Realtime Preview',
+    description: 'GPT-4o 实时版本，支持音频和文本实时输入输出。',
+    type: 'realtime',
+    contextWindowTokens: 16_000,
+    maxOutput: 4096,
+    releasedAt: '2024-12-17',
+  },
+  {
+    id: 'gpt-4o-realtime-preview-2025-06-03',
+    displayName: 'GPT-4o Realtime 250603',
+    description: 'GPT-4o 实时版本 2025-06-03。',
+    type: 'realtime',
+    contextWindowTokens: 32_000,
+    maxOutput: 4096,
+    releasedAt: '2025-06-03',
+  },
+  {
+    id: 'gpt-4o-realtime-preview-2024-10-01',
+    displayName: 'GPT-4o Realtime 241001',
+    description: 'GPT-4o 实时版本 2024-10-01。',
+    type: 'realtime',
+    contextWindowTokens: 16_000,
+    maxOutput: 4096,
+    releasedAt: '2024-10-01',
+    legacy: true,
+  },
+  {
+    id: 'gpt-4o-mini-realtime-preview',
+    displayName: 'GPT-4o Mini Realtime',
+    description: 'GPT-4o-mini 实时版本，支持音频和文本实时输入输出。',
+    type: 'realtime',
+    contextWindowTokens: 128_000,
+    maxOutput: 4096,
+    releasedAt: '2024-12-17',
+  },
+];
+
+// ============================================================================
+// Exports
+// ============================================================================
+
+export default {
+  chat: openaiChatModels,
+  embedding: openaiEmbeddingModels,
+  tts: openaiTTSModels,
+  stt: openaiSTTModels,
+  image: openaiImageModels,
+  realtime: openaiRealtimeModels,
+};

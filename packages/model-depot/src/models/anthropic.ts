@@ -16,11 +16,11 @@ const anthropicModels: ChatModelCard[] = [
       structuredOutput: true,
     },
     pricing: {
-      input: 15,
-      output: 75,
+      input: 5,
+      output: 25,
       cachedInput: 1.5,
     },
-    releasedAt: '2025-11-01',
+    releasedAt: '2025-11-24',
   },
   {
     id: 'claude-sonnet-4-5-20250929',
@@ -66,7 +66,26 @@ const anthropicModels: ChatModelCard[] = [
     },
     releasedAt: '2025-10-01',
   },
-
+  {
+    id: 'claude-opus-4-1-20250805',
+    displayName: 'Claude Opus 4.1',
+    description: 'Claude Opus 4.1 是 Anthropic 最强大的 4.1 系列模型，具备顶级推理能力。',
+    type: 'chat',
+    contextWindowTokens: 200_000,
+    maxOutput: 32_000,
+    abilities: {
+      functionCall: true,
+      vision: true,
+      reasoning: true,
+      search: true,
+    },
+    pricing: {
+      input: 15,
+      output: 75,
+      cachedInput: 1.5,
+    },
+    releasedAt: '2025-08-05',
+  },
   {
     id: 'claude-opus-4-20250514',
     displayName: 'Claude Opus 4',
@@ -107,7 +126,6 @@ const anthropicModels: ChatModelCard[] = [
     },
     releasedAt: '2025-05-14',
   },
-
   {
     id: 'claude-3-7-sonnet-20250219',
     displayName: 'Claude 3.7 Sonnet',
@@ -146,6 +164,25 @@ const anthropicModels: ChatModelCard[] = [
     releasedAt: '2024-10-22',
   },
   {
+    id: 'claude-3-5-sonnet-20240620',
+    displayName: 'Claude 3.5 Sonnet (June)',
+    description: 'Claude 3.5 Sonnet 2024年6月版本。',
+    type: 'chat',
+    contextWindowTokens: 200_000,
+    maxOutput: 8_192,
+    abilities: {
+      functionCall: true,
+      vision: true,
+    },
+    pricing: {
+      input: 3,
+      output: 15,
+      cachedInput: 0.3,
+    },
+    releasedAt: '2024-06-20',
+    legacy: true,
+  },
+  {
     id: 'claude-3-5-haiku-20241022',
     displayName: 'Claude 3.5 Haiku',
     description: 'Claude 3.5 Haiku 是快速且经济的选择，适合高吞吐量场景。',
@@ -164,7 +201,6 @@ const anthropicModels: ChatModelCard[] = [
     },
     releasedAt: '2024-10-22',
   },
-
   {
     id: 'claude-3-opus-20240229',
     displayName: 'Claude 3 Opus',

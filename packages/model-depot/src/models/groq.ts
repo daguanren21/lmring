@@ -4,16 +4,63 @@ const groqModels: ChatModelCard[] = [
   {
     id: 'groq/compound',
     displayName: 'Compound',
-    description: 'Groq复合AI系统，智能调用多种模型来回答查询。',
+    description:
+      'Compound 是一个复合 AI 系统，由 GroqCloud 中已经支持的多个开放可用的模型提供支持，可以智能地、有选择地使用工具来回答用户查询。',
     type: 'chat',
     contextWindowTokens: 131_072,
-    maxOutput: 8192,
+    maxOutput: 8_192,
     enabled: true,
+  },
+  {
+    id: 'groq/compound-mini',
+    displayName: 'Compound Mini',
+    description:
+      'Compound-mini 是一个复合 AI 系统，由 GroqCloud 中已经支持的公开可用模型提供支持，可以智能地、有选择地使用工具来回答用户查询。',
+    type: 'chat',
+    contextWindowTokens: 131_072,
+    maxOutput: 8_192,
+  },
+  {
+    id: 'openai/gpt-oss-120b',
+    displayName: 'GPT OSS 120B',
+    description:
+      'OpenAI GPT-OSS 120B 是一款拥有 1200 亿参数的顶尖语言模型，内置浏览器搜索和代码执行功能，并具备推理能力。',
+    type: 'chat',
+    contextWindowTokens: 131_072,
+    maxOutput: 65_536,
+    abilities: {
+      functionCall: true,
+      reasoning: true,
+    },
+    pricing: {
+      input: 0.15,
+      output: 0.6,
+    },
+    releasedAt: '2025-08-06',
+  },
+  {
+    id: 'openai/gpt-oss-20b',
+    displayName: 'GPT OSS 20B',
+    description:
+      'OpenAI GPT-OSS 20B 是一款拥有 200 亿参数的顶尖语言模型，内置浏览器搜索和代码执行功能，并具备推理能力。',
+    type: 'chat',
+    contextWindowTokens: 131_072,
+    maxOutput: 65_536,
+    abilities: {
+      functionCall: true,
+      reasoning: true,
+    },
+    pricing: {
+      input: 0.075,
+      output: 0.3,
+    },
+    releasedAt: '2025-08-06',
   },
   {
     id: 'moonshotai/kimi-k2-instruct-0905',
     displayName: 'Kimi K2 0905',
-    description: 'Kimi K2预览版，256k上下文，具备强大的Agentic Coding能力。',
+    description:
+      'kimi-k2-0905-preview 模型上下文长度为 256k，具备更强的 Agentic Coding 能力、更突出的前端代码的美观度和实用性、以及更好的上下文理解能力。',
     type: 'chat',
     contextWindowTokens: 262_144,
     maxOutput: 16_384,
@@ -25,6 +72,7 @@ const groqModels: ChatModelCard[] = [
       input: 1,
       output: 3,
     },
+    releasedAt: '2025-09-05',
   },
   {
     id: 'meta-llama/llama-4-scout-17b-16e-instruct',
@@ -32,7 +80,7 @@ const groqModels: ChatModelCard[] = [
     description: 'Meta Llama 4 Scout模型，MoE架构。',
     type: 'chat',
     contextWindowTokens: 131_072,
-    maxOutput: 8192,
+    maxOutput: 8_192,
     enabled: true,
     pricing: {
       input: 0.11,
@@ -45,7 +93,7 @@ const groqModels: ChatModelCard[] = [
     description: 'Meta Llama 4 Maverick模型，大规模MoE架构。',
     type: 'chat',
     contextWindowTokens: 131_072,
-    maxOutput: 8192,
+    maxOutput: 8_192,
     enabled: true,
     abilities: {
       functionCall: true,
@@ -73,7 +121,8 @@ const groqModels: ChatModelCard[] = [
   {
     id: 'llama-3.1-8b-instant',
     displayName: 'Llama 3.1 8B Instant',
-    description: 'Llama 3.1 8B高效模型，适合低成本大规模应用。',
+    description:
+      'Llama 3.1 8B 是一款高效能模型，提供了快速的文本生成能力，非常适合需要大规模效率和成本效益的应用场景。',
     type: 'chat',
     contextWindowTokens: 131_072,
     maxOutput: 131_072,
@@ -88,7 +137,8 @@ const groqModels: ChatModelCard[] = [
   {
     id: 'llama-3.3-70b-versatile',
     displayName: 'Llama 3.3 70B Versatile',
-    description: 'Meta Llama 3.3 70B多语言大模型，性能媲美405B。',
+    description:
+      'Meta Llama 3.3 多语言大语言模型 ( LLM ) 是 70B（文本输入/文本输出）中的预训练和指令调整生成模型。 Llama 3.3 指令调整的纯文本模型针对多语言对话用例进行了优化，并且在常见行业基准上优于许多可用的开源和封闭式聊天模型。',
     type: 'chat',
     contextWindowTokens: 131_072,
     maxOutput: 32_768,
@@ -111,6 +161,34 @@ const groqModels: ChatModelCard[] = [
       input: 0.79,
       output: 0.79,
     },
+  },
+  {
+    id: 'meta-llama/llama-guard-4-12b',
+    displayName: 'Llama Guard 4 12B',
+    description: 'Meta Llama Guard 4 12B 安全分类模型，用于内容审核和安全检测。',
+    type: 'chat',
+    contextWindowTokens: 131_072,
+    maxOutput: 1_024,
+    pricing: {
+      input: 0.2,
+      output: 0.2,
+    },
+  },
+  {
+    id: 'meta-llama/llama-prompt-guard-2-22m',
+    displayName: 'Llama Prompt Guard 2 22M',
+    description: 'Meta Llama Prompt Guard 2 22M 提示安全检测模型。',
+    type: 'chat',
+    contextWindowTokens: 512,
+    maxOutput: 512,
+  },
+  {
+    id: 'meta-llama/llama-prompt-guard-2-86m',
+    displayName: 'Llama Prompt Guard 2 86M',
+    description: 'Meta Llama Prompt Guard 2 86M 提示安全检测模型。',
+    type: 'chat',
+    contextWindowTokens: 512,
+    maxOutput: 512,
   },
 ];
 

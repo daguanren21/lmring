@@ -34,6 +34,9 @@ export interface Provider {
   apiKey?: string;
   proxyUrl?: string;
   enabledModels?: string[];
+  hasApiKey?: boolean;
+  isCustom?: boolean;
+  providerType?: string;
 }
 
 export interface ConnectionCheckResponse {
@@ -61,4 +64,7 @@ export interface ApiKeyRecord {
   configSource: string;
   createdAt: string;
   updatedAt: string;
+  hasApiKey?: boolean;
+  isCustom?: boolean;
+  providerType?: string;
 }

@@ -1,5 +1,5 @@
 import type { AiModelType, DefaultModelListItem, ModelAbilities } from '@lmring/model-depot';
-import { getEndpointConfig, getModelsForProvider } from '@lmring/model-depot';
+import { getEndpointConfig, getModelsForProvider, resolveProviderType } from '@lmring/model-depot';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -70,11 +70,12 @@ interface ProviderDetailProps {
   provider: Provider;
   onToggle: (id: string, enabled: boolean, apiKeyId?: string) => void;
   onSave?: (providerId: string, apiKeyId: string) => void;
+  onDelete?: (providerId: string) => void;
 }
 
 type CheckStatus = 'idle' | 'checking' | 'success' | 'error';
 
-export function ProviderDetail({ provider, onToggle, onSave }: ProviderDetailProps) {
+export function ProviderDetail({ provider, onToggle, onSave, onDelete }: ProviderDetailProps) {
   const [apiKey, setApiKey] = useState('');
   const [proxyUrl, setProxyUrl] = useState('');
   const [showKey, setShowKey] = useState(false);
@@ -94,8 +95,11 @@ export function ProviderDetail({ provider, onToggle, onSave }: ProviderDetailPro
   const [modelEnabledStates, setModelEnabledStates] = useState<Record<string, boolean>>({});
   const [customModels, setCustomModels] = useState<DefaultModelListItem[]>([]);
   const [modelToDelete, setModelToDelete] = useState<string | null>(null);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [showApiKeyWarning, setShowApiKeyWarning] = useState(false);
 
-  const hasExistingApiKey = Boolean(provider.apiKeyId);
+  const hasExistingApiKey = Boolean(provider.hasApiKey);
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: provider.id is intentionally included to reset form when provider changes
   useEffect(() => {
@@ -178,7 +182,7 @@ export function ProviderDetail({ provider, onToggle, onSave }: ProviderDetailPro
   }, [provider.apiKeyId, provider.id]);
 
   const models = useMemo(() => {
-    const staticModels = getModelsForProvider(provider.id.toLowerCase());
+    const staticModels = getModelsForProvider(resolveProviderType(provider));
     const staticIds = new Set(staticModels.map((m) => m.id));
 
     const dbCustomModels = Object.keys(modelEnabledStates)
@@ -203,7 +207,7 @@ export function ProviderDetail({ provider, onToggle, onSave }: ProviderDetailPro
     }
 
     return [...staticModels, ...mergedCustomModelsMap.values()] as typeof staticModels;
-  }, [provider.id, modelEnabledStates, customModels]);
+  }, [provider, modelEnabledStates, customModels]);
 
   const filteredModels = useMemo(() => {
     if (!searchQuery) return models;
@@ -230,9 +234,9 @@ export function ProviderDetail({ provider, onToggle, onSave }: ProviderDetailPro
   }, [modelsByType]);
 
   const defaultUrl = useMemo(() => {
-    const endpoint = getEndpointConfig(provider.id.toLowerCase());
+    const endpoint = getEndpointConfig(resolveProviderType(provider));
     return endpoint?.baseURL || '';
-  }, [provider.id]);
+  }, [provider]);
 
   const handleSave = useCallback(async () => {
     if (!apiKey.trim()) return;
@@ -295,6 +299,7 @@ export function ProviderDetail({ provider, onToggle, onSave }: ProviderDetailPro
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           providerName: provider.id.toLowerCase(),
+          providerType: provider.providerType,
           apiKey: apiKey.trim(),
           proxyUrl: proxyUrl.trim() || undefined,
           model: selectedModel,
@@ -326,7 +331,7 @@ export function ProviderDetail({ provider, onToggle, onSave }: ProviderDetailPro
         description: errorMessage,
       });
     }
-  }, [apiKey, proxyUrl, selectedModel, provider.id, handleSave]);
+  }, [apiKey, proxyUrl, selectedModel, provider.id, provider.providerType, handleSave]);
 
   const handleToggle = useCallback(async () => {
     const newEnabled = !provider.connected;
@@ -383,6 +388,12 @@ export function ProviderDetail({ provider, onToggle, onSave }: ProviderDetailPro
 
   const handleModelToggle = useCallback(
     async (modelId: string, enabled: boolean) => {
+      // If trying to enable a model but no API key is configured or entered, show warning
+      if (enabled && !provider.hasApiKey && !apiKey.trim()) {
+        setShowApiKeyWarning(true);
+        return;
+      }
+
       setModelEnabledStates((prev) => ({ ...prev, [modelId]: enabled }));
 
       if (provider.apiKeyId) {
@@ -402,7 +413,7 @@ export function ProviderDetail({ provider, onToggle, onSave }: ProviderDetailPro
         }
       }
     },
-    [provider.apiKeyId],
+    [provider.apiKeyId, provider.hasApiKey, apiKey],
   );
 
   const handleAddModel = useCallback(
@@ -483,6 +494,35 @@ export function ProviderDetail({ provider, onToggle, onSave }: ProviderDetailPro
     [provider.apiKeyId],
   );
 
+  const handleDeleteProvider = useCallback(async () => {
+    if (!provider.apiKeyId || !provider.isCustom) return;
+
+    setIsDeleting(true);
+    try {
+      const response = await fetch(`/api/settings/api-keys/${provider.apiKeyId}`, {
+        method: 'DELETE',
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to delete provider');
+      }
+
+      toast.success('Provider Deleted', {
+        description: `${provider.name} has been removed successfully`,
+      });
+
+      onDelete?.(provider.id);
+    } catch (error) {
+      toast.error('Delete Failed', {
+        description: error instanceof Error ? error.message : 'Failed to delete provider',
+      });
+    } finally {
+      setIsDeleting(false);
+      setShowDeleteDialog(false);
+    }
+  }, [provider.apiKeyId, provider.isCustom, provider.name, provider.id, onDelete]);
+
   const handleShowKey = useCallback(async () => {
     if (showKey) {
       setShowKey(false);
@@ -494,7 +534,7 @@ export function ProviderDetail({ provider, onToggle, onSave }: ProviderDetailPro
       return;
     }
 
-    if (!provider.apiKeyId) {
+    if (!provider.apiKeyId || !provider.hasApiKey) {
       setShowKey(true);
       return;
     }
@@ -504,8 +544,10 @@ export function ProviderDetail({ provider, onToggle, onSave }: ProviderDetailPro
       const response = await fetch(`/api/settings/api-keys/${provider.apiKeyId}`);
       if (response.ok) {
         const data = await response.json();
-        setFetchedApiKey(data.apiKey);
-        setApiKey(data.apiKey);
+        if (data.apiKey) {
+          setFetchedApiKey(data.apiKey);
+          setApiKey(data.apiKey);
+        }
         setShowKey(true);
       } else {
         toast.error('Failed to fetch API key');
@@ -517,7 +559,7 @@ export function ProviderDetail({ provider, onToggle, onSave }: ProviderDetailPro
     } finally {
       setIsFetchingKey(false);
     }
-  }, [showKey, fetchedApiKey, provider.apiKeyId]);
+  }, [showKey, fetchedApiKey, provider.apiKeyId, provider.hasApiKey]);
 
   const renderProviderIcon = (size = 20, className?: string) => {
     if (provider.Icon) {
@@ -624,7 +666,24 @@ export function ProviderDetail({ provider, onToggle, onSave }: ProviderDetailPro
             )}
           </div>
         </div>
-        <Switch checked={provider.connected} onCheckedChange={handleToggle} disabled={isToggling} />
+        <div className="flex items-center gap-2">
+          {provider.isCustom && (
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-9 w-9 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+              onClick={() => setShowDeleteDialog(true)}
+              disabled={isDeleting}
+            >
+              <Trash2Icon className="h-4 w-4" />
+            </Button>
+          )}
+          <Switch
+            checked={provider.connected}
+            onCheckedChange={handleToggle}
+            disabled={isToggling}
+          />
+        </div>
       </div>
 
       <Separator />
@@ -866,6 +925,59 @@ export function ProviderDetail({ provider, onToggle, onSave }: ProviderDetailPro
             >
               Delete
             </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Delete Provider Confirmation Dialog */}
+      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Provider</AlertDialogTitle>
+            <AlertDialogDescription asChild>
+              <div className="text-sm text-muted-foreground">
+                Are you sure you want to delete "{provider.name}"? This will permanently remove:
+                <ul className="list-disc list-inside mt-2 space-y-1">
+                  <li>Your API key configuration</li>
+                  <li>All enabled model settings</li>
+                  <li>All custom models added to this provider</li>
+                </ul>
+                <p className="mt-2">This action cannot be undone.</p>
+              </div>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={handleDeleteProvider}
+              disabled={isDeleting}
+            >
+              {isDeleting ? (
+                <>
+                  <Loader2Icon className="mr-2 h-4 w-4 animate-spin" />
+                  Deleting...
+                </>
+              ) : (
+                'Delete'
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* API Key Required Warning Dialog */}
+      <AlertDialog open={showApiKeyWarning} onOpenChange={setShowApiKeyWarning}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>API Key Required</AlertDialogTitle>
+            <AlertDialogDescription>
+              You need to enter an API key before enabling models for this provider. Please enter
+              your API key in the field above.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setShowApiKeyWarning(false)}>OK</AlertDialogCancel>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

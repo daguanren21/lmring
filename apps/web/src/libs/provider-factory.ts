@@ -76,6 +76,9 @@ export async function fetchUserApiKeys(
   >();
 
   for (const key of keys) {
+    if (!key.encryptedKey) {
+      continue;
+    }
     keyMap.set(key.id, {
       providerName: key.providerName,
       apiKey: decrypt(key.encryptedKey),

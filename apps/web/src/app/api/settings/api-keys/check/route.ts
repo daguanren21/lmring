@@ -102,12 +102,11 @@ export async function POST(request: Request) {
       );
     }
 
-    const { providerName, apiKey, proxyUrl, model } = validationResult.data;
+    const { providerName, providerType, apiKey, proxyUrl, model } = validationResult.data;
 
-    // Create provider instance
     let provider: ReturnType<typeof ProviderBuilder.openai>;
     try {
-      provider = createTestProvider(providerName, apiKey, proxyUrl);
+      provider = createTestProvider(providerType || providerName, apiKey, proxyUrl);
     } catch (error) {
       return NextResponse.json(
         {

@@ -11,6 +11,7 @@ interface ProviderLayoutProps {
   onToggleProvider: (id: string, enabled?: boolean, apiKeyId?: string) => void;
   onSaveProvider?: (providerId: string, apiKeyId: string) => void;
   onAddProvider: (provider: Provider) => void;
+  onDeleteProvider?: (providerId: string) => void;
 }
 
 export function ProviderLayout({
@@ -18,6 +19,7 @@ export function ProviderLayout({
   onToggleProvider,
   onSaveProvider,
   onAddProvider,
+  onDeleteProvider,
 }: ProviderLayoutProps) {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
@@ -31,6 +33,11 @@ export function ProviderLayout({
   const handleAddProvider = (provider: Provider) => {
     onAddProvider(provider);
     setSelectedId(provider.id);
+  };
+
+  const handleDeleteProvider = (providerId: string) => {
+    onDeleteProvider?.(providerId);
+    setSelectedId(null);
   };
 
   return (
@@ -105,6 +112,7 @@ export function ProviderLayout({
             provider={selectedProvider}
             onToggle={onToggleProvider}
             onSave={onSaveProvider}
+            onDelete={handleDeleteProvider}
           />
         ) : (
           <ProviderGrid

@@ -197,7 +197,7 @@ export default function SettingsPage() {
   const initialProviders: Provider[] = React.useMemo(() => {
     const savedKeysMap = new Map(savedApiKeys.map((key) => [key.providerName.toLowerCase(), key]));
 
-    return providerMetadata.map((p) => {
+    const builtInProviders = providerMetadata.map((p) => {
       const savedKey = savedKeysMap.get(p.id.toLowerCase());
       return {
         id: p.id,
@@ -217,10 +217,39 @@ export default function SettingsPage() {
           maxOutputTokens: m.maxOutput,
         })),
         apiKeyId: savedKey?.id,
-        apiKey: savedKey ? maskApiKey('sk-xxxxxxxxxxxx') : undefined,
+        apiKey: savedKey?.hasApiKey ? maskApiKey('sk-xxxxxxxxxxxx') : undefined,
         proxyUrl: savedKey?.proxyUrl,
+        hasApiKey: savedKey?.hasApiKey ?? false,
+        isCustom: false,
+        providerType: p.id,
       };
     });
+
+    // Custom providers from savedApiKeys that don't match built-in providers
+    const builtInIds = new Set(providerMetadata.map((p) => p.id.toLowerCase()));
+    const customProviders = savedApiKeys
+      .filter((key) => key.isCustom && !builtInIds.has(key.providerName.toLowerCase()))
+      .map((key) => {
+        const providerType = key.providerType || 'openai';
+        return {
+          id: key.providerName,
+          name: key.providerName,
+          connected: key.enabled,
+          Icon: ICON_MAP[providerType]?.Avatar || ICON_MAP[providerType] || BoxIcon,
+          description: `Custom ${providerType} provider`,
+          type: key.enabled ? ('enabled' as const) : ('disabled' as const),
+          tags: [providerType],
+          models: [],
+          apiKeyId: key.id,
+          apiKey: key.hasApiKey ? maskApiKey('sk-xxxxxxxxxxxx') : undefined,
+          proxyUrl: key.proxyUrl,
+          hasApiKey: key.hasApiKey ?? false,
+          isCustom: true,
+          providerType,
+        };
+      });
+
+    return [...customProviders, ...builtInProviders];
   }, [providerMetadata, savedApiKeys]);
 
   const [providers, setProviders] = React.useState<Provider[]>([]);
@@ -275,9 +304,35 @@ export default function SettingsPage() {
     });
   }, []);
 
-  const handleAddProvider = (provider: Provider) => {
+  const handleAddProvider = React.useCallback((provider: Provider) => {
+    // Add to providers list
     setProviders((prev) => [provider, ...prev]);
-  };
+
+    // Also update savedApiKeys to track the new provider
+    if (provider.apiKeyId) {
+      setSavedApiKeys((prev) => [
+        ...prev,
+        {
+          id: provider.apiKeyId as string,
+          providerName: provider.id,
+          proxyUrl: provider.proxyUrl || '',
+          enabled: false,
+          configSource: 'manual',
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          isCustom: provider.isCustom,
+          providerType: provider.providerType,
+        },
+      ]);
+    }
+  }, []);
+
+  const handleDeleteProvider = React.useCallback((providerId: string) => {
+    setProviders((prev) => prev.filter((p) => p.id !== providerId));
+    setSavedApiKeys((prev) =>
+      prev.filter((k) => k.providerName.toLowerCase() !== providerId.toLowerCase()),
+    );
+  }, []);
 
   const renderSidebarItem = (id: Tab, label: string, icon: React.ReactNode) => (
     <button
@@ -326,6 +381,7 @@ export default function SettingsPage() {
             onToggleProvider={handleToggleProvider}
             onSaveProvider={handleSaveProvider}
             onAddProvider={handleAddProvider}
+            onDeleteProvider={handleDeleteProvider}
           />
         ) : (
           <div className="flex-1 overflow-y-auto">

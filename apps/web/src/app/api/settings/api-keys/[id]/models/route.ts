@@ -45,6 +45,13 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
       );
     }
 
+    if (!key.encryptedKey) {
+      return NextResponse.json(
+        { error: 'NO_API_KEY', message: 'API key not configured for this provider' },
+        { status: 400 },
+      );
+    }
+
     const decryptedKey = decrypt(key.encryptedKey);
 
     const baseUrl = key.proxyUrl ?? getDefaultProviderUrl(key.providerName);

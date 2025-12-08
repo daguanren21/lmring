@@ -133,3 +133,42 @@ export const ProviderDisplayNames: Record<ModelProvider, string> = {
 export function isValidProvider(providerId: string): providerId is ModelProvider {
   return Object.values(ModelProvider).includes(providerId as ModelProvider);
 }
+
+/**
+ * Maps UI provider type names to model-depot provider IDs.
+ * Used when creating custom providers to determine which model catalog to use.
+ */
+export const PROVIDER_TYPE_TO_DEPOT_ID: Record<string, string> = {
+  OpenAI: 'openai',
+  'OpenAI-Response': 'openai',
+  Gemini: 'google',
+  Anthropic: 'anthropic',
+  'Azure OpenAI': 'azure',
+  'New API': 'openai',
+  CherryIn: 'openai',
+};
+
+export const PROVIDER_OPTIONS = Object.keys(PROVIDER_TYPE_TO_DEPOT_ID);
+
+/**
+ * Priority:
+ * 1. Custom provider (isCustom=true) → use providerType (e.g., "openai", "anthropic")
+ * 2. Built-in provider → use id (e.g., "openai", "anthropic")
+ * 3. Fallback → return 'openai'
+ */
+export function resolveProviderType(provider: {
+  id: string;
+  providerType?: string | null;
+  isCustom?: boolean;
+}): string {
+  if (provider.isCustom && provider.providerType) {
+    return provider.providerType;
+  }
+
+  const lowerId = provider.id.toLowerCase();
+  if (isValidProvider(lowerId)) {
+    return lowerId;
+  }
+
+  return 'openai';
+}

@@ -38,7 +38,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
       return NextResponse.json({ error: 'API key not found' }, { status: 404 });
     }
 
-    const decryptedKey = decrypt(key.encryptedKey);
+    const decryptedKey = key.encryptedKey ? decrypt(key.encryptedKey) : null;
 
     return NextResponse.json(
       {
@@ -124,6 +124,49 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
     );
   } catch (error) {
     logError('Patch API key error', error);
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+  }
+}
+
+export async function DELETE(request: Request, { params }: { params: Promise<{ id: string }> }) {
+  try {
+    const session = await auth.api.getSession({
+      headers: request.headers,
+    });
+
+    if (!session?.user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const userId = session.user.id;
+    const { id: keyId } = await params;
+
+    if (!uuidRegex.test(keyId)) {
+      return NextResponse.json(
+        { error: 'INVALID_ID', message: 'Invalid API key ID format' },
+        { status: 400 },
+      );
+    }
+
+    const [existingKey] = await db
+      .select()
+      .from(apiKeys)
+      .where(and(eq(apiKeys.id, keyId), eq(apiKeys.userId, userId)))
+      .limit(1);
+
+    if (!existingKey) {
+      return NextResponse.json({ error: 'API key not found' }, { status: 404 });
+    }
+
+    if (!existingKey.isCustom) {
+      return NextResponse.json({ error: 'Cannot delete built-in providers' }, { status: 403 });
+    }
+
+    await db.delete(apiKeys).where(eq(apiKeys.id, keyId));
+
+    return NextResponse.json({ message: 'Provider deleted successfully' }, { status: 200 });
+  } catch (error) {
+    logError('Delete API key error', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

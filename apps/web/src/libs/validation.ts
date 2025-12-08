@@ -51,7 +51,7 @@ export const voteSchema = z.object({
 
 export const apiKeySchema = z.object({
   providerName: z.string().min(1).max(100),
-  apiKey: z.string().min(1).max(500),
+  apiKey: z.string().min(1).max(500).optional(),
   proxyUrl: z
     .string()
     .max(500)
@@ -61,6 +61,8 @@ export const apiKeySchema = z.object({
     )
     .optional(),
   enabled: z.boolean().optional(),
+  isCustom: z.boolean().optional(),
+  providerType: z.string().max(100).optional(),
 });
 
 export const apiKeyPatchSchema = z.object({
@@ -69,6 +71,7 @@ export const apiKeyPatchSchema = z.object({
 
 export const connectionCheckSchema = z.object({
   providerName: z.string().min(1).max(100),
+  providerType: z.string().min(1).max(100).optional(),
   apiKey: z.string().min(1).max(500),
   proxyUrl: z
     .string()

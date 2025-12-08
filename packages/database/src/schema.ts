@@ -89,10 +89,12 @@ export const apiKeys = pgTable(
       .references(() => users.id, { onDelete: 'cascade' })
       .notNull(),
     providerName: text('provider_name').notNull(),
-    encryptedKey: text('encrypted_key').notNull(),
+    encryptedKey: text('encrypted_key'),
     proxyUrl: text('proxy_url'), // Custom proxy URL (nullable, plain text)
-    enabled: boolean('enabled').default(false).notNull(), // Whether this provider is enabled
+    enabled: boolean('enabled').default(false).notNull(),
     configSource: configSourceEnum('config_source').default('manual'),
+    isCustom: boolean('is_custom').default(false).notNull(),
+    providerType: text('provider_type'),
     createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
     updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
   },

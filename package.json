@@ -6,7 +6,7 @@
     "node": ">=24.11.1"
   },
   "scripts": {
-    "dev": "turbo run dev",
+    "dev": "turbo run dev dev:spotlight",
     "build": "turbo run build",
     "start": "turbo run start",
     "lint": "turbo run lint",

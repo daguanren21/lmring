@@ -112,20 +112,14 @@ export const shareSchema = z.object({
   expiresInDays: z.number().int().min(1).max(365).optional(),
 });
 
-export const arenaModelSchema = z.object({
-  keyId: z.uuid('Invalid API key ID'),
+/**
+ * Schema for single workflow stream request
+ * Used by /api/workflow/stream endpoint
+ */
+export const workflowStreamSchema = z.object({
+  workflowId: z.uuid('Invalid workflow ID'),
   modelId: z.string().min(1).max(200),
-  options: z
-    .object({
-      temperature: z.number().min(0).max(2).optional(),
-      maxTokens: z.number().int().min(1).max(100000).optional(),
-      topP: z.number().min(0).max(1).optional(),
-    })
-    .optional(),
-});
-
-export const arenaCompareSchema = z.object({
-  models: z.array(arenaModelSchema).min(1).max(10),
+  keyId: z.uuid('Invalid API key ID'),
   messages: z
     .array(
       z.object({
@@ -135,12 +129,13 @@ export const arenaCompareSchema = z.object({
     )
     .min(1)
     .max(100),
-  options: z
-    .object({
-      streaming: z.boolean().optional(),
-      stopOnError: z.boolean().optional(),
-    })
-    .optional(),
+  config: z.object({
+    temperature: z.number().min(0).max(2).default(0.7),
+    maxTokens: z.number().int().min(1).max(100000).default(2048),
+    topP: z.number().min(0).max(1).default(0.9),
+    frequencyPenalty: z.number().min(-2).max(2).optional(),
+    presencePenalty: z.number().min(-2).max(2).optional(),
+  }),
 });
 
 export type ConversationInput = z.infer<typeof conversationSchema>;
@@ -154,8 +149,7 @@ export type ModelEnableInput = z.infer<typeof modelEnableSchema>;
 export type CustomModelInput = z.infer<typeof customModelSchema>;
 export type UserPreferencesInput = z.infer<typeof userPreferencesSchema>;
 export type ShareInput = z.infer<typeof shareSchema>;
-export type ArenaModelInput = z.infer<typeof arenaModelSchema>;
-export type ArenaCompareInput = z.infer<typeof arenaCompareSchema>;
+export type WorkflowStreamInput = z.infer<typeof workflowStreamSchema>;
 
 export function maskApiKey(apiKey: string): string {
   if (apiKey.length <= 8) {

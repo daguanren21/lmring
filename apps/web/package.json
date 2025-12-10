@@ -28,7 +28,7 @@
     "@lmring/i18n": "workspace:*",
     "@lmring/model-depot": "workspace:*",
     "@lmring/ui": "workspace:*",
-    "@lobehub/icons": "^2.44.0",
+    "@lobehub/icons": "^2.45.0",
     "@logtape/logtape": "^1.2.2",
     "@sentry/nextjs": "^10.29.0",
     "@supabase/ssr": "^0.8.0",

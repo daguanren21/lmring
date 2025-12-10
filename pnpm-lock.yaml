@@ -21,8 +21,8 @@ importers:
         specifier: ^2.0.9
         version: 2.0.9
       knip:
-        specifier: ^5.72.0
-        version: 5.72.0(@types/node@24.10.2)(typescript@5.9.3)
+        specifier: ^5.73.0
+        version: 5.73.0(@types/node@24.10.2)(typescript@5.9.3)
       turbo:
         specifier: ^2.6.3
         version: 2.6.3
@@ -57,8 +57,8 @@ importers:
         specifier: workspace:*
         version: link:../../packages/ui
       '@lobehub/icons':
-        specifier: ^2.44.0
-        version: 2.44.0(@babel/core@7.28.5)(@types/mdast@4.0.4)(@types/react@19.2.7)(antd@5.29.1(luxon@3.7.2)(react-dom@19.2.1(react@19.2.1))(react@19.2.1))(framer-motion@12.23.25(react-dom@19.2.1(react@19.2.1))(react@19.2.1))(micromark-util-types@2.0.2)(micromark@4.0.2)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
+        specifier: ^2.45.0
+        version: 2.45.0(@babel/core@7.28.5)(@types/mdast@4.0.4)(@types/react@19.2.7)(antd@5.29.1(luxon@3.7.2)(react-dom@19.2.1(react@19.2.1))(react@19.2.1))(framer-motion@12.23.25(react-dom@19.2.1(react@19.2.1))(react@19.2.1))(micromark-util-types@2.0.2)(micromark@4.0.2)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
       '@logtape/logtape':
         specifier: ^1.2.2
         version: 1.2.2
@@ -205,11 +205,11 @@ importers:
   packages/ai-hub:
     dependencies:
       '@ai-sdk/amazon-bedrock':
-        specifier: ^3.0.67
-        version: 3.0.67(zod@4.1.13)
+        specifier: ^3.0.68
+        version: 3.0.68(zod@4.1.13)
       '@ai-sdk/anthropic':
-        specifier: ^2.0.53
-        version: 2.0.53(zod@4.1.13)
+        specifier: ^2.0.54
+        version: 2.0.54(zod@4.1.13)
       '@ai-sdk/azure':
         specifier: ^2.0.82
         version: 2.0.82(zod@4.1.13)
@@ -217,8 +217,8 @@ importers:
         specifier: ^1.0.31
         version: 1.0.31(zod@4.1.13)
       '@ai-sdk/google-vertex':
-        specifier: ^3.0.87
-        version: 3.0.87(zod@4.1.13)
+        specifier: ^3.0.88
+        version: 3.0.88(zod@4.1.13)
       '@ai-sdk/mistral':
         specifier: ^2.0.25
         version: 2.0.25(zod@4.1.13)
@@ -241,8 +241,8 @@ importers:
         specifier: workspace:*
         version: link:../model-depot
       '@openrouter/ai-sdk-provider':
-        specifier: ^1.4.1
-        version: 1.4.1(ai@5.0.108(zod@4.1.13))(zod@4.1.13)
+        specifier: ^1.5.2
+        version: 1.5.2(ai@5.0.108(zod@4.1.13))(zod@4.1.13)
       ai:
         specifier: ^5.0.108
         version: 5.0.108(zod@4.1.13)
@@ -473,14 +473,14 @@ importers:
 
 packages:
 
-  '@ai-sdk/amazon-bedrock@3.0.67':
-    resolution: {integrity: sha512-lsvB3zjxSq79BEI0m+iVWCrnJfaPfRfvKHVdU8tVDhB0hRmJQ16A8qU4K6zjxg4wBZo658DO/6zmygHHMOkyzw==}
+  '@ai-sdk/amazon-bedrock@3.0.68':
+    resolution: {integrity: sha512-iLPV/2q/SRkgAe9tRY0PLZxJKd1re8G7xm81MWB1RHsynlTOWid7eBDyudzF7VVBtX6nyWO8+urmpwRWSWllOg==}
     engines: {node: '>=18'}
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
 
-  '@ai-sdk/anthropic@2.0.53':
-    resolution: {integrity: sha512-ih7NV+OFSNWZCF+tYYD7ovvvM+gv7TRKQblpVohg2ipIwC9Y0TirzocJVREzZa/v9luxUwFbsPji++DUDWWxsg==}
+  '@ai-sdk/anthropic@2.0.54':
+    resolution: {integrity: sha512-6OSFMkt5NkAchH7o0W+dI2h6yR8EPXx7Yl6txyh0gadLlkf1UU/ScyoYlkxAW8UtGju/+apvwVTdLYEQuIsVVQ==}
     engines: {node: '>=18'}
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
@@ -503,8 +503,8 @@ packages:
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
 
-  '@ai-sdk/google-vertex@3.0.87':
-    resolution: {integrity: sha512-RnpkLjY5ZG1Wntlb3zgZzmFr0firXEN4pE62Py6XHOFLcEUCx9t+m89gTAngoCabgmjp2F+8esdrSHnjwqibGA==}
+  '@ai-sdk/google-vertex@3.0.88':
+    resolution: {integrity: sha512-4wE+3b2f+GOzY0mOqGGYj/DDBrUFprr6DUwD1wx/UeNZpjKgvtqvl2GA2aPrSmcjhxEoV7qEoGdAhRlDyFfW5g==}
     engines: {node: '>=18'}
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
@@ -1760,8 +1760,8 @@ packages:
       react: ^19.0.0
       react-dom: ^19.0.0
 
-  '@lobehub/icons@2.44.0':
-    resolution: {integrity: sha512-kfMzMJUNPvgg8WhYUoSJdaSNRGxvniZxnIqwsrMi9Dpz48RRAO35Y6xjGQevHvXEI/sKlBDq46x9NW3WA7G3Ew==}
+  '@lobehub/icons@2.45.0':
+    resolution: {integrity: sha512-ZPBUlufKPeGEU6BVV4zMRLHscwHDWegolDLJH4qMVVIhMeqJhnsytlO/z2RdrzBcyt96/lKrafAueuukWE2yWg==}
     peerDependencies:
       antd: ^5.23.0
       react: ^19.0.0
@@ -1905,12 +1905,16 @@ packages:
     resolution: {integrity: sha512-ALxKMNFFJQJV1Z2OMVTV+q7EbKHhnTAPcTgkgHeXCNdW5nFExoXuwusZLS4Zv2o83j9UoDx1R/CSX7QZVgEHTA==}
     engines: {node: '>=18.0.0'}
 
-  '@openrouter/ai-sdk-provider@1.4.1':
-    resolution: {integrity: sha512-dj88dldpAreSNPVkO3ap19XGgx98nb/WeTrPdiUmErKSyFGYQvrjpXTn7WFyhGPDRrEdhua6oaBshsA8yiuGlg==}
+  '@openrouter/ai-sdk-provider@1.5.2':
+    resolution: {integrity: sha512-3Th0vmJ9pjnwcPc2H1f59Mb0LFvwaREZAScfOQIpUxAHjZ7ZawVKDP27qgsteZPmMYqccNMy4r4Y3kgUnNcKAg==}
     engines: {node: '>=18'}
     peerDependencies:
+      '@toon-format/toon': ^2.0.0
       ai: ^5.0.0
       zod: ^3.24.1 || ^v4
+    peerDependenciesMeta:
+      '@toon-format/toon':
+        optional: true
 
   '@openrouter/sdk@0.1.27':
     resolution: {integrity: sha512-RH//L10bSmc81q25zAZudiI4kNkLgxF2E+WU42vghp3N6TEvZ6F0jK7uT3tOxkEn91gzmMw9YVmDENy7SJsajQ==}
@@ -6071,8 +6075,8 @@ packages:
     resolution: {integrity: sha512-eTIzlVOSUR+JxdDFepEYcBMtZ9Qqdef+rnzWdRZuMbOywu5tO2w2N7rqjoANZ5k9vywhL6Br1VRjUIgTQx4E8w==}
     engines: {node: '>=6'}
 
-  knip@5.72.0:
-    resolution: {integrity: sha512-rlyoXI8FcggNtM/QXd/GW0sbsYvNuA/zPXt7bsuVi6kVQogY2PDCr81bPpzNnl0CP8AkFm2Z2plVeL5QQSis2w==}
+  knip@5.73.0:
+    resolution: {integrity: sha512-L6zy2R/aAICy+lQWwdjl2TUY/kv2mqjkyKIL5+F4cUcn+3TQHjqzHen+N43S4oi4FyQ2qPJMNIODusr1vicTUA==}
     engines: {node: '>=18.18.0'}
     hasBin: true
     peerDependencies:
@@ -8832,9 +8836,9 @@ packages:
 
 snapshots:
 
-  '@ai-sdk/amazon-bedrock@3.0.67(zod@4.1.13)':
+  '@ai-sdk/amazon-bedrock@3.0.68(zod@4.1.13)':
     dependencies:
-      '@ai-sdk/anthropic': 2.0.53(zod@4.1.13)
+      '@ai-sdk/anthropic': 2.0.54(zod@4.1.13)
       '@ai-sdk/provider': 2.0.0
       '@ai-sdk/provider-utils': 3.0.18(zod@4.1.13)
       '@smithy/eventstream-codec': 4.2.5
@@ -8842,7 +8846,7 @@ snapshots:
       aws4fetch: 1.0.20
       zod: 4.1.13
 
-  '@ai-sdk/anthropic@2.0.53(zod@4.1.13)':
+  '@ai-sdk/anthropic@2.0.54(zod@4.1.13)':
     dependencies:
       '@ai-sdk/provider': 2.0.0
       '@ai-sdk/provider-utils': 3.0.18(zod@4.1.13)
@@ -8868,9 +8872,9 @@ snapshots:
       '@vercel/oidc': 3.0.5
       zod: 4.1.13
 
-  '@ai-sdk/google-vertex@3.0.87(zod@4.1.13)':
+  '@ai-sdk/google-vertex@3.0.88(zod@4.1.13)':
     dependencies:
-      '@ai-sdk/anthropic': 2.0.53(zod@4.1.13)
+      '@ai-sdk/anthropic': 2.0.54(zod@4.1.13)
       '@ai-sdk/google': 2.0.45(zod@4.1.13)
       '@ai-sdk/provider': 2.0.0
       '@ai-sdk/provider-utils': 3.0.18(zod@4.1.13)
@@ -9786,7 +9790,7 @@ snapshots:
       react: 19.2.1
       react-dom: 19.2.1(react@19.2.1)
 
-  '@hono/mcp@0.1.5(@modelcontextprotocol/sdk@1.24.3(zod@4.1.13))(hono@4.10.7)':
+  '@hono/mcp@0.1.5(@modelcontextprotocol/sdk@1.24.3(zod@3.25.76))(hono@4.10.7)':
     dependencies:
       '@modelcontextprotocol/sdk': 1.24.3(zod@3.25.76)
       hono: 4.10.7
@@ -10101,7 +10105,7 @@ snapshots:
       - supports-color
       - vue
 
-  '@lobehub/icons@2.44.0(@babel/core@7.28.5)(@types/mdast@4.0.4)(@types/react@19.2.7)(antd@5.29.1(luxon@3.7.2)(react-dom@19.2.1(react@19.2.1))(react@19.2.1))(framer-motion@12.23.25(react-dom@19.2.1(react@19.2.1))(react@19.2.1))(micromark-util-types@2.0.2)(micromark@4.0.2)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)':
+  '@lobehub/icons@2.45.0(@babel/core@7.28.5)(@types/mdast@4.0.4)(@types/react@19.2.7)(antd@5.29.1(luxon@3.7.2)(react-dom@19.2.1(react@19.2.1))(react@19.2.1))(framer-motion@12.23.25(react-dom@19.2.1(react@19.2.1))(react@19.2.1))(micromark-util-types@2.0.2)(micromark@4.0.2)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)':
     dependencies:
       '@lobehub/ui': 2.22.0(@babel/core@7.28.5)(@types/mdast@4.0.4)(@types/react@19.2.7)(antd@5.29.1(luxon@3.7.2)(react-dom@19.2.1(react@19.2.1))(react@19.2.1))(framer-motion@12.23.25(react-dom@19.2.1(react@19.2.1))(react@19.2.1))(micromark-util-types@2.0.2)(micromark@4.0.2)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
       antd: 5.29.1(luxon@3.7.2)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
@@ -10134,7 +10138,7 @@ snapshots:
       '@floating-ui/react': 0.27.16(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
       '@giscus/react': 3.1.0(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
       '@lobehub/fluent-emoji': 2.0.0(@babel/core@7.28.5)(@types/mdast@4.0.4)(@types/react@19.2.7)(antd@5.29.1(luxon@3.7.2)(react-dom@19.2.1(react@19.2.1))(react@19.2.1))(framer-motion@12.23.25(react-dom@19.2.1(react@19.2.1))(react@19.2.1))(micromark-util-types@2.0.2)(micromark@4.0.2)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
-      '@lobehub/icons': 2.44.0(@babel/core@7.28.5)(@types/mdast@4.0.4)(@types/react@19.2.7)(antd@5.29.1(luxon@3.7.2)(react-dom@19.2.1(react@19.2.1))(react@19.2.1))(framer-motion@12.23.25(react-dom@19.2.1(react@19.2.1))(react@19.2.1))(micromark-util-types@2.0.2)(micromark@4.0.2)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
+      '@lobehub/icons': 2.45.0(@babel/core@7.28.5)(@types/mdast@4.0.4)(@types/react@19.2.7)(antd@5.29.1(luxon@3.7.2)(react-dom@19.2.1(react@19.2.1))(react@19.2.1))(framer-motion@12.23.25(react-dom@19.2.1(react@19.2.1))(react@19.2.1))(micromark-util-types@2.0.2)(micromark@4.0.2)(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
       '@mdx-js/mdx': 3.1.1
       '@mdx-js/react': 3.1.1(@types/react@19.2.7)(react@19.2.1)
       '@radix-ui/react-slot': 1.2.4(@types/react@19.2.7)(react@19.2.1)
@@ -10386,7 +10390,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@openrouter/ai-sdk-provider@1.4.1(ai@5.0.108(zod@4.1.13))(zod@4.1.13)':
+  '@openrouter/ai-sdk-provider@1.5.2(ai@5.0.108(zod@4.1.13))(zod@4.1.13)':
     dependencies:
       '@openrouter/sdk': 0.1.27
       ai: 5.0.108(zod@4.1.13)
@@ -11811,7 +11815,7 @@ snapshots:
 
   '@spotlightjs/spotlight@4.7.2':
     dependencies:
-      '@hono/mcp': 0.1.5(@modelcontextprotocol/sdk@1.24.3(zod@4.1.13))(hono@4.10.7)
+      '@hono/mcp': 0.1.5(@modelcontextprotocol/sdk@1.24.3(zod@3.25.76))(hono@4.10.7)
       '@hono/node-server': 1.19.6(hono@4.10.7)
       '@jridgewell/trace-mapping': 0.3.31
       '@modelcontextprotocol/sdk': 1.24.3(zod@3.25.76)
@@ -15028,7 +15032,7 @@ snapshots:
 
   kleur@3.0.3: {}
 
-  knip@5.72.0(@types/node@24.10.2)(typescript@5.9.3):
+  knip@5.73.0(@types/node@24.10.2)(typescript@5.9.3):
     dependencies:
       '@nodelib/fs.walk': 1.2.8
       '@types/node': 24.10.2

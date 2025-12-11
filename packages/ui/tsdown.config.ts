@@ -1,0 +1,36 @@
+import { defineConfig } from "tsdown";
+
+export default defineConfig({
+  entry: {
+    index: "./src/index.ts",
+    button: "./src/components/button/index.tsx",
+    card: "./src/components/card/index.tsx",
+    input: "./src/components/input/index.tsx",
+    textarea: "./src/components/textarea/index.tsx",
+    badge: "./src/components/badge/index.tsx",
+    label: "./src/components/label/index.tsx",
+    avatar: "./src/components/avatar/index.tsx",
+    separator: "./src/components/separator/index.tsx",
+    select: "./src/components/select/index.tsx",
+    "dropdown-menu": "./src/components/dropdown-menu/index.tsx",
+    popover: "./src/components/popover/index.tsx",
+    slider: "./src/components/slider/index.tsx",
+    switch: "./src/components/switch/index.tsx",
+    tooltip: "./src/components/tooltip/index.tsx",
+    dialog: "./src/components/dialog/index.tsx",
+    "alert-dialog": "./src/components/alert-dialog/index.tsx",
+    tabs: "./src/components/tabs/index.tsx",
+    resizable: "./src/components/resizable/index.tsx",
+  },
+  dts: true,
+  format: "esm",
+  outDir: "dist",
+  platform: "neutral",
+  treeshake: true,
+  clean: true,
+  minify: false,
+  sourcemap: true,
+  exports: {
+    all: true,
+  },
+});

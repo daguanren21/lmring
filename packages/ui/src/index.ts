@@ -1,18 +1,24 @@
 // Export utilities
 export { cn } from './utils';
 
-// Export UI components
-export { ResizablePanelGroup, ResizablePanel, ResizableHandle } from './resizable';
+// Export UI components (barrel + subpath support)
+export { ResizablePanelGroup, ResizablePanel, ResizableHandle } from './components/resizable';
 
-// Export shadcn components
-export { Button, buttonVariants } from './button';
-export { Card, CardHeader, CardFooter, CardTitle, CardDescription, CardContent } from './card';
-export { Input } from './input';
-export { Textarea } from './textarea';
-export { Badge, badgeVariants } from './badge';
-export { Label } from './label';
-export { Avatar, AvatarImage, AvatarFallback } from './avatar';
-export { Separator } from './separator';
+export { Button, buttonVariants } from './components/button';
+export {
+  Card,
+  CardHeader,
+  CardFooter,
+  CardTitle,
+  CardDescription,
+  CardContent,
+} from './components/card';
+export { Input } from './components/input';
+export { Textarea } from './components/textarea';
+export { Badge, badgeVariants } from './components/badge';
+export { Label } from './components/label';
+export { Avatar, AvatarImage, AvatarFallback } from './components/avatar';
+export { Separator } from './components/separator';
 export {
   Select,
   SelectGroup,
@@ -24,7 +30,7 @@ export {
   SelectSeparator,
   SelectScrollUpButton,
   SelectScrollDownButton,
-} from './select';
+} from './components/select';
 export {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -41,11 +47,11 @@ export {
   DropdownMenuSubContent,
   DropdownMenuSubTrigger,
   DropdownMenuRadioGroup,
-} from './dropdown-menu';
-export { Popover, PopoverTrigger, PopoverContent, PopoverAnchor } from './popover';
-export { Slider } from './slider';
-export { Switch } from './switch';
-export { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from './tooltip';
+} from './components/dropdown-menu';
+export { Popover, PopoverTrigger, PopoverContent, PopoverAnchor } from './components/popover';
+export { Slider } from './components/slider';
+export { Switch } from './components/switch';
+export { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from './components/tooltip';
 export {
   Dialog,
   DialogPortal,
@@ -57,7 +63,7 @@ export {
   DialogFooter,
   DialogTitle,
   DialogDescription,
-} from './dialog';
+} from './components/dialog';
 export {
   AlertDialog,
   AlertDialogPortal,
@@ -70,7 +76,5 @@ export {
   AlertDialogDescription,
   AlertDialogAction,
   AlertDialogCancel,
-} from './alert-dialog';
-export { Tabs, TabsList, TabsTrigger, TabsContent } from './tabs';
-export { Toaster, toast } from './sonner';
-
+} from './components/alert-dialog';
+export { Tabs, TabsList, TabsTrigger, TabsContent } from './components/tabs';

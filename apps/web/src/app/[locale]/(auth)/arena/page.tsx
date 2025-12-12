@@ -90,46 +90,63 @@ export default function ArenaPage() {
         return;
       }
 
+      const apiKeyIdToProviderName = new Map<string, string>();
+      for (const provider of enabledProviders) {
+        if (provider.id) {
+          apiKeyIdToProviderName.set(provider.id, provider.providerName.toLowerCase());
+        }
+      }
+
       const newEnabledModelsMap = new Map<string, Set<string>>();
       const newCustomModelsMap = new Map<string, Array<{ modelId: string; displayName: string }>>();
 
-      await Promise.all(
-        enabledProviders.map(async (provider) => {
-          try {
-            // Fetch enabled models and custom models in parallel
-            const [enabledResponse, customResponse] = await Promise.all([
-              fetch(`/api/settings/api-keys/${provider.id}/enabled-models`),
-              fetch(`/api/settings/api-keys/${provider.id}/custom-models`),
-            ]);
+      try {
+        // Fetch all enabled models and custom models in parallel using batch APIs
+        const [enabledResponse, customResponse] = await Promise.all([
+          fetch('/api/settings/api-keys/all/enabled-models'),
+          fetch('/api/settings/api-keys/all/custom-models'),
+        ]);
 
-            if (enabledResponse.ok) {
-              const data = await enabledResponse.json();
+        if (enabledResponse.ok) {
+          const data = await enabledResponse.json();
+          const modelsByApiKeyId = data.models || {};
+
+          for (const [apiKeyId, models] of Object.entries(modelsByApiKeyId)) {
+            const providerName = apiKeyIdToProviderName.get(apiKeyId);
+            if (providerName) {
               const enabledModelIds = new Set<string>();
-              for (const model of data.models || []) {
+              for (const model of models as Array<{ modelId: string; enabled: boolean }>) {
                 if (model.enabled) {
                   enabledModelIds.add(model.modelId);
                 }
               }
-              newEnabledModelsMap.set(provider.providerName.toLowerCase(), enabledModelIds);
+              newEnabledModelsMap.set(providerName, enabledModelIds);
             }
+          }
+        }
 
-            if (customResponse.ok) {
-              const data = await customResponse.json();
-              const customModels = (data.models || []).map(
-                (m: { modelId: string; displayName?: string }) => ({
+        if (customResponse.ok) {
+          const data = await customResponse.json();
+          const modelsByApiKeyId = data.models || {};
+
+          for (const [apiKeyId, models] of Object.entries(modelsByApiKeyId)) {
+            const providerName = apiKeyIdToProviderName.get(apiKeyId);
+            if (providerName) {
+              const customModels = (models as Array<{ modelId: string; displayName?: string }>).map(
+                (m) => ({
                   modelId: m.modelId,
                   displayName: m.displayName || m.modelId,
                 }),
               );
               if (customModels.length > 0) {
-                newCustomModelsMap.set(provider.providerName.toLowerCase(), customModels);
+                newCustomModelsMap.set(providerName, customModels);
               }
             }
-          } catch (error) {
-            console.error(`Failed to fetch models for ${provider.providerName}:`, error);
           }
-        }),
-      );
+        }
+      } catch (error) {
+        console.error('Failed to fetch models:', error);
+      }
 
       setEnabledModelsMap(newEnabledModelsMap);
       setCustomModelsMap(newCustomModelsMap);

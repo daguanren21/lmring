@@ -41,12 +41,12 @@ import { ChatList } from './chat/chat-list';
 interface ModelCardProps {
   modelId?: string;
   models: ModelOption[];
-  // Deprecated: use messages instead
   response?: string;
   messages?: WorkflowMessage[];
   pendingResponse?: PendingResponse;
   isLoading?: boolean;
   status?: WorkflowStatus;
+  error?: string;
   synced?: boolean;
   customPrompt?: string;
   config?: ModelConfig;
@@ -81,6 +81,7 @@ export function ModelCard({
   response = '',
   isLoading = false,
   status,
+  error,
   synced = true,
   customPrompt = '',
   config = DEFAULT_CONFIG,
@@ -431,6 +432,7 @@ export function ModelCard({
                   pendingResponse={pendingResponse}
                   isLoading={isLoading}
                   status={status}
+                  error={error}
                   providerId={selectedModel?.providerId}
                   onRetry={onRetry}
                   onMaximize={onMaximize}

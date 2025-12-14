@@ -15,6 +15,9 @@ export type ArenaState = {
   globalPrompt: string;
   initialized: boolean;
   availableModels: ModelOption[];
+  modelsLastLoadedAt: number | null;
+  enabledModelsMap: Map<string, Set<string>>;
+  customModelsMap: Map<string, Array<{ modelId: string; displayName: string }>>;
 };
 
 export type ArenaActions = {
@@ -39,6 +42,11 @@ export type ArenaActions = {
   ) => void;
   setError: (index: number, error: string) => void;
   setAvailableModels: (models: ModelOption[]) => void;
+  setModelsLastLoadedAt: (timestamp: number | null) => void;
+  setComparisons: (comparisons: ModelComparison[]) => void;
+  resetComparisons: (availableModels: ModelOption[]) => void;
+  setEnabledModelsMap: (map: Map<string, Set<string>>) => void;
+  setCustomModelsMap: (map: Map<string, Array<{ modelId: string; displayName: string }>>) => void;
 };
 
 export type ArenaStore = ArenaState & ArenaActions;
@@ -60,6 +68,9 @@ const defaultInitState: ArenaState = {
   globalPrompt: '',
   initialized: false,
   availableModels: [],
+  modelsLastLoadedAt: null,
+  enabledModelsMap: new Map(),
+  customModelsMap: new Map(),
 };
 
 export const createArenaStore = (initState: Partial<ArenaState> = {}) => {
@@ -95,7 +106,6 @@ export const createArenaStore = (initState: Partial<ArenaState> = {}) => {
           const state = get();
           if (state.comparisons.length >= 4) return;
 
-          // Always use the first available model as default
           const newModelId = state.availableModels[0]?.id || '';
 
           set(
@@ -262,6 +272,31 @@ export const createArenaStore = (initState: Partial<ArenaState> = {}) => {
 
         setAvailableModels: (models) =>
           set({ availableModels: models }, false, 'arena/setAvailableModels'),
+
+        setModelsLastLoadedAt: (timestamp) =>
+          set({ modelsLastLoadedAt: timestamp }, false, 'arena/setModelsLastLoadedAt'),
+
+        setComparisons: (comparisons) => set({ comparisons }, false, 'arena/setComparisons'),
+
+        resetComparisons: (availableModels) => {
+          const defaultModelId = availableModels[0]?.id || '';
+          set(
+            {
+              comparisons: [
+                createEmptyComparison('1', defaultModelId),
+                createEmptyComparison('2', defaultModelId),
+              ],
+            },
+            false,
+            'arena/resetComparisons',
+          );
+        },
+
+        setEnabledModelsMap: (map) =>
+          set({ enabledModelsMap: map }, false, 'arena/setEnabledModelsMap'),
+
+        setCustomModelsMap: (map) =>
+          set({ customModelsMap: map }, false, 'arena/setCustomModelsMap'),
       }),
       { name: 'arena-store', enabled: process.env.NODE_ENV === 'development' },
     ),
@@ -298,4 +333,7 @@ export const arenaSelectors = {
   availableModels: (state: ArenaStore) => state.availableModels,
   isAnyLoading: (state: ArenaStore) => state.comparisons.some((c) => c.isLoading),
   comparisonCount: (state: ArenaStore) => state.comparisons.length,
+  modelsLastLoadedAt: (state: ArenaStore) => state.modelsLastLoadedAt,
+  enabledModelsMap: (state: ArenaStore) => state.enabledModelsMap,
+  customModelsMap: (state: ArenaStore) => state.customModelsMap,
 };

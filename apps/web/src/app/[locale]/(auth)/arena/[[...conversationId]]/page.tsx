@@ -3,7 +3,7 @@
 import { Button, ResponseViewer, ScrollArea, toast } from '@lmring/ui';
 import { motion } from 'framer-motion';
 import { XIcon } from 'lucide-react';
-import { useRouter } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import * as React from 'react';
 import { ModelCard } from '@/components/arena/model-card';
@@ -14,8 +14,12 @@ import {
   PromptInputSubmit,
   PromptInputTextarea,
 } from '@/components/arena/prompt-input';
+import { useConversation } from '@/hooks/use-conversation';
 import { useProviderMetadata } from '@/hooks/use-provider-metadata';
-import { useWorkflowExecution } from '@/hooks/use-workflow-execution';
+import {
+  useWorkflowExecution,
+  type WorkflowPersistenceCallbacks,
+} from '@/hooks/use-workflow-execution';
 import {
   arenaSelectors,
   settingsSelectors,
@@ -24,12 +28,23 @@ import {
   useWorkflowStore,
   workflowSelectors,
 } from '@/stores';
-import type { ModelOption } from '@/types/arena';
+import type { LoadedConversation } from '@/stores/workflow-store';
+import type { ModelComparison, ModelOption } from '@/types/arena';
+import { DEFAULT_MODEL_CONFIG } from '@/types/arena';
+import type { ArenaWorkflow } from '@/types/workflow';
 
 export default function ArenaPage() {
+  const params = useParams();
+  const locale = params.locale as string;
+  const conversationIdParam = params.conversationId as string[] | undefined;
+  const conversationId = conversationIdParam?.[0];
+
   const router = useRouter();
   const t = useTranslations('Arena');
   const providerMetadata = useProviderMetadata();
+
+  const { loadConversation, saveMessage, saveModelResponse, createConversation } =
+    useConversation();
 
   const comparisons = useArenaStore(arenaSelectors.comparisons);
   const initialized = useArenaStore(arenaSelectors.initialized);
@@ -44,6 +59,14 @@ export default function ArenaPage() {
   const removeComparison = useArenaStore((state) => state.removeComparison);
   const availableModels = useArenaStore(arenaSelectors.availableModels);
   const setAvailableModels = useArenaStore((state) => state.setAvailableModels);
+  const modelsLastLoadedAt = useArenaStore(arenaSelectors.modelsLastLoadedAt);
+  const setModelsLastLoadedAt = useArenaStore((state) => state.setModelsLastLoadedAt);
+  const setComparisons = useArenaStore((state) => state.setComparisons);
+  const resetComparisons = useArenaStore((state) => state.resetComparisons);
+  const enabledModelsMap = useArenaStore(arenaSelectors.enabledModelsMap);
+  const setEnabledModelsMap = useArenaStore((state) => state.setEnabledModelsMap);
+  const customModelsMap = useArenaStore(arenaSelectors.customModelsMap);
+  const setCustomModelsMap = useArenaStore((state) => state.setCustomModelsMap);
 
   const savedApiKeys = useSettingsStore(settingsSelectors.savedApiKeys);
   const loadApiKeys = useSettingsStore((state) => state.loadApiKeys);
@@ -59,19 +82,86 @@ export default function ArenaPage() {
   const setWorkflowConfig = useWorkflowStore((state) => state.setWorkflowConfig);
   const setWorkflowCustomPrompt = useWorkflowStore((state) => state.setCustomPrompt);
   const clearWorkflowHistory = useWorkflowStore((state) => state.clearWorkflowHistory);
+  const resetConversation = useWorkflowStore((state) => state.resetConversation);
+  const loadConversationHistory = useWorkflowStore((state) => state.loadConversationHistory);
+  const setConversationId = useWorkflowStore((state) => state.setConversationId);
+  const storedConversationId = useWorkflowStore(workflowSelectors.conversationId);
+  const setNewConversation = useWorkflowStore((state) => state.setNewConversation);
+  const isCreatingConversation = useWorkflowStore(workflowSelectors.isCreatingConversation);
+  const workflowOrder = useWorkflowStore(workflowSelectors.workflowOrder);
+  const setIsCreatingConversation = useWorkflowStore((state) => state.setIsCreatingConversation);
 
-  const { startAllSyncedWorkflows, cancelAllWorkflows, regenerateLastResponse } =
-    useWorkflowExecution();
+  const [currentUrlConversationId, setCurrentUrlConversationId] = React.useState<
+    string | undefined
+  >(conversationId);
 
   const comparisonWorkflowMap = React.useRef<Map<string, string>>(new Map());
-  const [enabledModelsMap, setEnabledModelsMap] = React.useState<Map<string, Set<string>>>(
-    new Map(),
+
+  const handleConversationCreated = React.useCallback(
+    (newConversationId: string, title: string) => {
+      window.history.replaceState(null, '', `/${locale}/arena/${newConversationId}`);
+      setConversationId(newConversationId);
+      setCurrentUrlConversationId(newConversationId);
+      setNewConversation({ id: newConversationId, title, updatedAt: new Date().toISOString() });
+      setConversationLoaded(true);
+    },
+    [locale, setConversationId, setNewConversation],
   );
+
+  const persistenceCallbacks = React.useMemo<WorkflowPersistenceCallbacks>(
+    () => ({
+      onCreateConversation: async (title: string) => {
+        const conversation = await createConversation(title);
+        return conversation?.id ?? null;
+      },
+      onSaveUserMessage: async (convId: string, content: string) => {
+        const message = await saveMessage(convId, 'user', content);
+        return message?.id ?? null;
+      },
+      onSaveModelResponse: async (
+        workflowId: string,
+        messageId: string,
+        modelName: string,
+        providerName: string,
+        responseContent: string,
+        tokensUsed?: number,
+        responseTimeMs?: number,
+      ) => {
+        // Find the displayPosition by looking up the workflowId in comparisonWorkflowMap
+        let displayPosition = 0;
+        for (const [comparisonId, wfId] of comparisonWorkflowMap.current.entries()) {
+          if (wfId === workflowId) {
+            // Find the index of this comparison in the comparisons array
+            const index = comparisons.findIndex((c) => c.id === comparisonId);
+            if (index >= 0) {
+              displayPosition = index;
+            }
+            break;
+          }
+        }
+
+        await saveModelResponse(
+          messageId,
+          modelName,
+          providerName,
+          responseContent,
+          tokensUsed,
+          responseTimeMs,
+          displayPosition,
+        );
+      },
+      onConversationCreated: handleConversationCreated,
+    }),
+    [createConversation, saveMessage, saveModelResponse, handleConversationCreated, comparisons],
+  );
+
+  const { startAllSyncedWorkflows, cancelAllWorkflows, regenerateLastResponse } =
+    useWorkflowExecution(persistenceCallbacks);
+
   const [enabledModelsLoaded, setEnabledModelsLoaded] = React.useState(false);
-  const [customModelsMap, setCustomModelsMap] = React.useState<
-    Map<string, Array<{ modelId: string; displayName: string }>>
-  >(new Map());
   const [maximizedContent, setMaximizedContent] = React.useState<string | null>(null);
+  const [conversationLoaded, setConversationLoaded] = React.useState(false);
+  const [conversationError, setConversationError] = React.useState<string | null>(null);
 
   React.useEffect(() => {
     if (!apiKeysLoaded) {
@@ -79,17 +169,62 @@ export default function ArenaPage() {
     }
   }, [apiKeysLoaded, loadApiKeys]);
 
+  React.useEffect(() => {
+    if (conversationId !== currentUrlConversationId) {
+      setCurrentUrlConversationId(conversationId);
+
+      if (isCreatingConversation) {
+        setIsCreatingConversation(false);
+        return;
+      }
+
+      if (!conversationId) {
+        // Always reset when navigating to new chat, regardless of storedConversationId
+        resetConversation();
+        comparisonWorkflowMap.current.clear();
+        if (availableModels.length > 0) {
+          resetComparisons(availableModels);
+        }
+        setConversationLoaded(false);
+        setConversationError(null);
+      } else if (conversationId !== storedConversationId) {
+        setConversationLoaded(false);
+        setConversationError(null);
+      }
+    }
+  }, [
+    conversationId,
+    currentUrlConversationId,
+    storedConversationId,
+    isCreatingConversation,
+    resetConversation,
+    setIsCreatingConversation,
+    availableModels,
+    resetComparisons,
+  ]);
+
   const hasConfiguredProviders = React.useMemo(() => {
     return savedApiKeys.some((k) => k.enabled);
   }, [savedApiKeys]);
 
+  // Fetch enabled and custom models with caching
   React.useEffect(() => {
     const fetchEnabledModels = async () => {
       if (!apiKeysLoaded) return;
 
+      const needsRefresh =
+        typeof window !== 'undefined' &&
+        sessionStorage.getItem('arena_models_need_refresh') === 'true';
+
+      if (modelsLastLoadedAt && !needsRefresh) {
+        setEnabledModelsLoaded(true);
+        return;
+      }
+
       const enabledProviders = savedApiKeys.filter((k) => k.enabled && k.id);
       if (enabledProviders.length === 0) {
         setEnabledModelsLoaded(true);
+        setModelsLastLoadedAt(Date.now());
         return;
       }
 
@@ -104,7 +239,6 @@ export default function ArenaPage() {
       const newCustomModelsMap = new Map<string, Array<{ modelId: string; displayName: string }>>();
 
       try {
-        // Fetch all enabled models and custom models in parallel using batch APIs
         const [enabledResponse, customResponse] = await Promise.all([
           fetch('/api/settings/api-keys/all/enabled-models'),
           fetch('/api/settings/api-keys/all/custom-models'),
@@ -147,6 +281,11 @@ export default function ArenaPage() {
             }
           }
         }
+
+        setModelsLastLoadedAt(Date.now());
+        if (typeof window !== 'undefined') {
+          sessionStorage.removeItem('arena_models_need_refresh');
+        }
       } catch (error) {
         console.error('Failed to fetch models:', error);
       }
@@ -157,7 +296,14 @@ export default function ArenaPage() {
     };
 
     fetchEnabledModels();
-  }, [apiKeysLoaded, savedApiKeys]);
+  }, [
+    apiKeysLoaded,
+    modelsLastLoadedAt,
+    setModelsLastLoadedAt,
+    setEnabledModelsMap,
+    setCustomModelsMap,
+    savedApiKeys,
+  ]);
 
   const filteredProviders = React.useMemo(() => {
     if (hasConfiguredProviders) {
@@ -212,7 +358,6 @@ export default function ArenaPage() {
         }
       }
 
-      // Add custom models for this provider
       const providerCustomModels = customModelsMap.get(provider.id.toLowerCase());
       if (providerCustomModels) {
         for (const customModel of providerCustomModels) {
@@ -234,8 +379,6 @@ export default function ArenaPage() {
       }
     }
 
-    // Handle custom providers (created via "Add Provider" dialog)
-    // These providers are not in ALL_PROVIDER_METADATA, so they won't appear in filteredProviders
     const customProviders = savedApiKeys.filter((k) => k.isCustom && k.enabled);
     for (const customProvider of customProviders) {
       const providerCustomModels = customModelsMap.get(customProvider.providerName.toLowerCase());
@@ -296,6 +439,62 @@ export default function ArenaPage() {
     [savedApiKeys],
   );
 
+  React.useEffect(() => {
+    const loadConversationData = async () => {
+      if (!conversationId) {
+        return;
+      }
+
+      if (conversationLoaded && storedConversationId === conversationId) {
+        return;
+      }
+
+      if (!apiKeysLoaded || !enabledModelsLoaded) {
+        return;
+      }
+
+      try {
+        const data = await loadConversation(conversationId);
+        if (!data) {
+          setConversationError('Conversation not found');
+          return;
+        }
+
+        const modelKeyMap = new Map<string, { modelId: string; keyId: string }>();
+
+        for (const message of data.messages) {
+          if (message.responses) {
+            for (const response of message.responses) {
+              const fullModelId = `${response.providerName}:${response.modelName}`;
+              if (!modelKeyMap.has(fullModelId)) {
+                // Always add the model to the map, even if keyId is missing
+                // This ensures card count matches original conversation
+                const keyId = getKeyIdForModel(fullModelId) || '';
+                modelKeyMap.set(fullModelId, { modelId: fullModelId, keyId });
+              }
+            }
+          }
+        }
+        loadConversationHistory(data as LoadedConversation, modelKeyMap);
+        setConversationLoaded(true);
+      } catch (error) {
+        console.error('Failed to load conversation:', error);
+        setConversationError('Failed to load conversation');
+      }
+    };
+
+    loadConversationData();
+  }, [
+    conversationId,
+    conversationLoaded,
+    storedConversationId,
+    apiKeysLoaded,
+    enabledModelsLoaded,
+    loadConversation,
+    loadConversationHistory,
+    getKeyIdForModel,
+  ]);
+
   const getOrCreateWorkflow = React.useCallback(
     (comparisonId: string, modelId: string, synced: boolean): string | undefined => {
       const existingWorkflowId = comparisonWorkflowMap.current.get(comparisonId);
@@ -315,6 +514,7 @@ export default function ArenaPage() {
 
       const workflowId = createWorkflow(modelId, keyId, synced);
       comparisonWorkflowMap.current.set(comparisonId, workflowId);
+
       return workflowId;
     },
     [workflows, deleteWorkflow, createWorkflow, getKeyIdForModel],
@@ -328,6 +528,130 @@ export default function ArenaPage() {
     },
     [workflows],
   );
+
+  React.useEffect(() => {
+    if (!conversationLoaded || workflows.size === 0) return;
+
+    // Use workflowOrder for consistent ordering if available, otherwise fall back to entries
+    const orderedWorkflows =
+      workflowOrder.length > 0
+        ? workflowOrder
+            .map((id) => {
+              const workflow = workflows.get(id);
+              return workflow ? ([id, workflow] as const) : null;
+            })
+            .filter((entry): entry is [string, ArenaWorkflow] => entry !== null)
+        : Array.from(workflows.entries());
+
+    if (orderedWorkflows.length !== comparisons.length) {
+      const newComparisons: ModelComparison[] = orderedWorkflows.map(
+        ([workflowId, workflow], index) => {
+          const existingComparison = comparisons[index];
+          const newId = existingComparison?.id || `${Date.now()}-${index}`;
+          comparisonWorkflowMap.current.set(newId, workflowId);
+          return {
+            id: newId,
+            modelId: workflow.modelId,
+            response: '',
+            isLoading: false,
+            synced: workflow.synced,
+            customPrompt: workflow.customPrompt || '',
+            config: { ...DEFAULT_MODEL_CONFIG },
+          };
+        },
+      );
+
+      setComparisons(newComparisons);
+      return;
+    }
+
+    comparisons.forEach((comparison, compIndex) => {
+      const matchingEntry = orderedWorkflows.find(([_, wf]) => wf.modelId === comparison.modelId);
+
+      if (matchingEntry) {
+        const [workflowId, workflow] = matchingEntry;
+        const currentMapping = comparisonWorkflowMap.current.get(comparison.id);
+        if (currentMapping !== workflowId) {
+          comparisonWorkflowMap.current.set(comparison.id, workflowId);
+        }
+
+        if (comparison.modelId !== workflow.modelId) {
+          selectModel(compIndex, workflow.modelId);
+        }
+      }
+    });
+  }, [conversationLoaded, workflows, workflowOrder, comparisons, selectModel, setComparisons]);
+
+  // Handle re-entry to the same conversation (e.g., navigating from History to the same conversation)
+  React.useEffect(() => {
+    if (
+      conversationId &&
+      conversationId === storedConversationId &&
+      !conversationLoaded &&
+      workflows.size > 0 &&
+      comparisonWorkflowMap.current.size === 0
+    ) {
+      const orderedWorkflows =
+        workflowOrder.length > 0
+          ? workflowOrder
+              .map((id) => {
+                const workflow = workflows.get(id);
+                return workflow ? ([id, workflow] as const) : null;
+              })
+              .filter((entry): entry is [string, ArenaWorkflow] => entry !== null)
+          : Array.from(workflows.entries());
+
+      if (orderedWorkflows.length !== comparisons.length) {
+        const newComparisons: ModelComparison[] = orderedWorkflows.map(
+          ([workflowId, workflow], index) => {
+            const existingComparison = comparisons[index];
+            const newId = existingComparison?.id || `${Date.now()}-${index}`;
+            comparisonWorkflowMap.current.set(newId, workflowId);
+            return {
+              id: newId,
+              modelId: workflow.modelId,
+              response: '',
+              isLoading: false,
+              synced: workflow.synced,
+              customPrompt: workflow.customPrompt || '',
+              config: { ...DEFAULT_MODEL_CONFIG },
+            };
+          },
+        );
+        setComparisons(newComparisons);
+        setConversationLoaded(true);
+        return;
+      }
+
+      comparisons.forEach((comparison, compIndex) => {
+        const matchingEntry = orderedWorkflows.find(([_, wf]) => wf.modelId === comparison.modelId);
+
+        if (matchingEntry) {
+          const [workflowId, workflow] = matchingEntry;
+          // Update mapping only if it changed
+          const currentMapping = comparisonWorkflowMap.current.get(comparison.id);
+          if (currentMapping !== workflowId) {
+            comparisonWorkflowMap.current.set(comparison.id, workflowId);
+          }
+
+          if (comparison.modelId !== workflow.modelId) {
+            selectModel(compIndex, workflow.modelId);
+          }
+        }
+      });
+
+      setConversationLoaded(true);
+    }
+  }, [
+    conversationId,
+    storedConversationId,
+    conversationLoaded,
+    workflows,
+    workflowOrder,
+    comparisons,
+    selectModel,
+    setComparisons,
+  ]);
 
   const handleSubmit = React.useCallback(async () => {
     if (!workflowGlobalPrompt.trim()) return;
@@ -345,7 +669,6 @@ export default function ArenaPage() {
 
     const syncedComparisons = comparisons.filter((comp) => comp.synced);
 
-    // Check if all synced cards have a model selected
     const missingModelCards = syncedComparisons.filter((comp) => !comp.modelId);
     if (missingModelCards.length > 0) {
       toast.warning(t('select_model_for_all_cards_title'), {
@@ -501,7 +824,24 @@ export default function ArenaPage() {
     };
   }, [cancelAllWorkflows]);
 
-  if (!initialized) {
+  if (conversationError) {
+    return (
+      <div className="flex items-center justify-center h-full bg-background">
+        <div className="text-center space-y-4">
+          <div className="text-destructive">{conversationError}</div>
+          <Button onClick={() => router.push(`/${locale}/arena`)}>Start New Conversation</Button>
+        </div>
+      </div>
+    );
+  }
+
+  if (
+    !initialized ||
+    (conversationId &&
+      !conversationLoaded &&
+      storedConversationId !== conversationId &&
+      !isCreatingConversation)
+  ) {
     return (
       <div className="flex items-center justify-center h-full bg-background">
         <div className="text-muted-foreground">{t('loading_models')}</div>
@@ -543,6 +883,7 @@ export default function ArenaPage() {
                   response={response}
                   isLoading={isLoading}
                   status={workflow?.status}
+                  error={workflow?.error}
                   synced={comparison.synced}
                   customPrompt={comparison.customPrompt}
                   config={comparison.config}

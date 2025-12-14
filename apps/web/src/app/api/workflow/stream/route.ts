@@ -162,7 +162,8 @@ export async function POST(request: Request) {
               content: m.content,
             })),
             ...(canUseTemperature && { temperature: config.temperature }),
-            maxOutputTokens: config.maxTokens,
+            // Skip maxOutputTokens when using custom proxy URL (some proxies don't support it)
+            ...(!keyData.proxyUrl && config.maxTokens && { maxOutputTokens: config.maxTokens }),
             // Only pass optional params when they have values (avoids Anthropic conflict)
             ...(config.topP != null && canUseTemperature && { topP: config.topP }),
             ...(config.frequencyPenalty != null &&

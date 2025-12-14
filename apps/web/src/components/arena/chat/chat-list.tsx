@@ -10,6 +10,7 @@ interface ChatListProps {
   pendingResponse?: PendingResponse;
   isLoading?: boolean;
   status?: WorkflowStatus;
+  error?: string;
   providerId?: string;
   onRetry?: (messageId: string) => void;
   onMaximize?: (content: string) => void;
@@ -20,6 +21,7 @@ export function ChatList({
   pendingResponse,
   isLoading,
   status,
+  error,
   providerId,
   onRetry,
   onMaximize,
@@ -66,6 +68,7 @@ export function ChatList({
             providerId={providerId}
             isStreaming={status === 'running'}
             status={status}
+            error={error}
           />
         )}
 

@@ -149,7 +149,6 @@ export function ProviderDetail({ provider, onToggle, onSave, onDelete }: Provide
     fetchModelStates();
   }, [provider.apiKeyId]);
 
-  // Fetch custom models from database
   useEffect(() => {
     const fetchCustomModels = async () => {
       if (!provider.apiKeyId) {
@@ -261,6 +260,10 @@ export function ProviderDetail({ provider, onToggle, onSave, onDelete }: Provide
       const result: SaveApiKeyResponse = await response.json();
 
       onSave?.(provider.id, result.id);
+
+      if (typeof window !== 'undefined') {
+        sessionStorage.setItem('arena_models_need_refresh', 'true');
+      }
 
       toast.success('Saved', {
         description: 'API key configuration saved successfully',
@@ -374,6 +377,10 @@ export function ProviderDetail({ provider, onToggle, onSave, onDelete }: Provide
         const result: SaveApiKeyResponse = await response.json();
         onToggle(provider.id, newEnabled, result.id);
         onSave?.(provider.id, result.id);
+
+        if (typeof window !== 'undefined') {
+          sessionStorage.setItem('arena_models_need_refresh', 'true');
+        }
       } else {
         onToggle(provider.id, newEnabled);
       }
@@ -405,6 +412,10 @@ export function ProviderDetail({ provider, onToggle, onSave, onDelete }: Provide
               models: [{ modelId, enabled }],
             }),
           });
+
+          if (typeof window !== 'undefined') {
+            sessionStorage.setItem('arena_models_need_refresh', 'true');
+          }
         } catch {
           setModelEnabledStates((prev) => ({ ...prev, [modelId]: !enabled }));
           toast.error('Error', {
@@ -449,8 +460,11 @@ export function ProviderDetail({ provider, onToggle, onSave, onDelete }: Provide
             source: 'custom' as const,
           },
         ]);
-        // Do not auto-enable new models
-        // setModelEnabledStates((prev) => ({ ...prev, [model.id]: true }));
+
+        if (typeof window !== 'undefined') {
+          sessionStorage.setItem('arena_models_need_refresh', 'true');
+        }
+
         toast.success('Model Added');
       } catch (error) {
         toast.error('Failed to add model', {
@@ -476,13 +490,16 @@ export function ProviderDetail({ provider, onToggle, onSave, onDelete }: Provide
           throw new Error(error.message || 'Failed to delete model');
         }
 
-        // Remove from local state
         setCustomModels((prev) => prev.filter((m) => m.id !== modelId));
         setModelEnabledStates((prev) => {
           const newState = { ...prev };
           delete newState[modelId];
           return newState;
         });
+
+        if (typeof window !== 'undefined') {
+          sessionStorage.setItem('arena_models_need_refresh', 'true');
+        }
 
         toast.success('Model Deleted');
       } catch (error) {

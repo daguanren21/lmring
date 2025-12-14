@@ -11,6 +11,7 @@ interface PromptInputContextValue {
   onStop?: () => void;
   isLoading: boolean;
   disabled: boolean;
+  isSubmitting: boolean;
 }
 
 const PromptInputContext = React.createContext<PromptInputContextValue | undefined>(undefined);
@@ -22,6 +23,8 @@ function usePromptInput() {
   }
   return context;
 }
+
+const SUBMIT_DEBOUNCE_MS = 500;
 
 interface PromptInputProps
   extends Omit<React.HTMLAttributes<HTMLDivElement>, 'onChange' | 'onSubmit'> {
@@ -44,10 +47,26 @@ export function PromptInput({
   children,
   ...props
 }: PromptInputProps) {
-  const handleSubmit = () => {
-    if (!value.trim() || isLoading || disabled) return;
+  const lastSubmitTimeRef = React.useRef<number>(0);
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
+
+  const handleSubmit = React.useCallback(() => {
+    if (!value.trim() || isLoading || disabled || isSubmitting) return;
+
+    const now = Date.now();
+    if (now - lastSubmitTimeRef.current < SUBMIT_DEBOUNCE_MS) {
+      return;
+    }
+
+    lastSubmitTimeRef.current = now;
+    setIsSubmitting(true);
+
+    setTimeout(() => {
+      setIsSubmitting(false);
+    }, SUBMIT_DEBOUNCE_MS);
+
     onSubmit();
-  };
+  }, [value, isLoading, disabled, isSubmitting, onSubmit]);
 
   return (
     <PromptInputContext.Provider
@@ -58,6 +77,7 @@ export function PromptInput({
         onStop,
         isLoading,
         disabled,
+        isSubmitting,
       }}
     >
       <div
@@ -79,14 +99,20 @@ export const PromptInputTextarea = React.forwardRef<
     maxHeight?: number;
   }
 >(({ className, onKeyDown, maxHeight = 200, ...props }, ref) => {
-  const { value, setValue, onSubmit, isLoading, disabled } = usePromptInput();
+  const { value, setValue, onSubmit, isLoading, disabled, isSubmitting } = usePromptInput();
   const textareaRef = React.useRef<HTMLTextAreaElement>(null);
   const [isComposing, setIsComposing] = React.useState(false);
 
   React.useImperativeHandle(ref, () => textareaRef.current as HTMLTextAreaElement);
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === 'Enter' && !e.shiftKey && !isComposing && !e.nativeEvent.isComposing) {
+    if (
+      e.key === 'Enter' &&
+      !e.shiftKey &&
+      !isComposing &&
+      !e.nativeEvent.isComposing &&
+      !isSubmitting
+    ) {
       e.preventDefault();
       onSubmit();
     }
@@ -151,7 +177,7 @@ export function PromptInputSubmit({
   children,
   ...props
 }: React.ComponentProps<typeof Button>) {
-  const { value, onSubmit, onStop, isLoading, disabled } = usePromptInput();
+  const { value, onSubmit, onStop, isLoading, disabled, isSubmitting } = usePromptInput();
 
   if (isLoading && onStop) {
     return (
@@ -168,14 +194,16 @@ export function PromptInputSubmit({
     );
   }
 
+  const isDisabled = !value.trim() || isLoading || disabled || isSubmitting;
+
   return (
     <Button
       size="icon"
       onClick={onSubmit}
-      disabled={!value.trim() || isLoading || disabled}
+      disabled={isDisabled}
       className={cn(
         'h-8 w-8 rounded-full transition-all',
-        !value.trim() && !isLoading ? 'opacity-50' : 'opacity-100',
+        isDisabled ? 'opacity-50' : 'opacity-100',
         className,
       )}
       {...props}

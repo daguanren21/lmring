@@ -1,7 +1,29 @@
-import { useCallback } from 'react';
+import { useCallback, useRef } from 'react';
 import { buildWorkflowStreamRequest, streamWorkflow } from '@/libs/workflow-api';
 import { useWorkflowStore } from '@/stores/workflow-store';
 import type { ArenaWorkflow, WorkflowMetrics } from '@/types/workflow';
+
+/**
+ * Persistence callbacks for saving conversation data
+ */
+export interface WorkflowPersistenceCallbacks {
+  /** Called when first message is sent to create a conversation */
+  onCreateConversation?: (title: string) => Promise<string | null>;
+  /** Called to save a user message */
+  onSaveUserMessage?: (conversationId: string, content: string) => Promise<string | null>;
+  /** Called when a model response is complete */
+  onSaveModelResponse?: (
+    workflowId: string,
+    messageId: string,
+    modelName: string,
+    providerName: string,
+    responseContent: string,
+    tokensUsed?: number,
+    responseTimeMs?: number,
+  ) => Promise<void>;
+  /** Called when a conversation is created (for URL update and sidebar notification) */
+  onConversationCreated?: (conversationId: string, title: string) => void;
+}
 
 /**
  * Hook for executing workflows with independent streaming
@@ -13,7 +35,7 @@ import type { ArenaWorkflow, WorkflowMetrics } from '@/types/workflow';
  * - Retry a failed workflow
  * - Execute all synced workflows with the global prompt
  */
-export function useWorkflowExecution() {
+export function useWorkflowExecution(persistenceCallbacks?: WorkflowPersistenceCallbacks) {
   const addUserMessage = useWorkflowStore((s) => s.addUserMessage);
   const startPendingResponse = useWorkflowStore((s) => s.startPendingResponse);
   const appendPendingResponse = useWorkflowStore((s) => s.appendPendingResponse);
@@ -27,13 +49,64 @@ export function useWorkflowExecution() {
   const globalPrompt = useWorkflowStore((s) => s.globalPrompt);
   const clearWorkflowHistory = useWorkflowStore((s) => s.clearWorkflowHistory);
   const removeLastAssistantMessage = useWorkflowStore((s) => s.removeLastAssistantMessage);
+  const getConversationId = useWorkflowStore((s) => s.getConversationId);
+  const setConversationId = useWorkflowStore((s) => s.setConversationId);
+
+  const currentDbMessageIdRef = useRef<string | null>(null);
+
+  const conversationCreationPromiseRef = useRef<Promise<{
+    conversationId: string;
+    messageId: string;
+  } | null> | null>(null);
+  const pendingPromptRef = useRef<string>('');
+
+  const createConversationOnFirstChunk = useCallback(async (): Promise<{
+    conversationId: string;
+    messageId: string;
+  } | null> => {
+    const existingConversationId = getConversationId();
+    if (existingConversationId && persistenceCallbacks?.onSaveUserMessage) {
+      const messageId = await persistenceCallbacks.onSaveUserMessage(
+        existingConversationId,
+        pendingPromptRef.current,
+      );
+      if (messageId) {
+        return { conversationId: existingConversationId, messageId };
+      }
+      return null;
+    }
+
+    if (!persistenceCallbacks?.onCreateConversation) return null;
+
+    const prompt = pendingPromptRef.current;
+    const title = prompt.trim().slice(0, 50) + (prompt.length > 50 ? '...' : '');
+    const conversationId = await persistenceCallbacks.onCreateConversation(title);
+
+    if (!conversationId) return null;
+
+    setConversationId(conversationId);
+
+    let messageId: string | null = null;
+    if (persistenceCallbacks.onSaveUserMessage) {
+      messageId = await persistenceCallbacks.onSaveUserMessage(conversationId, prompt);
+    }
+
+    persistenceCallbacks.onConversationCreated?.(conversationId, title);
+
+    return messageId ? { conversationId, messageId } : null;
+  }, [getConversationId, setConversationId, persistenceCallbacks]);
 
   /**
    * Execute streaming for a single workflow
    */
   const executeWorkflowStream = useCallback(
-    async (workflow: ArenaWorkflow, prompt: string) => {
+    async (
+      workflow: ArenaWorkflow,
+      prompt: string,
+      options?: { isNewConversation?: boolean; existingDbMessageId?: string },
+    ) => {
       const { id, modelId, keyId, messages, config } = workflow;
+      const { isNewConversation = false, existingDbMessageId } = options || {};
 
       addUserMessage(id, prompt);
       startPendingResponse(id);
@@ -55,11 +128,29 @@ export function useWorkflowExecution() {
       });
 
       let metrics: WorkflowMetrics | undefined;
+      let finalContent = '';
+      let dbMessageId = existingDbMessageId;
+      let isFirstChunk = true;
 
       try {
         for await (const event of streamWorkflow(request, abortController.signal)) {
           if (event.type === 'chunk' && event.chunk) {
+            if (isFirstChunk && isNewConversation && persistenceCallbacks) {
+              isFirstChunk = false;
+
+              if (!conversationCreationPromiseRef.current) {
+                conversationCreationPromiseRef.current = createConversationOnFirstChunk();
+              }
+
+              const result = await conversationCreationPromiseRef.current;
+              if (result) {
+                dbMessageId = result.messageId;
+                currentDbMessageIdRef.current = result.messageId;
+              }
+            }
+
             appendPendingResponse(id, event.chunk);
+            finalContent += event.chunk;
           } else if (event.type === 'reasoning' && event.reasoning) {
             appendPendingReasoning(id, event.reasoning);
           } else if (event.type === 'complete') {
@@ -73,6 +164,23 @@ export function useWorkflowExecution() {
 
         completePendingResponse(id, metrics);
         setAbortController(id, undefined);
+
+        if (dbMessageId && persistenceCallbacks?.onSaveModelResponse && finalContent) {
+          const [providerName, modelName] = modelId.split(':');
+          try {
+            await persistenceCallbacks.onSaveModelResponse(
+              id,
+              dbMessageId,
+              modelName || modelId,
+              providerName || 'unknown',
+              finalContent,
+              metrics?.totalTokens,
+              metrics?.totalTime,
+            );
+          } catch (error) {
+            console.error('Failed to save model response:', error);
+          }
+        }
       } catch (error) {
         if (error instanceof Error && error.name === 'AbortError') {
           setWorkflowStatus(id, 'cancelled');
@@ -91,6 +199,8 @@ export function useWorkflowExecution() {
       completePendingResponse,
       setWorkflowStatus,
       setAbortController,
+      persistenceCallbacks,
+      createConversationOnFirstChunk,
     ],
   );
 
@@ -210,14 +320,12 @@ export function useWorkflowExecution() {
         return;
       }
 
-      // Remove the last assistant message and get the user message content
       const userContent = removeLastAssistantMessage(workflowId);
       if (!userContent) {
         console.warn('No user message found to regenerate response');
         return;
       }
 
-      // Get the fresh workflow state after removing the assistant message
       const freshWorkflow = getWorkflow(workflowId);
       if (freshWorkflow) {
         await executeWorkflowStream(freshWorkflow, userContent);
@@ -228,6 +336,7 @@ export function useWorkflowExecution() {
 
   /**
    * Start all synced workflows with the global prompt
+   * Conversation is created lazily when the first model returns content
    */
   const startAllSyncedWorkflows = useCallback(async () => {
     if (!globalPrompt.trim()) {
@@ -243,8 +352,39 @@ export function useWorkflowExecution() {
       return;
     }
 
-    await Promise.all(runnableWorkflows.map((w) => executeWorkflowStream(w, globalPrompt)));
-  }, [globalPrompt, getSyncedWorkflows, executeWorkflowStream]);
+    const existingConversationId = getConversationId();
+    const isNewConversation = !existingConversationId;
+
+    conversationCreationPromiseRef.current = null;
+    pendingPromptRef.current = globalPrompt;
+
+    let existingDbMessageId: string | undefined;
+    if (existingConversationId && persistenceCallbacks?.onSaveUserMessage) {
+      const messageId = await persistenceCallbacks.onSaveUserMessage(
+        existingConversationId,
+        globalPrompt,
+      );
+      if (messageId) {
+        existingDbMessageId = messageId;
+        currentDbMessageIdRef.current = messageId;
+      }
+    }
+
+    await Promise.all(
+      runnableWorkflows.map((w) =>
+        executeWorkflowStream(w, globalPrompt, {
+          isNewConversation,
+          existingDbMessageId,
+        }),
+      ),
+    );
+  }, [
+    globalPrompt,
+    getSyncedWorkflows,
+    executeWorkflowStream,
+    persistenceCallbacks,
+    getConversationId,
+  ]);
 
   /**
    * Continue all synced workflows with a follow-up prompt

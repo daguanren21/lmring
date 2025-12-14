@@ -196,6 +196,7 @@ export const modelResponses = pgTable(
     responseContent: text('response_content').notNull(),
     tokensUsed: integer('tokens_used'),
     responseTimeMs: integer('response_time_ms'),
+    displayPosition: integer('display_position').default(0).notNull(),
     createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
   },
   (table) => [

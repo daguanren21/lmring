@@ -41,6 +41,7 @@ export const modelResponseSchema = z.object({
   responseContent: z.string().trim().min(1).max(50000),
   tokensUsed: z.number().int().min(0).max(1000000).optional(),
   responseTimeMs: z.number().int().min(0).max(3600000).optional(),
+  displayPosition: z.number().int().min(0).max(10).optional(),
 });
 
 export const voteSchema = z.object({

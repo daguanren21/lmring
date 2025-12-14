@@ -14,13 +14,61 @@ import {
 } from '@/types/workflow';
 
 /**
+ * Conversation data loaded from database
+ */
+export interface LoadedConversationMessage {
+  id: string;
+  role: 'user' | 'assistant' | 'system';
+  content: string;
+  createdAt: string;
+  responses?: Array<{
+    id: string;
+    modelName: string;
+    providerName: string;
+    responseContent: string;
+    tokensUsed?: number;
+    responseTimeMs?: number;
+    displayPosition?: number;
+  }>;
+}
+
+export interface LoadedConversation {
+  conversation: {
+    id: string;
+    title: string;
+    createdAt: string;
+    updatedAt: string;
+  };
+  messages: LoadedConversationMessage[];
+}
+
+/**
+ * New conversation info for sidebar optimistic update
+ */
+export interface NewConversationInfo {
+  id: string;
+  title: string;
+  updatedAt: string;
+}
+
+/**
  * Workflow Store State
  */
 export type WorkflowState = {
   /** Map of workflow ID to workflow instance */
   workflows: Map<string, ArenaWorkflow>;
+  /** Array of workflow IDs in display order */
+  workflowOrder: string[];
   /** Global prompt shared by synced workflows */
   globalPrompt: string;
+  /** Current conversation ID (null for new conversations) */
+  conversationId: string | null;
+  /** Map of database message ID to workflow message ID */
+  messageIdMap: Map<string, string>;
+  /** New conversation info for sidebar optimistic update */
+  newConversation: NewConversationInfo | null;
+  /** Flag to indicate if a conversation is being created (to avoid triggering reload on URL update) */
+  isCreatingConversation: boolean;
 };
 
 /**
@@ -72,6 +120,24 @@ export type WorkflowActions = {
   getWorkflow: (id: string) => ArenaWorkflow | undefined;
   getAllWorkflows: () => ArenaWorkflow[];
   getSyncedWorkflows: () => ArenaWorkflow[];
+
+  // Conversation management
+  setConversationId: (id: string | null) => void;
+  getConversationId: () => string | null;
+  loadConversationHistory: (
+    data: LoadedConversation,
+    modelKeyMap: Map<string, { modelId: string; keyId: string }>,
+  ) => void;
+  resetConversation: () => void;
+  setMessageIdMapping: (dbMessageId: string, workflowMessageId: string) => void;
+  getDbMessageId: (workflowMessageId: string) => string | undefined;
+
+  // New conversation notification for sidebar
+  setNewConversation: (conversation: NewConversationInfo | null) => void;
+  clearNewConversation: () => void;
+
+  // Conversation creation flag management
+  setIsCreatingConversation: (isCreating: boolean) => void;
 };
 
 export type WorkflowStore = WorkflowState & WorkflowActions;
@@ -112,7 +178,12 @@ function createEmptyWorkflow(
  */
 const defaultInitState: WorkflowState = {
   workflows: new Map(),
+  workflowOrder: [],
   globalPrompt: '',
+  conversationId: null,
+  messageIdMap: new Map(),
+  newConversation: null,
+  isCreatingConversation: false,
 };
 
 /**
@@ -138,7 +209,11 @@ export const createWorkflowStore = (initState: Partial<WorkflowState> = {}) => {
             (state) => {
               const newMap = new Map(state.workflows);
               newMap.set(id, createEmptyWorkflow(id, modelId, keyId, synced));
-              return { workflows: newMap };
+
+              // Add workflow ID to workflowOrder to maintain creation order
+              const newOrder = [...state.workflowOrder, id];
+
+              return { workflows: newMap, workflowOrder: newOrder };
             },
             false,
             'workflow/create',
@@ -157,7 +232,11 @@ export const createWorkflowStore = (initState: Partial<WorkflowState> = {}) => {
             (state) => {
               const newMap = new Map(state.workflows);
               newMap.delete(id);
-              return { workflows: newMap };
+
+              // Remove workflow ID from workflowOrder
+              const newOrder = state.workflowOrder.filter((wfId) => wfId !== id);
+
+              return { workflows: newMap, workflowOrder: newOrder };
             },
             false,
             'workflow/delete',
@@ -587,6 +666,182 @@ export const createWorkflowStore = (initState: Partial<WorkflowState> = {}) => {
         getSyncedWorkflows: () => {
           return Array.from(get().workflows.values()).filter((w) => w.synced);
         },
+
+        // ============ Conversation Management ============
+
+        setConversationId: (id) => {
+          set({ conversationId: id }, false, 'workflow/setConversationId');
+        },
+
+        getConversationId: () => {
+          return get().conversationId;
+        },
+
+        loadConversationHistory: (data, modelKeyMap) => {
+          const { messages } = data;
+
+          // Group messages and their model responses
+          // For each user message, find the corresponding model responses
+          const newWorkflows = new Map<string, ArenaWorkflow>();
+          const newMessageIdMap = new Map<string, string>();
+
+          // Build a map of modelKey -> displayPosition from the first message's responses
+          const modelPositionMap = new Map<string, number>();
+          const firstUserMessage = messages.find((m) => m.role === 'user');
+
+          if (firstUserMessage?.responses) {
+            for (const response of firstUserMessage.responses) {
+              const modelKey = `${response.providerName}:${response.modelName}`;
+              // Use displayPosition from response if available, otherwise use a high number
+              modelPositionMap.set(modelKey, response.displayPosition ?? 999);
+            }
+          }
+
+          // Initialize workflows for each model in the conversation
+          for (const [key, { modelId, keyId }] of modelKeyMap) {
+            const workflow = createEmptyWorkflow(key, modelId, keyId, true);
+            newWorkflows.set(key, workflow);
+          }
+
+          // Create workflowOrder sorted by displayPosition
+          const sortedWorkflowIds = Array.from(modelKeyMap.keys()).sort((a, b) => {
+            const posA = modelPositionMap.get(a) ?? 999;
+            const posB = modelPositionMap.get(b) ?? 999;
+            return posA - posB;
+          });
+
+          // Process messages and distribute to workflows
+          for (let i = 0; i < messages.length; i++) {
+            const msg = messages[i];
+            if (!msg) continue;
+
+            if (msg.role === 'user') {
+              // Add user message to all workflows
+              const workflowMessageId = generateId();
+              newMessageIdMap.set(msg.id, workflowMessageId);
+
+              const userMessage: WorkflowMessage = {
+                id: workflowMessageId,
+                role: 'user',
+                content: msg.content,
+                timestamp: new Date(msg.createdAt),
+              };
+
+              for (const [workflowId, workflow] of newWorkflows) {
+                newWorkflows.set(workflowId, {
+                  ...workflow,
+                  messages: [...workflow.messages, userMessage],
+                  status: 'completed',
+                  updatedAt: new Date(),
+                });
+              }
+
+              // Add corresponding model responses as assistant messages
+              if (msg.responses) {
+                for (const response of msg.responses) {
+                  // Find the workflow for this model
+                  const workflowKey = `${response.providerName}:${response.modelName}`;
+                  const workflow = newWorkflows.get(workflowKey);
+
+                  if (workflow) {
+                    const assistantMessage: WorkflowMessage = {
+                      id: generateId(),
+                      role: 'assistant',
+                      content: response.responseContent,
+                      timestamp: new Date(msg.createdAt),
+                      metrics: response.responseTimeMs
+                        ? {
+                            responseTime: response.responseTimeMs,
+                            tokenCount: response.tokensUsed,
+                          }
+                        : undefined,
+                    };
+
+                    newWorkflows.set(workflowKey, {
+                      ...workflow,
+                      messages: [...workflow.messages, assistantMessage],
+                    });
+                  }
+                }
+              }
+            }
+          }
+
+          set(
+            {
+              workflows: newWorkflows,
+              workflowOrder: sortedWorkflowIds,
+              conversationId: data.conversation.id,
+              messageIdMap: newMessageIdMap,
+            },
+            false,
+            'workflow/loadConversationHistory',
+          );
+        },
+
+        resetConversation: () => {
+          // Abort all running workflows
+          for (const [_id, controller] of abortControllers) {
+            controller.abort();
+          }
+          abortControllers.clear();
+
+          set(
+            {
+              workflows: new Map(),
+              workflowOrder: [],
+              globalPrompt: '',
+              conversationId: null,
+              messageIdMap: new Map(),
+              newConversation: null,
+              isCreatingConversation: false,
+            },
+            false,
+            'workflow/resetConversation',
+          );
+        },
+
+        setMessageIdMapping: (dbMessageId, workflowMessageId) => {
+          set(
+            (state) => {
+              const newMap = new Map(state.messageIdMap);
+              newMap.set(dbMessageId, workflowMessageId);
+              return { messageIdMap: newMap };
+            },
+            false,
+            'workflow/setMessageIdMapping',
+          );
+        },
+
+        getDbMessageId: (workflowMessageId) => {
+          const state = get();
+          for (const [dbId, wfId] of state.messageIdMap) {
+            if (wfId === workflowMessageId) {
+              return dbId;
+            }
+          }
+          return undefined;
+        },
+
+        // ============ New Conversation Notification ============
+
+        setNewConversation: (conversation) => {
+          set(
+            { newConversation: conversation, isCreatingConversation: true },
+            false,
+            'workflow/setNewConversation',
+          );
+        },
+
+        clearNewConversation: () => {
+          set({ newConversation: null }, false, 'workflow/clearNewConversation');
+        },
+
+        // ============ Conversation Creation Flag ============
+
+        setIsCreatingConversation: (isCreating) => {
+          set({ isCreatingConversation: isCreating }, false, 'workflow/setIsCreatingConversation');
+        },
       }),
       { name: 'workflow-store', enabled: process.env.NODE_ENV === 'development' },
     ),
@@ -623,6 +878,7 @@ export function useWorkflowStore<T>(selector: (state: WorkflowStore) => T): T {
  */
 export const workflowSelectors = {
   workflows: (state: WorkflowStore) => state.workflows,
+  workflowOrder: (state: WorkflowStore) => state.workflowOrder,
   globalPrompt: (state: WorkflowStore) => state.globalPrompt,
   workflowCount: (state: WorkflowStore) => state.workflows.size,
   isAnyRunning: (state: WorkflowStore) =>
@@ -630,4 +886,9 @@ export const workflowSelectors = {
   allWorkflows: (state: WorkflowStore) => Array.from(state.workflows.values()),
   syncedWorkflows: (state: WorkflowStore) =>
     Array.from(state.workflows.values()).filter((w) => w.synced),
+  conversationId: (state: WorkflowStore) => state.conversationId,
+  messageIdMap: (state: WorkflowStore) => state.messageIdMap,
+  hasConversation: (state: WorkflowStore) => state.conversationId !== null,
+  newConversation: (state: WorkflowStore) => state.newConversation,
+  isCreatingConversation: (state: WorkflowStore) => state.isCreatingConversation,
 };

@@ -13,6 +13,7 @@ interface MessageProps {
   message: WorkflowMessage;
   isStreaming?: boolean;
   status?: WorkflowStatus;
+  error?: string;
   providerId?: string;
   onRetry?: () => void;
   onMaximize?: (content: string) => void;
@@ -22,6 +23,7 @@ export function Message({
   message,
   isStreaming = false,
   status,
+  error,
   providerId,
   onRetry,
   onMaximize,
@@ -77,6 +79,7 @@ export function Message({
                 content={message.content}
                 isStreaming={isStreaming}
                 status={status}
+                error={error}
                 className="overflow-x-auto custom-scrollbar"
               />
               {isAssistant && !isStreaming && (

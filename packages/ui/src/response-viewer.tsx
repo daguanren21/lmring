@@ -11,6 +11,7 @@ interface ResponseViewerProps {
   content: string;
   isStreaming?: boolean;
   status?: ResponseViewerStatus;
+  error?: string;
   className?: string;
 }
 
@@ -18,6 +19,7 @@ export function ResponseViewer({
   content,
   isStreaming = false,
   status,
+  error,
   className,
 }: ResponseViewerProps) {
   const containerRef = React.useRef<HTMLDivElement>(null);
@@ -29,6 +31,31 @@ export function ResponseViewer({
       container.scrollTop = container.scrollHeight;
     }
   }, [isStreaming, content]);
+
+  if (status === 'failed') {
+    return (
+      <div className="space-y-2">
+        {content && (
+          <div className={cn('text-sm', className)}>
+            <Streamdown
+              parseIncompleteMarkdown={true}
+              isAnimating={false}
+              controls={{ code: true }}
+            >
+              {content}
+            </Streamdown>
+          </div>
+        )}
+        <div className="flex items-start gap-2 text-sm text-destructive">
+          <StopCircle className="h-4 w-4 mt-0.5 flex-shrink-0" />
+          <div className="flex-1">
+            <div className="font-medium">Request failed</div>
+            {error && <div className="text-xs mt-1 opacity-90">{error}</div>}
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (!content && status === 'cancelled') {
     return (

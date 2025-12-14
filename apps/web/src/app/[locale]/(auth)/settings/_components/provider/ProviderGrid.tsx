@@ -1,14 +1,15 @@
-import { Badge } from '@lmring/ui';
+import { Badge, ProviderCardSkeleton } from '@lmring/ui';
 import { ProviderCard } from './ProviderCard';
 import type { Provider } from './types';
 
 interface ProviderGridProps {
   providers: Provider[];
+  isLoading?: boolean;
   onToggle: (id: string) => void;
   onSelect: (id: string) => void;
 }
 
-export function ProviderGrid({ providers, onToggle, onSelect }: ProviderGridProps) {
+export function ProviderGrid({ providers, isLoading, onToggle, onSelect }: ProviderGridProps) {
   return (
     <div className="space-y-6 p-4 md:p-8">
       {/* <div className="flex items-center gap-2">
@@ -37,20 +38,24 @@ export function ProviderGrid({ providers, onToggle, onSelect }: ProviderGridProp
               variant="secondary"
               className="text-xs px-1.5 min-w-5 h-5 flex items-center justify-center"
             >
-              {providers.filter((p) => p.type === 'enabled').length}
+              {isLoading ? '-' : providers.filter((p) => p.type === 'enabled').length}
             </Badge>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {providers
-              .filter((p) => p.type === 'enabled')
-              .map((provider) => (
-                <ProviderCard
-                  key={provider.id}
-                  provider={provider}
-                  onToggle={onToggle}
-                  onSelect={onSelect}
-                />
-              ))}
+            {isLoading ? (
+              <ProviderCardSkeleton count={3} />
+            ) : (
+              providers
+                .filter((p) => p.type === 'enabled')
+                .map((provider) => (
+                  <ProviderCard
+                    key={provider.id}
+                    provider={provider}
+                    onToggle={onToggle}
+                    onSelect={onSelect}
+                  />
+                ))
+            )}
           </div>
         </div>
 
@@ -61,20 +66,24 @@ export function ProviderGrid({ providers, onToggle, onSelect }: ProviderGridProp
               variant="secondary"
               className="text-xs px-1.5 min-w-5 h-5 flex items-center justify-center"
             >
-              {providers.filter((p) => p.type === 'disabled').length}
+              {isLoading ? '-' : providers.filter((p) => p.type === 'disabled').length}
             </Badge>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {providers
-              .filter((p) => p.type === 'disabled')
-              .map((provider) => (
-                <ProviderCard
-                  key={provider.id}
-                  provider={provider}
-                  onToggle={onToggle}
-                  onSelect={onSelect}
-                />
-              ))}
+            {isLoading ? (
+              <ProviderCardSkeleton count={6} />
+            ) : (
+              providers
+                .filter((p) => p.type === 'disabled')
+                .map((provider) => (
+                  <ProviderCard
+                    key={provider.id}
+                    provider={provider}
+                    onToggle={onToggle}
+                    onSelect={onSelect}
+                  />
+                ))
+            )}
           </div>
         </div>
       </div>

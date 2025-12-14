@@ -1,6 +1,6 @@
 'use client';
 
-import { Button, ResponseViewer, ScrollArea, toast } from '@lmring/ui';
+import { Button, ModelCardSkeleton, ResponseViewer, ScrollArea, toast } from '@lmring/ui';
 import { motion } from 'framer-motion';
 import { XIcon } from 'lucide-react';
 import { useParams, useRouter } from 'next/navigation';
@@ -885,8 +885,19 @@ export default function ArenaPage() {
       !isCreatingConversation)
   ) {
     return (
-      <div className="flex items-center justify-center h-full bg-background">
-        <div className="text-muted-foreground">{t('loading_models')}</div>
+      <div className="flex flex-col h-full bg-background overflow-hidden">
+        <div className="flex-1 overflow-hidden p-4">
+          <div
+            className="h-full gap-4 overflow-hidden"
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(2, 1fr)',
+              gridTemplateRows: '1fr',
+            }}
+          >
+            <ModelCardSkeleton count={2} />
+          </div>
+        </div>
       </div>
     );
   }

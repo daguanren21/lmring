@@ -377,6 +377,7 @@ export default function SettingsPage() {
         {activeTab === 'provider' ? (
           <ProviderLayout
             providers={providers}
+            isLoading={!apiKeysLoaded}
             onToggleProvider={handleToggleProvider}
             onSaveProvider={handleSaveProvider}
             onAddProvider={handleAddProvider}

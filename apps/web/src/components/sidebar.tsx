@@ -8,6 +8,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
   ScrollArea,
+  SidebarConversationSkeleton,
 } from '@lmring/ui';
 import { AnimatePresence, motion } from 'framer-motion';
 import {
@@ -312,52 +313,56 @@ export function Sidebar({ locale = 'en', user }: SidebarProps) {
           );
         })}
 
-        {!collapsed && recentConversations.length > 0 && (
+        {!collapsed && (
           <div className="mt-4">
             <div className="px-3 py-2 text-xs font-medium text-muted-foreground uppercase tracking-wider">
               Today
             </div>
             <ScrollArea className="max-h-[300px]">
-              <div className="space-y-0.5">
-                {recentConversations.map((conv) => {
-                  const isConvActive = currentPath === `/arena/${conv.id}`;
-                  const displayText = conv.firstMessage
-                    ? truncateText(conv.firstMessage, 20)
-                    : truncateText(conv.title, 20);
+              {!conversationsLoaded ? (
+                <SidebarConversationSkeleton count={5} />
+              ) : recentConversations.length > 0 ? (
+                <div className="space-y-0.5">
+                  {recentConversations.map((conv) => {
+                    const isConvActive = currentPath === `/arena/${conv.id}`;
+                    const displayText = conv.firstMessage
+                      ? truncateText(conv.firstMessage, 20)
+                      : truncateText(conv.title, 20);
 
-                  return (
-                    <Link key={conv.id} href={`/${locale}/arena/${conv.id}`} className="block">
-                      <motion.div
-                        whileHover={{ x: 2 }}
-                        whileTap={{ scale: 0.98 }}
-                        className={`
-                          relative flex items-center gap-2 px-3 py-1.5 rounded-md text-sm
-                          transition-colors apple-transition
-                          ${
-                            isConvActive
-                              ? 'bg-sidebar-accent text-sidebar-accent-foreground'
-                              : 'hover:bg-sidebar-accent/30 text-sidebar-foreground/70'
-                          }
-                        `}
-                      >
-                        {isConvActive && (
-                          <motion.div
-                            layoutId="conversationIndicator"
-                            className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-5 bg-primary rounded-r-full"
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            exit={{ opacity: 0 }}
+                    return (
+                      <Link key={conv.id} href={`/${locale}/arena/${conv.id}`} className="block">
+                        <motion.div
+                          whileHover={{ x: 2 }}
+                          whileTap={{ scale: 0.98 }}
+                          className={`
+                            relative flex items-center gap-2 px-3 py-1.5 rounded-md text-sm
+                            transition-colors apple-transition
+                            ${
+                              isConvActive
+                                ? 'bg-sidebar-accent text-sidebar-accent-foreground'
+                                : 'hover:bg-sidebar-accent/30 text-sidebar-foreground/70'
+                            }
+                          `}
+                        >
+                          {isConvActive && (
+                            <motion.div
+                              layoutId="conversationIndicator"
+                              className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-5 bg-primary rounded-r-full"
+                              initial={{ opacity: 0 }}
+                              animate={{ opacity: 1 }}
+                              exit={{ opacity: 0 }}
+                            />
+                          )}
+                          <MessageSquareIcon
+                            className={`h-4 w-4 flex-shrink-0 ${isConvActive ? 'text-primary' : 'opacity-60'}`}
                           />
-                        )}
-                        <MessageSquareIcon
-                          className={`h-4 w-4 flex-shrink-0 ${isConvActive ? 'text-primary' : 'opacity-60'}`}
-                        />
-                        <span className="truncate">{displayText}</span>
-                      </motion.div>
-                    </Link>
-                  );
-                })}
-              </div>
+                          <span className="truncate">{displayText}</span>
+                        </motion.div>
+                      </Link>
+                    );
+                  })}
+                </div>
+              ) : null}
             </ScrollArea>
           </div>
         )}

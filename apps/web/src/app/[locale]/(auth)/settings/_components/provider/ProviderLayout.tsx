@@ -1,4 +1,4 @@
-import { Input, Separator } from '@lmring/ui';
+import { Input, ProviderSidebarSkeleton, Separator } from '@lmring/ui';
 import { BoxIcon, SearchIcon } from 'lucide-react';
 import { useState } from 'react';
 import { AddProviderDialog } from './AddProviderDialog';
@@ -8,6 +8,7 @@ import type { Provider } from './types';
 
 interface ProviderLayoutProps {
   providers: Provider[];
+  isLoading?: boolean;
   onToggleProvider: (id: string, enabled?: boolean, apiKeyId?: string) => void;
   onSaveProvider?: (providerId: string, apiKeyId: string) => void;
   onAddProvider: (provider: Provider) => void;
@@ -16,6 +17,7 @@ interface ProviderLayoutProps {
 
 export function ProviderLayout({
   providers,
+  isLoading,
   onToggleProvider,
   onSaveProvider,
   onAddProvider,
@@ -76,29 +78,33 @@ export function ProviderLayout({
 
             <Separator className="my-2" />
 
-            {filteredProviders.map((provider) => {
-              const Icon = provider.Icon;
-              return (
-                <button
-                  key={provider.id}
-                  type="button"
-                  onClick={() => setSelectedId(provider.id)}
-                  className={`w-full flex items-center gap-3 px-3 py-1.5 rounded-md text-sm transition-colors ${
-                    selectedId === provider.id
-                      ? 'bg-secondary text-secondary-foreground font-medium'
-                      : 'text-muted-foreground hover:bg-muted/50 hover:text-foreground'
-                  }`}
-                >
-                  <div className="h-8 w-8 rounded-md flex items-center justify-center bg-background shrink-0">
-                    {Icon ? <Icon size={24} className="" /> : <span>{provider.name[0]}</span>}
-                  </div>
-                  <span className="truncate text-left flex-1">{provider.name}</span>
-                  {provider.connected && (
-                    <div className="h-2 w-2 rounded-full bg-green-500 shrink-0" />
-                  )}
-                </button>
-              );
-            })}
+            {isLoading ? (
+              <ProviderSidebarSkeleton count={8} />
+            ) : (
+              filteredProviders.map((provider) => {
+                const Icon = provider.Icon;
+                return (
+                  <button
+                    key={provider.id}
+                    type="button"
+                    onClick={() => setSelectedId(provider.id)}
+                    className={`w-full flex items-center gap-3 px-3 py-1.5 rounded-md text-sm transition-colors ${
+                      selectedId === provider.id
+                        ? 'bg-secondary text-secondary-foreground font-medium'
+                        : 'text-muted-foreground hover:bg-muted/50 hover:text-foreground'
+                    }`}
+                  >
+                    <div className="h-8 w-8 rounded-md flex items-center justify-center bg-background shrink-0">
+                      {Icon ? <Icon size={24} className="" /> : <span>{provider.name[0]}</span>}
+                    </div>
+                    <span className="truncate text-left flex-1">{provider.name}</span>
+                    {provider.connected && (
+                      <div className="h-2 w-2 rounded-full bg-green-500 shrink-0" />
+                    )}
+                  </button>
+                );
+              })
+            )}
           </div>
         </div>
         <div className="p-4 bg-background/50 backdrop-blur-sm">
@@ -117,6 +123,7 @@ export function ProviderLayout({
         ) : (
           <ProviderGrid
             providers={filteredProviders}
+            isLoading={isLoading}
             onToggle={onToggleProvider}
             onSelect={setSelectedId}
           />

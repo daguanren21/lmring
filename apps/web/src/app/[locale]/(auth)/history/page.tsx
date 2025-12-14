@@ -1,6 +1,6 @@
 'use client';
 
-import { Badge, Card, CardContent, CardHeader, toast } from '@lmring/ui';
+import { Badge, Card, CardContent, CardHeader, ConversationCardSkeleton, toast } from '@lmring/ui';
 import { motion } from 'framer-motion';
 import { CalendarIcon, ClockIcon, MessageSquareIcon, Share2Icon } from 'lucide-react';
 import Link from 'next/link';
@@ -71,8 +71,20 @@ export default function HistoryPage() {
 
   if (!loaded) {
     return (
-      <div className="flex items-center justify-center h-full">
-        <div className="text-muted-foreground">Loading history...</div>
+      <div className="p-6 space-y-6">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+        >
+          <div className="flex items-center gap-3 mb-6">
+            <ClockIcon className="h-8 w-8 text-primary" />
+            <h1 className="text-3xl font-bold text-foreground">History</h1>
+          </div>
+          <div className="grid gap-4">
+            <ConversationCardSkeleton count={5} />
+          </div>
+        </motion.div>
       </div>
     );
   }

@@ -608,8 +608,12 @@ export default function ArenaPage() {
   React.useEffect(() => {
     // Only sync workflows -> comparisons when viewing an existing conversation route.
     // In "New Chat" mode, workflows are created lazily per-card and should not dictate card count.
-    if (!conversationId || !storedConversationId || storedConversationId !== conversationId) return;
-    if (!conversationLoaded || workflows.size === 0) return;
+    if (!conversationId || !storedConversationId || storedConversationId !== conversationId) {
+      return;
+    }
+    if (!conversationLoaded || workflows.size === 0) {
+      return;
+    }
 
     // Use workflowOrder for consistent ordering if available, otherwise fall back to entries
     const orderedWorkflows =
@@ -622,7 +626,23 @@ export default function ArenaPage() {
             .filter((entry): entry is [string, ArenaWorkflow] => entry !== null)
         : Array.from(workflows.entries());
 
-    if (orderedWorkflows.length !== comparisons.length) {
+    // Check if comparisons need to be synced with workflows
+    // This happens when:
+    // 1. Length mismatch
+    // 2. ModelId mismatch (comparisons have default models, workflows have loaded models)
+    // 3. ComparisonWorkflowMap is stale (pointing to old workflow IDs from previous conversation)
+    const needsSync =
+      orderedWorkflows.length !== comparisons.length ||
+      orderedWorkflows.some(([workflowId, wf], index) => {
+        const comparison = comparisons[index];
+        if (!comparison) return true;
+        if (comparison.modelId !== wf.modelId) return true;
+        const mappedWorkflowId = comparisonWorkflowMap.current.get(comparison.id);
+        if (mappedWorkflowId !== workflowId) return true;
+        return false;
+      });
+
+    if (needsSync) {
       const newComparisons: ModelComparison[] = orderedWorkflows.map(
         ([workflowId, workflow], index) => {
           const existingComparison = comparisons[index];
@@ -644,18 +664,12 @@ export default function ArenaPage() {
       return;
     }
 
-    comparisons.forEach((comparison, compIndex) => {
-      const matchingEntry = orderedWorkflows.find(([_, wf]) => wf.modelId === comparison.modelId);
-
-      if (matchingEntry) {
-        const [workflowId, workflow] = matchingEntry;
+    orderedWorkflows.forEach(([workflowId, _workflow], index) => {
+      const comparison = comparisons[index];
+      if (comparison) {
         const currentMapping = comparisonWorkflowMap.current.get(comparison.id);
         if (currentMapping !== workflowId) {
           comparisonWorkflowMap.current.set(comparison.id, workflowId);
-        }
-
-        if (comparison.modelId !== workflow.modelId) {
-          selectModel(compIndex, workflow.modelId);
         }
       }
     });
@@ -666,7 +680,6 @@ export default function ArenaPage() {
     workflows,
     workflowOrder,
     comparisons,
-    selectModel,
     setComparisons,
   ]);
 
@@ -689,7 +702,23 @@ export default function ArenaPage() {
               .filter((entry): entry is [string, ArenaWorkflow] => entry !== null)
           : Array.from(workflows.entries());
 
-      if (orderedWorkflows.length !== comparisons.length) {
+      // Check if comparisons need to be synced with workflows
+      // This happens when:
+      // 1. Length mismatch
+      // 2. ModelId mismatch
+      // 3. ComparisonWorkflowMap is stale (pointing to old workflow IDs)
+      const needsSync =
+        orderedWorkflows.length !== comparisons.length ||
+        orderedWorkflows.some(([workflowId, wf], index) => {
+          const comparison = comparisons[index];
+          if (!comparison) return true;
+          if (comparison.modelId !== wf.modelId) return true;
+          const mappedWorkflowId = comparisonWorkflowMap.current.get(comparison.id);
+          if (mappedWorkflowId !== workflowId) return true;
+          return false;
+        });
+
+      if (needsSync) {
         const newComparisons: ModelComparison[] = orderedWorkflows.map(
           ([workflowId, workflow], index) => {
             const existingComparison = comparisons[index];
@@ -711,20 +740,10 @@ export default function ArenaPage() {
         return;
       }
 
-      comparisons.forEach((comparison, compIndex) => {
-        const matchingEntry = orderedWorkflows.find(([_, wf]) => wf.modelId === comparison.modelId);
-
-        if (matchingEntry) {
-          const [workflowId, workflow] = matchingEntry;
-          // Update mapping only if it changed
-          const currentMapping = comparisonWorkflowMap.current.get(comparison.id);
-          if (currentMapping !== workflowId) {
-            comparisonWorkflowMap.current.set(comparison.id, workflowId);
-          }
-
-          if (comparison.modelId !== workflow.modelId) {
-            selectModel(compIndex, workflow.modelId);
-          }
+      orderedWorkflows.forEach(([workflowId], index) => {
+        const comparison = comparisons[index];
+        if (comparison) {
+          comparisonWorkflowMap.current.set(comparison.id, workflowId);
         }
       });
 
@@ -737,7 +756,6 @@ export default function ArenaPage() {
     workflows,
     workflowOrder,
     comparisons,
-    selectModel,
     setComparisons,
   ]);
 

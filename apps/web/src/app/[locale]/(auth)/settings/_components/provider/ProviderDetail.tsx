@@ -49,7 +49,6 @@ import {
   MicIcon,
   PencilIcon,
   RadioIcon,
-  RotateCwIcon,
   SearchIcon,
   Trash2Icon,
   VolumeIcon,
@@ -1039,9 +1038,6 @@ export function ProviderDetail({ provider, onToggle, onSave, onDelete }: Provide
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
             </div>
-            <Button variant="outline" size="icon" className="h-9 w-9" title="Fetch models">
-              <RotateCwIcon className="h-4 w-4" />
-            </Button>
             <AddModelDialog onAdd={handleAddModel} />
           </div>
         </div>

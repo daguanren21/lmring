@@ -293,6 +293,20 @@
       "tool": "Outil"
     }
   },
+  "History": {
+    "delete_aria_label": "Supprimer la conversation",
+    "share_aria_label": "Partager la conversation",
+    "share_success": "Lien de partage copié dans le presse-papiers",
+    "share_expires": "Le lien expire le {date}",
+    "share_no_expire": "Le lien n'expire pas",
+    "share_failed": "Échec de la création du lien de partage",
+    "delete_success": "Conversation supprimée avec succès",
+    "delete_failed": "Échec de la suppression de la conversation",
+    "delete_dialog_title": "Supprimer la conversation",
+    "delete_dialog_description": "Êtes-vous sûr de vouloir supprimer cette conversation ? Cette action est irréversible.",
+    "delete_dialog_cancel": "Annuler",
+    "delete_dialog_confirm": "Supprimer"
+  },
   "Leaderboard": {
     "title": "Classement des modèles",
     "elo_score": "Score ELO"

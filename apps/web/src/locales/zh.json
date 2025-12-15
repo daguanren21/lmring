@@ -293,6 +293,20 @@
       "tool": "工具"
     }
   },
+  "History": {
+    "delete_aria_label": "删除对话",
+    "share_aria_label": "分享对话",
+    "share_success": "分享链接已复制到剪贴板",
+    "share_expires": "链接将于 {date} 过期",
+    "share_no_expire": "链接永不过期",
+    "share_failed": "创建分享链接失败",
+    "delete_success": "对话删除成功",
+    "delete_failed": "删除对话失败",
+    "delete_dialog_title": "删除对话",
+    "delete_dialog_description": "确定要删除此对话吗？此操作无法撤销。",
+    "delete_dialog_cancel": "取消",
+    "delete_dialog_confirm": "删除"
+  },
   "Leaderboard": {
     "title": "排行榜",
     "elo_score": "ELO 分数"

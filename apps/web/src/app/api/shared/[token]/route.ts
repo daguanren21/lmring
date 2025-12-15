@@ -1,7 +1,24 @@
 import { asc, db, eq } from '@lmring/database';
-import { conversations, messages, sharedResults } from '@lmring/database/schema';
+import { conversations, messages, modelResponses, sharedResults } from '@lmring/database/schema';
 import { NextResponse } from 'next/server';
 import { logError } from '@/libs/error-logging';
+
+interface MessageWithResponses {
+  id: string;
+  role: 'user' | 'assistant' | 'system';
+  content: string;
+  createdAt: Date;
+  responses?: Array<{
+    id: string;
+    modelName: string;
+    providerName: string;
+    responseContent: string;
+    tokensUsed: number | null;
+    responseTimeMs: number | null;
+    displayPosition: number;
+    createdAt: Date;
+  }>;
+}
 
 export async function GET(_request: Request, { params }: { params: Promise<{ token: string }> }) {
   try {
@@ -37,6 +54,86 @@ export async function GET(_request: Request, { params }: { params: Promise<{ tok
       .where(eq(messages.conversationId, shared.conversationId))
       .orderBy(asc(messages.createdAt));
 
+    // Get all model responses for these messages
+    const messageIds = conversationMessages.map((m) => m.id);
+
+    const responsesByMessageId: Map<
+      string,
+      Array<{
+        id: string;
+        modelName: string;
+        providerName: string;
+        responseContent: string;
+        tokensUsed: number | null;
+        responseTimeMs: number | null;
+        displayPosition: number;
+        createdAt: Date;
+      }>
+    > = new Map();
+
+    if (messageIds.length === 1 && messageIds[0]) {
+      const firstMessageId = messageIds[0];
+      const responses = await db
+        .select({
+          id: modelResponses.id,
+          messageId: modelResponses.messageId,
+          modelName: modelResponses.modelName,
+          providerName: modelResponses.providerName,
+          responseContent: modelResponses.responseContent,
+          tokensUsed: modelResponses.tokensUsed,
+          responseTimeMs: modelResponses.responseTimeMs,
+          displayPosition: modelResponses.displayPosition,
+          createdAt: modelResponses.createdAt,
+        })
+        .from(modelResponses)
+        .where(eq(modelResponses.messageId, firstMessageId))
+        .orderBy(asc(modelResponses.displayPosition), asc(modelResponses.createdAt));
+
+      responsesByMessageId.set(firstMessageId, responses);
+    } else if (messageIds.length > 1) {
+      const allResponses = await db
+        .select({
+          id: modelResponses.id,
+          messageId: modelResponses.messageId,
+          modelName: modelResponses.modelName,
+          providerName: modelResponses.providerName,
+          responseContent: modelResponses.responseContent,
+          tokensUsed: modelResponses.tokensUsed,
+          responseTimeMs: modelResponses.responseTimeMs,
+          displayPosition: modelResponses.displayPosition,
+          createdAt: modelResponses.createdAt,
+        })
+        .from(modelResponses)
+        .innerJoin(messages, eq(modelResponses.messageId, messages.id))
+        .where(eq(messages.conversationId, shared.conversationId))
+        .orderBy(asc(modelResponses.displayPosition), asc(modelResponses.createdAt));
+
+      for (const response of allResponses) {
+        if (!responsesByMessageId.has(response.messageId)) {
+          responsesByMessageId.set(response.messageId, []);
+        }
+        responsesByMessageId.get(response.messageId)?.push({
+          id: response.id,
+          modelName: response.modelName,
+          providerName: response.providerName,
+          responseContent: response.responseContent,
+          tokensUsed: response.tokensUsed,
+          responseTimeMs: response.responseTimeMs,
+          displayPosition: response.displayPosition,
+          createdAt: response.createdAt,
+        });
+      }
+    }
+
+    // Build the result with responses
+    const messagesWithResponses: MessageWithResponses[] = conversationMessages.map((msg) => ({
+      id: msg.id,
+      role: msg.role,
+      content: msg.content,
+      createdAt: msg.createdAt,
+      responses: responsesByMessageId.get(msg.id),
+    }));
+
     return NextResponse.json(
       {
         conversation: {
@@ -44,7 +141,7 @@ export async function GET(_request: Request, { params }: { params: Promise<{ tok
           title: conversation.title,
           createdAt: conversation.createdAt,
         },
-        messages: conversationMessages,
+        messages: messagesWithResponses,
       },
       { status: 200 },
     );

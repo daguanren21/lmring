@@ -698,17 +698,23 @@ export const createWorkflowStore = (initState: Partial<WorkflowState> = {}) => {
           }
 
           // Initialize workflows for each model in the conversation
-          for (const [key, { modelId, keyId }] of modelKeyMap) {
-            const workflow = createEmptyWorkflow(key, modelId, keyId, true);
-            newWorkflows.set(key, workflow);
+          // Note: modelKeyMap uses modelId (e.g. "openai:gpt-4") as key, but workflow IDs must be UUIDs
+          const modelKeyToWorkflowId = new Map<string, string>();
+          for (const [modelKey, { modelId, keyId }] of modelKeyMap) {
+            const workflowId = generateId();
+            const workflow = createEmptyWorkflow(workflowId, modelId, keyId, true);
+            newWorkflows.set(workflowId, workflow);
+            modelKeyToWorkflowId.set(modelKey, workflowId);
           }
 
-          // Create workflowOrder sorted by displayPosition
-          const sortedWorkflowIds = Array.from(modelKeyMap.keys()).sort((a, b) => {
+          const sortedModelKeys = Array.from(modelKeyMap.keys()).sort((a, b) => {
             const posA = modelPositionMap.get(a) ?? 999;
             const posB = modelPositionMap.get(b) ?? 999;
             return posA - posB;
           });
+          const sortedWorkflowIds = sortedModelKeys
+            .map((modelKey) => modelKeyToWorkflowId.get(modelKey))
+            .filter((id): id is string => id !== undefined);
 
           // Process messages and distribute to workflows
           for (let i = 0; i < messages.length; i++) {
@@ -739,11 +745,12 @@ export const createWorkflowStore = (initState: Partial<WorkflowState> = {}) => {
               // Add corresponding model responses as assistant messages
               if (msg.responses) {
                 for (const response of msg.responses) {
-                  // Find the workflow for this model
-                  const workflowKey = `${response.providerName}:${response.modelName}`;
-                  const workflow = newWorkflows.get(workflowKey);
+                  // Find the workflow for this model using the modelKey -> workflowId mapping
+                  const modelKey = `${response.providerName}:${response.modelName}`;
+                  const workflowId = modelKeyToWorkflowId.get(modelKey);
+                  const workflow = workflowId ? newWorkflows.get(workflowId) : undefined;
 
-                  if (workflow) {
+                  if (workflow && workflowId) {
                     const assistantMessage: WorkflowMessage = {
                       id: generateId(),
                       role: 'assistant',
@@ -757,7 +764,7 @@ export const createWorkflowStore = (initState: Partial<WorkflowState> = {}) => {
                         : undefined,
                     };
 
-                    newWorkflows.set(workflowKey, {
+                    newWorkflows.set(workflowId, {
                       ...workflow,
                       messages: [...workflow.messages, assistantMessage],
                     });

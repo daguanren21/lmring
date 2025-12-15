@@ -1,10 +1,26 @@
 'use client';
 
-import { Badge, Card, CardContent, CardHeader, ConversationCardSkeleton, toast } from '@lmring/ui';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  Badge,
+  Card,
+  CardContent,
+  CardHeader,
+  ConversationCardSkeleton,
+  toast,
+} from '@lmring/ui';
 import { motion } from 'framer-motion';
-import { CalendarIcon, ClockIcon, MessageSquareIcon, Share2Icon } from 'lucide-react';
+import { CalendarIcon, ClockIcon, MessageSquareIcon, Share2Icon, Trash2Icon } from 'lucide-react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import * as React from 'react';
 import { ProviderIcon } from '@/components/arena/provider-icon';
 import { type ConversationData, useConversation } from '@/hooks/use-conversation';
@@ -12,9 +28,12 @@ import { type ConversationData, useConversation } from '@/hooks/use-conversation
 export default function HistoryPage() {
   const params = useParams();
   const locale = (params.locale as string) || 'en';
-  const { getConversationsWithModels, shareConversation, isLoading } = useConversation();
+  const t = useTranslations('History');
+  const { getConversationsWithModels, shareConversation, deleteConversation, isLoading } =
+    useConversation();
   const [conversations, setConversations] = React.useState<ConversationData[]>([]);
   const [loaded, setLoaded] = React.useState(false);
+  const [conversationToDelete, setConversationToDelete] = React.useState<string | null>(null);
 
   React.useEffect(() => {
     const loadConversations = async () => {
@@ -33,14 +52,33 @@ export default function HistoryPage() {
     const result = await shareConversation(conversationId);
     if (result) {
       await navigator.clipboard.writeText(result.shareUrl);
-      toast.success('Share link copied to clipboard', {
+      toast.success(t('share_success'), {
         description: result.expiresAt
-          ? `Link expires on ${new Date(result.expiresAt).toLocaleDateString()}`
-          : 'Link does not expire',
+          ? t('share_expires', { date: new Date(result.expiresAt).toLocaleDateString() })
+          : t('share_no_expire'),
       });
     } else {
-      toast.error('Failed to create share link');
+      toast.error(t('share_failed'));
     }
+  };
+
+  const handleDeleteClick = (e: React.MouseEvent, conversationId: string) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setConversationToDelete(conversationId);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!conversationToDelete) return;
+
+    const success = await deleteConversation(conversationToDelete);
+    if (success) {
+      setConversations((prev) => prev.filter((c) => c.id !== conversationToDelete));
+      toast.success(t('delete_success'));
+    } else {
+      toast.error(t('delete_failed'));
+    }
+    setConversationToDelete(null);
   };
 
   const formatDate = (dateString: string) => {
@@ -151,15 +189,26 @@ export default function HistoryPage() {
                         <CalendarIcon className="h-4 w-4" />
                         {formatDate(conversation.updatedAt)}
                       </div>
-                      <button
-                        type="button"
-                        onClick={(e) => handleShare(e, conversation.id)}
-                        disabled={isLoading}
-                        className="p-2 hover:bg-accent rounded-lg transition-colors opacity-0 group-hover:opacity-100"
-                        aria-label="Share conversation"
-                      >
-                        <Share2Icon className="h-4 w-4" />
-                      </button>
+                      <div className="flex items-center gap-1">
+                        <button
+                          type="button"
+                          onClick={(e) => handleDeleteClick(e, conversation.id)}
+                          disabled={isLoading}
+                          className="p-2 rounded-lg transition-colors opacity-0 group-hover:opacity-100 hover:bg-destructive/10 hover:text-destructive"
+                          aria-label={t('delete_aria_label')}
+                        >
+                          <Trash2Icon className="h-4 w-4" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={(e) => handleShare(e, conversation.id)}
+                          disabled={isLoading}
+                          className="p-2 hover:bg-accent rounded-lg transition-colors opacity-0 group-hover:opacity-100"
+                          aria-label={t('share_aria_label')}
+                        >
+                          <Share2Icon className="h-4 w-4" />
+                        </button>
+                      </div>
                     </div>
                   </CardHeader>
                   <CardContent>
@@ -199,6 +248,29 @@ export default function HistoryPage() {
           ))}
         </div>
       </motion.div>
+
+      <AlertDialog
+        open={!!conversationToDelete}
+        onOpenChange={(open) => !open && setConversationToDelete(null)}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t('delete_dialog_title')}</AlertDialogTitle>
+            <AlertDialogDescription>{t('delete_dialog_description')}</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setConversationToDelete(null)}>
+              {t('delete_dialog_cancel')}
+            </AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={handleDeleteConfirm}
+            >
+              {t('delete_dialog_confirm')}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

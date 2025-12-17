@@ -27,8 +27,10 @@ COPY packages/config/tailwind-config/package.json ./packages/config/tailwind-con
 COPY packages/config/typescript-config/package.json ./packages/config/typescript-config/
 COPY packages/model-depot/package.json ./packages/model-depot/
 
-# Configure npm registry（optional）
-RUN pnpm config set registry https://registry.npmmirror.com
+# Configure npm registry (optional)
+# CN users can use: --build-arg NPM_REGISTRY=https://registry.npmmirror.com
+ARG NPM_REGISTRY=https://registry.npmjs.org
+RUN pnpm config set registry ${NPM_REGISTRY}
 
 # Install all dependencies with retry
 RUN pnpm install --frozen-lockfile
@@ -108,8 +110,10 @@ COPY --from=builder /app/pnpm-lock.yaml ./
 COPY --from=builder /app/pnpm-workspace.yaml ./
 COPY --from=builder /app/packages/database/package.json ./packages/database/
 
-# Configure npm registry（optional）
-RUN pnpm config set registry https://registry.npmmirror.com
+# Configure npm registry (optional)
+# CN users can use: --build-arg NPM_REGISTRY=https://registry.npmmirror.com
+ARG NPM_REGISTRY=https://registry.npmjs.org
+RUN pnpm config set registry ${NPM_REGISTRY}
 
 # Install only database dependencies for migrations
 RUN pnpm install --filter @lmring/database --prod --frozen-lockfile

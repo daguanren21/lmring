@@ -1,8 +1,11 @@
 name: Deploy Preview
 
 on:
-  push:
+  workflow_run:
+    workflows: ["CI"]
     branches: [develop]
+    types:
+      - completed
 
 concurrency:
   group: deploy-preview-${{ github.ref }}
@@ -17,6 +20,8 @@ jobs:
     name: Deploy to Vercel Preview
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    # Only deploy if CI succeeded
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     environment:
       name: preview
       url: ${{ steps.deploy.outputs.url }}
@@ -24,6 +29,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
@@ -33,6 +40,9 @@ jobs:
         with:
           node-version: '24'
           cache: 'pnpm'
+
+      - name: Install Dependencies
+        run: pnpm install --frozen-lockfile
 
       - name: Install Vercel CLI
         run: pnpm add -g vercel@latest

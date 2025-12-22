@@ -220,8 +220,8 @@ importers:
         specifier: ^1.0.32
         version: 1.0.32(zod@4.1.13)
       '@ai-sdk/google-vertex':
-        specifier: ^3.0.94
-        version: 3.0.94(zod@4.1.13)
+        specifier: ^3.0.96
+        version: 3.0.96(zod@4.1.13)
       '@ai-sdk/mistral':
         specifier: ^2.0.26
         version: 2.0.26(zod@4.1.13)
@@ -238,17 +238,17 @@ importers:
         specifier: ^3.0.19
         version: 3.0.19(zod@4.1.13)
       '@ai-sdk/xai':
-        specifier: ^2.0.41
-        version: 2.0.41(zod@4.1.13)
+        specifier: ^2.0.42
+        version: 2.0.42(zod@4.1.13)
       '@lmring/model-depot':
         specifier: workspace:*
         version: link:../model-depot
       '@openrouter/ai-sdk-provider':
         specifier: ^1.5.4
-        version: 1.5.4(ai@5.0.115(zod@4.1.13))(zod@4.1.13)
+        version: 1.5.4(ai@5.0.116(zod@4.1.13))(zod@4.1.13)
       ai:
-        specifier: ^5.0.115
-        version: 5.0.115(zod@4.1.13)
+        specifier: ^5.0.116
+        version: 5.0.116(zod@4.1.13)
       zod:
         specifier: ^4.1.13
         version: 4.1.13
@@ -332,8 +332,8 @@ importers:
   packages/env:
     dependencies:
       '@t3-oss/env-nextjs':
-        specifier: ^0.13.8
-        version: 0.13.8(typescript@5.9.3)(zod@4.1.13)
+        specifier: ^0.13.10
+        version: 0.13.10(typescript@5.9.3)(zod@4.1.13)
       dotenv:
         specifier: ^17.2.3
         version: 17.2.3
@@ -515,20 +515,20 @@ packages:
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
 
-  '@ai-sdk/gateway@2.0.22':
-    resolution: {integrity: sha512-6fHjDfCbjfj4vyMExuLei7ir2///E5sNwNZaobdJsJIxJjDSsjzSLGO/aUI7p9eOnB8XctDrDSF5ilwDGpi6eg==}
+  '@ai-sdk/gateway@2.0.23':
+    resolution: {integrity: sha512-qmX7afPRszUqG5hryHF3UN8ITPIRSGmDW6VYCmByzjoUkgm3MekzSx2hMV1wr0P+llDeuXb378SjqUfpvWJulg==}
     engines: {node: '>=18'}
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
 
-  '@ai-sdk/google-vertex@3.0.94':
-    resolution: {integrity: sha512-zBIYxox2Jdudjtj1lSZ5cQbCuCMtRwUfguEv7+pVGqQqlbKzT9puyr8lzNLrdHsPBgQctzQr9Yqa6tar1r2yag==}
+  '@ai-sdk/google-vertex@3.0.96':
+    resolution: {integrity: sha512-8+WmvjmAkebB4qJXzyY1bD+aLu0oWD38Efwa0C8+7a1+QcA/fIIOecR5VFto9PFlLXlk5iN2wTLZ8u52DOF7UA==}
     engines: {node: '>=18'}
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
 
-  '@ai-sdk/google@2.0.49':
-    resolution: {integrity: sha512-efwKk4mOV0SpumUaQskeYABk37FJPmEYwoDJQEjyLRmGSjtHRe9P5Cwof5ffLvaFav2IaJpBGEz98pyTs7oNWA==}
+  '@ai-sdk/google@2.0.51':
+    resolution: {integrity: sha512-5VMHdZTP4th00hthmh98jP+BZmxiTRMB9R2qh/AuF6OkQeiJikqxZg3hrWDfYrCmQ12wDjy6CbIypnhlwZiYrg==}
     engines: {node: '>=18'}
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
@@ -561,8 +561,8 @@ packages:
     resolution: {integrity: sha512-6o7Y2SeO9vFKB8lArHXehNuusnpddKPk7xqL7T2/b+OvXMRIXUO1rR4wcv1hAFUAT9avGZshty3Wlua/XA7TvA==}
     engines: {node: '>=18'}
 
-  '@ai-sdk/xai@2.0.41':
-    resolution: {integrity: sha512-mztE/1svgeBscJBEcy/AqVZSxTXasnN22o58Vsf7rX7f1X9gqadVoDHH4a/caiklADg/HNu2h1u+vTgVYL8XbA==}
+  '@ai-sdk/xai@2.0.42':
+    resolution: {integrity: sha512-wlwO4yRoZ/d+ca29vN8SDzxus7POdnL7GBTyRdSrt6icUF0hooLesauC8qRUC4aLxtqvMEc1YHtJOU7ZnLWbTQ==}
     engines: {node: '>=18'}
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
@@ -3562,13 +3562,13 @@ packages:
   '@swc/types@0.1.25':
     resolution: {integrity: sha512-iAoY/qRhNH8a/hBvm3zKj9qQ4oc2+3w1unPJa2XvTK3XjeLXtzcCingVPw/9e5mn1+0yPqxcBGp9Jf0pkfMb1g==}
 
-  '@t3-oss/env-core@0.13.8':
-    resolution: {integrity: sha512-L1inmpzLQyYu4+Q1DyrXsGJYCXbtXjC4cICw1uAKv0ppYPQv656lhZPU91Qd1VS6SO/bou1/q5ufVzBGbNsUpw==}
+  '@t3-oss/env-core@0.13.10':
+    resolution: {integrity: sha512-NNFfdlJ+HmPHkLi2HKy7nwuat9SIYOxei9K10lO2YlcSObDILY7mHZNSHsieIM3A0/5OOzw/P/b+yLvPdaG52g==}
     peerDependencies:
       arktype: ^2.1.0
       typescript: '>=5.0.0'
       valibot: ^1.0.0-beta.7 || ^1.0.0
-      zod: ^3.24.0 || ^4.0.0-beta.0
+      zod: ^3.24.0 || ^4.0.0
     peerDependenciesMeta:
       arktype:
         optional: true
@@ -3579,13 +3579,13 @@ packages:
       zod:
         optional: true
 
-  '@t3-oss/env-nextjs@0.13.8':
-    resolution: {integrity: sha512-QmTLnsdQJ8BiQad2W2nvV6oUpH4oMZMqnFEjhVpzU0h3sI9hn8zb8crjWJ1Amq453mGZs6A4v4ihIeBFDOrLeQ==}
+  '@t3-oss/env-nextjs@0.13.10':
+    resolution: {integrity: sha512-JfSA2WXOnvcc/uMdp31paMsfbYhhdvLLRxlwvrnlPE9bwM/n0Z+Qb9xRv48nPpvfMhOrkrTYw1I5Yc06WIKBJQ==}
     peerDependencies:
       arktype: ^2.1.0
       typescript: '>=5.0.0'
       valibot: ^1.0.0-beta.7 || ^1.0.0
-      zod: ^3.24.0 || ^4.0.0-beta.0
+      zod: ^3.24.0 || ^4.0.0
     peerDependenciesMeta:
       arktype:
         optional: true
@@ -4098,8 +4098,8 @@ packages:
       react: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
       react-dom: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
 
-  ai@5.0.115:
-    resolution: {integrity: sha512-aVuHx0orGxXvhyL7oXUyW8TnWQE6Al8f3Bl6VZjz0WHMV+WaACHPkSyvQ3wje2QCUGzdl5DBF5d+OaXyghPQyg==}
+  ai@5.0.116:
+    resolution: {integrity: sha512-+2hYJ80/NcDWuv9K2/MLP3cTCFgwWHmHlS1tOpFUKKcmLbErAAlE/S2knsKboc3PNAu8pQkDr2N3K/Vle7ENgQ==}
     engines: {node: '>=18'}
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
@@ -8962,17 +8962,17 @@ snapshots:
       '@ai-sdk/provider-utils': 3.0.19(zod@4.1.13)
       zod: 4.1.13
 
-  '@ai-sdk/gateway@2.0.22(zod@4.1.13)':
+  '@ai-sdk/gateway@2.0.23(zod@4.1.13)':
     dependencies:
       '@ai-sdk/provider': 2.0.0
       '@ai-sdk/provider-utils': 3.0.19(zod@4.1.13)
       '@vercel/oidc': 3.0.5
       zod: 4.1.13
 
-  '@ai-sdk/google-vertex@3.0.94(zod@4.1.13)':
+  '@ai-sdk/google-vertex@3.0.96(zod@4.1.13)':
     dependencies:
       '@ai-sdk/anthropic': 2.0.56(zod@4.1.13)
-      '@ai-sdk/google': 2.0.49(zod@4.1.13)
+      '@ai-sdk/google': 2.0.51(zod@4.1.13)
       '@ai-sdk/provider': 2.0.0
       '@ai-sdk/provider-utils': 3.0.19(zod@4.1.13)
       google-auth-library: 10.5.0
@@ -8980,7 +8980,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@ai-sdk/google@2.0.49(zod@4.1.13)':
+  '@ai-sdk/google@2.0.51(zod@4.1.13)':
     dependencies:
       '@ai-sdk/provider': 2.0.0
       '@ai-sdk/provider-utils': 3.0.19(zod@4.1.13)
@@ -9015,7 +9015,7 @@ snapshots:
     dependencies:
       json-schema: 0.4.0
 
-  '@ai-sdk/xai@2.0.41(zod@4.1.13)':
+  '@ai-sdk/xai@2.0.42(zod@4.1.13)':
     dependencies:
       '@ai-sdk/openai-compatible': 1.0.29(zod@4.1.13)
       '@ai-sdk/provider': 2.0.0
@@ -10490,10 +10490,10 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@openrouter/ai-sdk-provider@1.5.4(ai@5.0.115(zod@4.1.13))(zod@4.1.13)':
+  '@openrouter/ai-sdk-provider@1.5.4(ai@5.0.116(zod@4.1.13))(zod@4.1.13)':
     dependencies:
       '@openrouter/sdk': 0.1.27
-      ai: 5.0.115(zod@4.1.13)
+      ai: 5.0.116(zod@4.1.13)
       zod: 4.1.13
 
   '@openrouter/sdk@0.1.27':
@@ -12260,14 +12260,14 @@ snapshots:
     dependencies:
       '@swc/counter': 0.1.3
 
-  '@t3-oss/env-core@0.13.8(typescript@5.9.3)(zod@4.1.13)':
+  '@t3-oss/env-core@0.13.10(typescript@5.9.3)(zod@4.1.13)':
     optionalDependencies:
       typescript: 5.9.3
       zod: 4.1.13
 
-  '@t3-oss/env-nextjs@0.13.8(typescript@5.9.3)(zod@4.1.13)':
+  '@t3-oss/env-nextjs@0.13.10(typescript@5.9.3)(zod@4.1.13)':
     dependencies:
-      '@t3-oss/env-core': 0.13.8(typescript@5.9.3)(zod@4.1.13)
+      '@t3-oss/env-core': 0.13.10(typescript@5.9.3)(zod@4.1.13)
     optionalDependencies:
       typescript: 5.9.3
       zod: 4.1.13
@@ -12884,9 +12884,9 @@ snapshots:
       screenfull: 5.2.0
       tslib: 2.8.1
 
-  ai@5.0.115(zod@4.1.13):
+  ai@5.0.116(zod@4.1.13):
     dependencies:
-      '@ai-sdk/gateway': 2.0.22(zod@4.1.13)
+      '@ai-sdk/gateway': 2.0.23(zod@4.1.13)
       '@ai-sdk/provider': 2.0.0
       '@ai-sdk/provider-utils': 3.0.19(zod@4.1.13)
       '@opentelemetry/api': 1.9.0

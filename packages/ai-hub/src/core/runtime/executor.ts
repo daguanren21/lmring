@@ -1,10 +1,5 @@
 import type { LanguageModelV3, LanguageModelV3Middleware } from '@ai-sdk/provider';
-import {
-  generateObject as aiGenerateObject,
-  generateText as aiGenerateText,
-  streamObject as aiStreamObject,
-  streamText as aiStreamText,
-} from 'ai';
+import { generateText as aiGenerateText, streamText as aiStreamText, Output } from 'ai';
 import type { AiPlugin, PluginContext } from '../../types/plugin';
 import type { ProviderInstance } from '../../types/provider';
 import type {
@@ -28,8 +23,11 @@ type ProviderSource = ProviderInstance | LanguageModelV3 | ProviderLike;
 
 type StreamTextResponse = Awaited<ReturnType<typeof aiStreamText>>;
 type GenerateTextResponse = Awaited<ReturnType<typeof aiGenerateText>>;
-type GenerateObjectResponse = Awaited<ReturnType<typeof aiGenerateObject>>;
-type StreamObjectResponse = Awaited<ReturnType<typeof aiStreamObject>>;
+
+// For backward compatibility, generateObject/streamObject now use generateText/streamText with Output.object()
+// The return types are now the same as their text counterparts
+type GenerateObjectResponse = GenerateTextResponse;
+type StreamObjectResponse = StreamTextResponse;
 
 export class RuntimeExecutor {
   private engine: PluginEngine;
@@ -207,7 +205,13 @@ export class RuntimeExecutor {
       'generateObject',
       params,
       async (transformedParams) => {
-        const { model: modelId, stopSequences: _stopSequences, ...restParams } = transformedParams;
+        const {
+          model: modelId,
+          stopSequences: _stopSequences,
+          schema,
+          mode: _mode,
+          ...restParams
+        } = transformedParams;
 
         // Resolve model after transformation
         const resolvedModel = this.resolveModel(modelId);
@@ -219,8 +223,11 @@ export class RuntimeExecutor {
         // Update context with transformed modelId
         context.modelId = modelId;
 
-        const request: Parameters<typeof aiGenerateObject>[0] = {
+        return aiGenerateText({
           model: wrappedModel,
+          output: Output.object({
+            schema: schema as Parameters<typeof Output.object>[0]['schema'],
+          }),
           ...restParams,
           experimental_telemetry: {
             isEnabled: true,
@@ -229,8 +236,7 @@ export class RuntimeExecutor {
               modelId,
             },
           },
-        };
-        return aiGenerateObject(request);
+        });
       },
       context,
     );
@@ -256,7 +262,13 @@ export class RuntimeExecutor {
       'streamObject',
       params,
       async (transformedParams) => {
-        const { model: modelId, stopSequences: _stopSequences, ...restParams } = transformedParams;
+        const {
+          model: modelId,
+          stopSequences: _stopSequences,
+          schema,
+          mode: _mode,
+          ...restParams
+        } = transformedParams;
 
         // Resolve model after transformation
         const resolvedModel = this.resolveModel(modelId);
@@ -268,8 +280,11 @@ export class RuntimeExecutor {
         // Update context with transformed modelId
         context.modelId = modelId;
 
-        const request: Parameters<typeof aiStreamObject>[0] = {
+        return aiStreamText({
           model: wrappedModel,
+          output: Output.object({
+            schema: schema as Parameters<typeof Output.object>[0]['schema'],
+          }),
           ...restParams,
           experimental_telemetry: {
             isEnabled: true,
@@ -278,8 +293,7 @@ export class RuntimeExecutor {
               modelId,
             },
           },
-        };
-        return aiStreamObject(request);
+        });
       },
       context,
     );

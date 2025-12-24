@@ -1,5 +1,4 @@
-import type { LanguageModelV2 } from '@ai-sdk/provider';
-import type { LanguageModelMiddleware } from 'ai';
+import type { LanguageModelV3, LanguageModelV3Middleware } from '@ai-sdk/provider';
 import {
   generateObject as aiGenerateObject,
   generateText as aiGenerateText,
@@ -25,7 +24,7 @@ type ProviderLike = {
   chat?: ProviderInstance['languageModel'];
 };
 
-type ProviderSource = ProviderInstance | LanguageModelV2 | ProviderLike;
+type ProviderSource = ProviderInstance | LanguageModelV3 | ProviderLike;
 
 type StreamTextResponse = Awaited<ReturnType<typeof aiStreamText>>;
 type GenerateTextResponse = Awaited<ReturnType<typeof aiGenerateText>>;
@@ -35,12 +34,12 @@ type StreamObjectResponse = Awaited<ReturnType<typeof aiStreamObject>>;
 export class RuntimeExecutor {
   private engine: PluginEngine;
   private providerId: string;
-  private middlewares: LanguageModelMiddleware[];
+  private middlewares: LanguageModelV3Middleware[];
 
   constructor(
     private provider: ProviderSource, // Support both ProviderInstance and raw provider
     plugins: AiPlugin[] = [],
-    middlewares: LanguageModelMiddleware[] = [],
+    middlewares: LanguageModelV3Middleware[] = [],
   ) {
     this.engine = new PluginEngine(plugins);
     this.middlewares = middlewares;
@@ -57,7 +56,7 @@ export class RuntimeExecutor {
     }
   }
 
-  private resolveModel(modelId: string): LanguageModelV2 {
+  private resolveModel(modelId: string): LanguageModelV3 {
     if (!this.provider) {
       throw new ModelResolutionError(modelId, this.providerId, 'Provider not initialized');
     }
@@ -96,7 +95,7 @@ export class RuntimeExecutor {
     params: StreamTextParams,
     options?: {
       plugins?: AiPlugin[];
-      middlewares?: LanguageModelMiddleware[];
+      middlewares?: LanguageModelV3Middleware[];
     },
   ): Promise<StreamTextResponse> {
     const context = this.createContext(params.model, 'streamText');
@@ -144,7 +143,7 @@ export class RuntimeExecutor {
     params: GenerateTextParams,
     options?: {
       plugins?: AiPlugin[];
-      middlewares?: LanguageModelMiddleware[];
+      middlewares?: LanguageModelV3Middleware[];
     },
   ): Promise<GenerateTextResponse> {
     const context = this.createContext(params.model, 'generateText');
@@ -192,7 +191,7 @@ export class RuntimeExecutor {
     params: GenerateObjectParams<T>,
     options?: {
       plugins?: AiPlugin[];
-      middlewares?: LanguageModelMiddleware[];
+      middlewares?: LanguageModelV3Middleware[];
     },
   ): Promise<GenerateObjectResponse> {
     const context = this.createContext(params.model, 'generateObject');
@@ -241,7 +240,7 @@ export class RuntimeExecutor {
     params: StreamObjectParams<T>,
     options?: {
       plugins?: AiPlugin[];
-      middlewares?: LanguageModelMiddleware[];
+      middlewares?: LanguageModelV3Middleware[];
     },
   ): Promise<StreamObjectResponse> {
     const context = this.createContext(params.model, 'streamObject');
@@ -325,11 +324,11 @@ export class RuntimeExecutor {
     return this.isProviderLike(provider) && typeof (provider as ProviderLike).chat === 'function';
   }
 
-  private isLanguageModel(provider: ProviderSource): provider is LanguageModelV2 {
+  private isLanguageModel(provider: ProviderSource): provider is LanguageModelV3 {
     return (
       typeof provider === 'object' &&
       provider !== null &&
-      typeof (provider as LanguageModelV2).doGenerate === 'function'
+      typeof (provider as LanguageModelV3).doGenerate === 'function'
     );
   }
 }

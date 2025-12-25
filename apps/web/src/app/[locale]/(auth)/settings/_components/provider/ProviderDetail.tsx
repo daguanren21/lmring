@@ -33,7 +33,6 @@ import {
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-  toast,
 } from '@lmring/ui';
 import {
   AlertCircleIcon,
@@ -57,6 +56,7 @@ import {
 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { toast } from 'sonner';
 import { AddModelDialog } from './AddModelDialog';
 import { EditModelDialog } from './EditModelDialog';
 import type { ConnectionCheckResponse, Provider, SaveApiKeyResponse } from './types';

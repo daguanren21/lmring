@@ -1,9 +1,9 @@
 import { type Locale, routing } from '@lmring/i18n';
-import { Toaster } from '@lmring/ui';
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { hasLocale, NextIntlClientProvider } from 'next-intl';
-import { setRequestLocale } from 'next-intl/server';
+import { getMessages, setRequestLocale } from 'next-intl/server';
+import { Toaster } from 'sonner';
 import { PostHogProvider } from '@/components/analytics/PostHogProvider';
 import { ThemeProvider } from '@/components/theme-provider';
 import '@/styles/global.css';
@@ -11,26 +11,10 @@ import '@/styles/arena.css';
 
 export const metadata: Metadata = {
   icons: [
-    {
-      rel: 'apple-touch-icon',
-      url: '/apple-touch-icon.png',
-    },
-    {
-      rel: 'icon',
-      type: 'image/png',
-      sizes: '32x32',
-      url: '/favicon-32x32.png',
-    },
-    {
-      rel: 'icon',
-      type: 'image/png',
-      sizes: '16x16',
-      url: '/favicon-16x16.png',
-    },
-    {
-      rel: 'icon',
-      url: '/favicon.ico',
-    },
+    { rel: 'apple-touch-icon', url: '/apple-touch-icon.png' },
+    { rel: 'icon', type: 'image/png', sizes: '32x32', url: '/favicon-32x32.png' },
+    { rel: 'icon', type: 'image/png', sizes: '16x16', url: '/favicon-16x16.png' },
+    { rel: 'icon', url: '/favicon.ico' },
   ],
 };
 
@@ -42,22 +26,24 @@ export default async function RootLayout(props: {
   children: React.ReactNode;
   params: Promise<{ locale: string }>;
 }) {
-  const { locale } = await props.params;
+  const { locale: localeParam } = await props.params;
+  const locale = localeParam as Locale;
 
   if (!hasLocale(routing.locales, locale)) {
     notFound();
   }
 
-  setRequestLocale(locale as Locale);
+  setRequestLocale(locale);
+  const messages = await getMessages({ locale });
 
   return (
     <html lang={locale} suppressHydrationWarning>
-      <body>
+      <body suppressHydrationWarning>
         <ThemeProvider>
-          <NextIntlClientProvider>
+          <NextIntlClientProvider locale={locale} messages={messages}>
             <PostHogProvider>{props.children}</PostHogProvider>
+            <Toaster />
           </NextIntlClientProvider>
-          <Toaster />
         </ThemeProvider>
       </body>
     </html>

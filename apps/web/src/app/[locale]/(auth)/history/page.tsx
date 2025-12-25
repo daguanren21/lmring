@@ -14,7 +14,6 @@ import {
   CardContent,
   CardHeader,
   ConversationCardSkeleton,
-  toast,
 } from '@lmring/ui';
 import { motion } from 'framer-motion';
 import { CalendarIcon, ClockIcon, MessageSquareIcon, Share2Icon, Trash2Icon } from 'lucide-react';
@@ -22,6 +21,7 @@ import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import * as React from 'react';
+import { toast } from 'sonner';
 import { ProviderIcon } from '@/components/arena/provider-icon';
 import { type ConversationData, useConversation } from '@/hooks/use-conversation';
 

@@ -1,12 +1,12 @@
 'use client';
 
 import { Button, ModelCardSkeleton, ResponseViewer, ScrollArea } from '@lmring/ui';
-import { toast } from 'sonner';
 import { motion } from 'framer-motion';
 import { XIcon } from 'lucide-react';
 import { useParams, useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import * as React from 'react';
+import { toast } from 'sonner';
 import { ModelCard } from '@/components/arena/model-card';
 import {
   PromptInput,

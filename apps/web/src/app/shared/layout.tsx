@@ -1,5 +1,5 @@
-import { Toaster } from 'sonner';
 import type { Metadata } from 'next';
+import { Toaster } from 'sonner';
 import { ThemeProvider } from '@/components/theme-provider';
 import '@/styles/global.css';
 import '@/styles/arena.css';

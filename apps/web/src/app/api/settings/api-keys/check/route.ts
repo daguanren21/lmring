@@ -1,4 +1,4 @@
-import { generateText, ProviderBuilder } from '@lmring/ai-hub';
+import { generateText, ProviderBuilder, streamText } from '@lmring/ai-hub';
 import { NextResponse } from 'next/server';
 import { auth } from '@/libs/Auth';
 import { logError } from '@/libs/error-logging';
@@ -119,13 +119,42 @@ export async function POST(request: Request) {
     }
 
     // Test connection with a simple message
+    // Try streamText first (works with streaming-only endpoints),
+    // then fall back to generateText if streaming fails
     const startTime = Date.now();
     try {
-      const result = await generateText({
-        model: provider.languageModel(model),
-        messages: [{ role: 'user', content: 'hello' }],
-        maxRetries: 0, // Don't retry for connection check
-      });
+      let responseText: string;
+
+      try {
+        // First attempt: use streamText (more compatible with streaming-only proxies)
+        const streamResult = streamText({
+          model: provider.languageModel(model),
+          messages: [{ role: 'user', content: 'hello' }],
+          maxRetries: 0,
+        });
+        responseText = await streamResult.text;
+      } catch (streamError) {
+        // Check if the error indicates streaming is not supported
+        const errorMsg = streamError instanceof Error ? streamError.message : '';
+        const isStreamNotSupported =
+          errorMsg.toLowerCase().includes('stream') &&
+          (errorMsg.toLowerCase().includes('not supported') ||
+            errorMsg.toLowerCase().includes('disabled') ||
+            errorMsg.toLowerCase().includes('false'));
+
+        if (isStreamNotSupported) {
+          // Fallback: use generateText for non-streaming endpoints
+          const generateResult = await generateText({
+            model: provider.languageModel(model),
+            messages: [{ role: 'user', content: 'hello' }],
+            maxRetries: 0,
+          });
+          responseText = generateResult.text;
+        } else {
+          // Re-throw
+          throw streamError;
+        }
+      }
 
       const responseTimeMs = Date.now() - startTime;
 
@@ -134,7 +163,7 @@ export async function POST(request: Request) {
           success: true,
           message: 'Connection successful',
           responseTimeMs,
-          modelResponse: result.text?.slice(0, 100), // Return first 100 chars as confirmation
+          modelResponse: responseText?.slice(0, 100),
         },
         { status: 200 },
       );
